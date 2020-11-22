@@ -59,7 +59,7 @@ namespace KWEngine2.Model
             if(IsExtended)
             {
                 Vertices = new Vector3[meshData.VertexCount];
-                Normals = new Vector3[meshData.Normals.Count];
+                List<Vector3> tmpNormals = new List<Vector3>();
 
                 for(int i = 0; i < meshData.VertexCount; i++)
                 {
@@ -68,13 +68,27 @@ namespace KWEngine2.Model
                     Vertices[i].Z = meshData.Vertices[i].Z;
                 }
 
+                // Analyse normals and skip those who are identical or negated:
                 for (int i = 0; i < meshData.Normals.Count; i++)
                 {
-                    Normals[i].X = meshData.Normals[i].X;
-                    Normals[i].Y = meshData.Normals[i].Y;
-                    Normals[i].Z = meshData.Normals[i].Z;
-                    //Normals[i].Normalize();
+                    Vector3 normalToBeAdded = new Vector3(meshData.Normals[i].X, meshData.Normals[i].Y, meshData.Normals[i].Z);
+                    int identicalVectorIndex = -1;
+                    for (int j = 0; j < tmpNormals.Count; j++)
+                    {
+                        if ((tmpNormals[j].X == normalToBeAdded.X && tmpNormals[j].Y == normalToBeAdded.Y && tmpNormals[j].Z == normalToBeAdded.Z)
+                            ||
+                            (tmpNormals[j].X == -normalToBeAdded.X && tmpNormals[j].Y == -normalToBeAdded.Y && tmpNormals[j].Z == -normalToBeAdded.Z))
+                        {
+                            identicalVectorIndex = j;
+                            break;
+                        }
+                    }
+                    if(identicalVectorIndex < 0)
+                    {
+                        tmpNormals.Add(normalToBeAdded);
+                    }
                 }
+                Normals = tmpNormals.ToArray();
             }
             else
             {
