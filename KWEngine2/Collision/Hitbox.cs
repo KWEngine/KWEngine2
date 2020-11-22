@@ -85,6 +85,10 @@ namespace KWEngine2.Collision
                 Vector3 sceneCenter = Update(ref owner._sceneDimensions);
                 Owner._sceneCenter = sceneCenter;
             }
+            else
+            {
+                IsActive = false;
+            }
         }
 
         public Vector3 Update(ref Vector3 dims)

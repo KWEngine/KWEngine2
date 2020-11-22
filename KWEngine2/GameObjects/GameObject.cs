@@ -1345,30 +1345,32 @@ namespace KWEngine2.GameObjects
                 if(!found)
                     continue;
 
-                //bool considerForMeasurement = true; // ConsiderForMeasurement(go, this, ref offset);
-                //if (considerForMeasurement)
-                //{
-                    foreach (Hitbox hbother in go.Hitboxes)
-                    {
-                        foreach (Hitbox hbcaller in this.Hitboxes)
-                        {
-                            Intersection i;
-                            if (hbother.Owner.Model.IsTerrain)
-                            {
-                                i = Hitbox.TestIntersectionTerrain(hbcaller, hbother, offset);
-                            }
-                            else
-                            {
-                                i = Hitbox.TestIntersection(hbcaller, hbother, offset);
-                            }
+                foreach (Hitbox hbother in go.Hitboxes)
+                {
+                    if (!hbother.IsActive)
+                        continue;
 
-                            if (i != null)
-                            {
-                                return i;
-                            }
+                    foreach (Hitbox hbcaller in this.Hitboxes)
+                    {
+                        if (!hbcaller.IsActive)
+                            continue;
+
+                        Intersection i;
+                        if (hbother.Owner.Model.IsTerrain)
+                        {
+                            i = Hitbox.TestIntersectionTerrain(hbcaller, hbother, offset);
+                        }
+                        else
+                        {
+                            i = Hitbox.TestIntersection(hbcaller, hbother, offset);
+                        }
+
+                        if (i != null)
+                        {
+                            return i;
                         }
                     }
-                //}
+                }
             }
             
             return null;
@@ -1393,38 +1395,38 @@ namespace KWEngine2.GameObjects
             }
 
             Vector3 offset = new Vector3(offsetX, offsetY, offsetZ);
-
-            //foreach (GameObject go in CurrentWorld.GetGameObjects())
             foreach (GameObject go in _collisionCandidates)
             {
                 if (!go.IsCollisionObject || go.Equals(this)) // maybe skip this line?
                 {
                     continue;
                 }
-                //bool considerForMeasurement = true; // ConsiderForMeasurement(go, this, ref offset);
-                //if (considerForMeasurement)
-                //{
-                    foreach (Hitbox hbother in go.Hitboxes)
-                    {
-                        foreach (Hitbox hbcaller in this.Hitboxes)
-                        {
-                            Intersection i;
-                            if (hbother.Owner.Model.IsTerrain)
-                            {
-                                i = Hitbox.TestIntersectionTerrain(hbcaller, hbother, offset);
-                            }
-                            else
-                            {
-                                i = Hitbox.TestIntersection(hbcaller, hbother, offset);
-                            }
 
-                            if (i != null)
-                            {
-                                return i;
-                            }
+                foreach (Hitbox hbother in go.Hitboxes)
+                {
+                    if (!hbother.IsActive)
+                        continue;
+
+                    foreach (Hitbox hbcaller in this.Hitboxes)
+                    {
+                        if (!hbcaller.IsActive)
+                            continue;
+                        Intersection i;
+                        if (hbother.Owner.Model.IsTerrain)
+                        {
+                            i = Hitbox.TestIntersectionTerrain(hbcaller, hbother, offset);
+                        }
+                        else
+                        {
+                            i = Hitbox.TestIntersection(hbcaller, hbother, offset);
+                        }
+
+                        if (i != null)
+                        {
+                            return i;
                         }
                     }
-                //}
+                }
             }
             return null;
         }
@@ -1453,7 +1455,6 @@ namespace KWEngine2.GameObjects
             Vector3 offset = new Vector3(offsetX, offsetY, offsetZ);
 
             //Objekte außerhalb der Reichweite ausfiltern:
-            //foreach (GameObject go in CurrentWorld.GetGameObjects())
             foreach(GameObject go in _collisionCandidates)
             {
                 if (!go.IsCollisionObject || go.Equals(this))
@@ -1468,28 +1469,30 @@ namespace KWEngine2.GameObjects
                 if (!found)
                     continue;
 
-                //bool considerForMeasurement = true; // ConsiderForMeasurement(go, this, ref offset);
-                //if (considerForMeasurement)
-                //{
-                    foreach (Hitbox hbother in go.Hitboxes)
-                    {
-                        foreach (Hitbox hbcaller in this.Hitboxes)
-                        {
-                            Intersection i;
-                            if (hbother.Owner.Model.IsTerrain)
-                            {
-                                i = Hitbox.TestIntersectionTerrain(hbcaller, hbother, offset);
-                            }
-                            else
-                            {
-                                i = Hitbox.TestIntersection(hbcaller, hbother, offset);
-                            }
+                foreach (Hitbox hbother in go.Hitboxes)
+                {
+                    if (!hbother.IsActive)
+                        continue;
 
-                            if (i != null)
-                                intersections.Add(i);
+                    foreach (Hitbox hbcaller in this.Hitboxes)
+                    {
+                        if (!hbcaller.IsActive)
+                            continue;
+
+                        Intersection i;
+                        if (hbother.Owner.Model.IsTerrain)
+                        {
+                            i = Hitbox.TestIntersectionTerrain(hbcaller, hbother, offset);
                         }
+                        else
+                        {
+                            i = Hitbox.TestIntersection(hbcaller, hbother, offset);
+                        }
+
+                        if (i != null)
+                            intersections.Add(i);
                     }
-                //}
+                }
             }
             return intersections;
         }
@@ -1516,7 +1519,6 @@ namespace KWEngine2.GameObjects
             Vector3 offset = new Vector3(offsetX, offsetY, offsetZ);
             
             //Objekte außerhalb der Reichweite ausfiltern:
-            //foreach (GameObject go in CurrentWorld.GetGameObjects())
             foreach(GameObject go in _collisionCandidates)
             {
                 if (!go.IsCollisionObject || go.Equals(this)) // skip?
@@ -1524,89 +1526,34 @@ namespace KWEngine2.GameObjects
                     continue;
                 }
 
-                //bool considerForMeasurement = true; // ConsiderForMeasurement(go, this, ref offset);
-                //if (considerForMeasurement)
-                //{
-                    foreach (Hitbox hbother in go.Hitboxes)
-                    {
-                        foreach (Hitbox hbcaller in this.Hitboxes)
-                        {
-                            Intersection i;
-                            if (hbother.Owner.Model.IsTerrain)
-                            {
-                                i = Hitbox.TestIntersectionTerrain(hbcaller, hbother, offset);
-                            }
-                            else
-                            {
-                                i = Hitbox.TestIntersection(hbcaller, hbother, offset);
-                            }
+                foreach (Hitbox hbother in go.Hitboxes)
+                {
+                    if (!hbother.IsActive)
+                        continue;
 
-                            if (i != null)
-                                intersections.Add(i);
+                    foreach (Hitbox hbcaller in this.Hitboxes)
+                    {
+                        if (!hbcaller.IsActive)
+                            continue;
+
+                        Intersection i;
+                        if (hbother.Owner.Model.IsTerrain)
+                        {
+                            i = Hitbox.TestIntersectionTerrain(hbcaller, hbother, offset);
                         }
+                        else
+                        {
+                            i = Hitbox.TestIntersection(hbcaller, hbother, offset);
+                        }
+
+                        if (i != null)
+                            intersections.Add(i);
                     }
-                //}
+                }
             }
             return intersections;
         }
 
-        private static bool ConsiderForMeasurementTerrain(GameObject go, GameObject caller, ref Vector3 callerOffset)
-        {
-            GeoTerrain terra = go.Model.Meshes["Terrain"].Terrain;
-            float terraHigh = go.Position.Y + terra.GetScaleFactor();
-            float terraLow = go.Position.Y;
-            float left = go.Position.X - terra.GetWidth() / 2f;
-            float right = go.Position.X + terra.GetWidth() / 2f;
-
-            float back = go.Position.Z - terra.GetDepth() / 2f;
-            float front = go.Position.Z + terra.GetDepth() / 2f;
-
-            Vector3 hbCaller = caller.GetCenterPointForAllHitboxes();
-            if (hbCaller.X + callerOffset.X >= left && hbCaller.X + callerOffset.X <= right
-                                                    && hbCaller.Z + callerOffset.Z >= back && hbCaller.Z + callerOffset.Z <= front
-                                                    && hbCaller.Y + callerOffset.Y + caller.GetMaxDiameter() / 2 >= terraLow
-                                                    && hbCaller.Y + callerOffset.Y - caller.GetMaxDiameter() / 2 <= (terraHigh * 1.5f))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private static bool ConsiderForMeasurement(GameObject go, GameObject caller, ref Vector3 callerOffset)
-        {
-            if (go.Model.IsTerrain)
-            {
-                GeoTerrain terra = go.Model.Meshes["Terrain"].Terrain;
-                float terraHigh = go.Position.Y + terra.GetScaleFactor();
-                float terraLow = go.Position.Y;
-                float left = go.Position.X - terra.GetWidth() / 2f;
-                float right = go.Position.X + terra.GetWidth() / 2f;
-
-                float back = go.Position.Z - terra.GetDepth() / 2f;
-                float front = go.Position.Z + terra.GetDepth() / 2f;
-
-                Vector3 hbCaller = caller.GetCenterPointForAllHitboxes();
-                if (hbCaller.X + callerOffset.X >= left && hbCaller.X + callerOffset.X <= right
-                    && hbCaller.Z + callerOffset.Z >= back && hbCaller.Z + callerOffset.Z <= front
-                    && hbCaller.Y + callerOffset.Y + caller.GetMaxDiameter() / 2 >= terraLow
-                    && hbCaller.Y + callerOffset.Y - caller.GetMaxDiameter() / 2 <= (terraHigh * 1.5f))
-                {
-                    return true;
-                }
-                return false;
-            }
-            else
-            {
-                float distance = ((caller.GetCenterPointForAllHitboxes() + callerOffset) - go.GetCenterPointForAllHitboxes()).LengthFast;
-                float rad1 = caller.GetMaxDiameter() / 2;
-                float rad2 = go.GetMaxDiameter() / 2;
-                if (distance - (rad1 + rad2) > 0)
-                    return false;
-                else
-                    return true;
-            }
-        }
-        
         /// <summary>
         /// Vergleichsmethode für den Tiefenpuffer
         /// </summary>
