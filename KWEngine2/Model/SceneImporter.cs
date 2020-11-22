@@ -811,6 +811,8 @@ namespace KWEngine2.Model
 
             string currentMeshName = null;
             string currentNodeName = null;
+            Matrix4 currentNodeTransform = Matrix4.Identity;
+            Mesh currentMesh = null;
             GeoMeshHitbox meshHitBox = null;
             float minX = float.MaxValue, minY = float.MaxValue, minZ = float.MaxValue;
             float maxX = float.MinValue, maxY = float.MinValue, maxZ = float.MinValue;
@@ -819,7 +821,11 @@ namespace KWEngine2.Model
             for (int m = 0; m < scene.MeshCount; m++)
             {
                 mesh = scene.Meshes[m];
-                bool isNewMesh = currentMeshName != null && mesh.Name != currentMeshName && model.Filename != "kwcube6.obj";
+
+                Matrix4 parentTransform = Matrix4.Identity;
+                bool transformFound = FindTransformForMesh(scene, scene.RootNode, mesh, ref nodeTransform, out string nodeName, ref parentTransform);
+
+                bool isNewMesh = currentMeshName != null && mesh.Name != currentMeshName && currentNodeName != null && currentNodeName != nodeName && model.Filename != "kwcube6.obj";
 
                 if (mesh.PrimitiveType != PrimitiveType.Triangle)
                 {
@@ -831,10 +837,10 @@ namespace KWEngine2.Model
                     if (currentMeshName != null)
                     {
                         // Generate hitbox for the previous mesh:
-                        meshHitBox = new GeoMeshHitbox(maxX, maxY, maxZ, minX, minY, minZ, currentNodeName.ToLower().Contains("_fullhitbox") ? mesh : null);
+                        meshHitBox = new GeoMeshHitbox(maxX, maxY, maxZ, minX, minY, minZ, currentNodeName.ToLower().Contains("_fullhitbox") ? currentMesh : null);
                         meshHitBox.Model = model;
                         meshHitBox.Name = currentMeshName;
-                        meshHitBox.Transform = nodeTransform;
+                        meshHitBox.Transform = currentNodeTransform;
                         meshHitBox.IsActive = !currentNodeName.ToLower().Contains("_nohitbox");
                         model.MeshHitboxes.Add(meshHitBox);
 
@@ -851,13 +857,15 @@ namespace KWEngine2.Model
                 currentMeshName = mesh.Name;
                 
                 GeoMesh geoMesh = new GeoMesh();
-                Matrix4 parentTransform = Matrix4.Identity;
-                bool transformFound = FindTransformForMesh(scene, scene.RootNode, mesh, ref nodeTransform, out string nodeName, ref parentTransform);
+                //Matrix4 parentTransform = Matrix4.Identity;
+                //bool transformFound = FindTransformForMesh(scene, scene.RootNode, mesh, ref nodeTransform, out string nodeName, ref parentTransform);
                 geoMesh.Transform = nodeTransform;
                 geoMesh.Terrain = null;
                 geoMesh.BoneTranslationMatrixCount = mesh.BoneCount;
                 geoMesh.Name = mesh.Name + " #" + m.ToString().PadLeft(4, '0') + " (Node: " + nodeName + ")";
                 currentNodeName = nodeName;
+                currentMesh = mesh;
+                currentNodeTransform = nodeTransform;
                 geoMesh.NameOrg = mesh.Name;
                 geoMesh.Vertices = new GeoVertex[mesh.VertexCount];
                 geoMesh.Primitive = OpenTK.Graphics.OpenGL4.PrimitiveType.Triangles;
