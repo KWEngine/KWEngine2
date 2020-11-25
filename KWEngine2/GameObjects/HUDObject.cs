@@ -29,6 +29,10 @@ namespace KWEngine2.GameObjects
     /// </summary>
     public sealed class HUDObject
     {
+        /// <summary>
+        /// Gibt an, ob das HUDObject sichtbar ist oder nicht (Standard: true)
+        /// </summary>
+        public bool IsVisible { get; set; } = true;
         internal Vector2 _absolute = new Vector2(0, 0);
         internal Vector4 _tint = new Vector4(1, 1, 1, 1);
         internal Vector4 _glow = new Vector4(0, 0, 0, 0);

@@ -78,6 +78,9 @@ namespace KWEngine2.Renderers
 
         internal override void Draw(HUDObject ho, ref Matrix4 viewProjection)
         {
+            if (!ho.IsVisible)
+                return;
+
             GL.UseProgram(mProgramId);
 
             GeoMesh mesh = KWEngine.KWRect.Meshes.Values.ElementAt(0);
