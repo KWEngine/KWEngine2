@@ -20,27 +20,6 @@ namespace KWEngine2.GameObjects
     public abstract class GameObject : IComparable
     {
         /// <summary>
-        /// Ebene
-        /// </summary>
-        public enum Plane {
-            /// <summary>
-            /// X
-            /// </summary>
-            X, 
-            /// <summary>
-            /// Y
-            /// </summary>
-            Y, 
-            /// <summary>
-            /// Z
-            /// </summary>
-            Z, 
-            /// <summary>
-            /// Kamerablickebene
-            /// </summary>
-            Camera }
-
-        /// <summary>
         /// Legt fest, ob das Objekt jeden Frame zuletzt aktualisiert wird (Standard: Nach Reihenfolge des Hinzufügens)
         /// </summary>
         public bool UpdateLast { get; set; } = false;
@@ -1818,7 +1797,7 @@ namespace KWEngine2.GameObjects
                 );
         }
 
-        private bool LinePlaneIntersection(out Vector3 contact, Vector3 ray, Vector3 rayOrigin,
+        internal static bool LinePlaneIntersection(out Vector3 contact, Vector3 ray, Vector3 rayOrigin,
                                             Vector3 normal, Vector3 coord)
         {
             contact = Vector3.Zero;
@@ -2037,13 +2016,13 @@ namespace KWEngine2.GameObjects
             return true;
         }
 
-        private static Vector3 Get3DMouseCoords(float x, float y)
+        internal static Vector3 Get3DMouseCoords(float x, float y)
         {
             HelperMouseRay r = new HelperMouseRay(x, y, GLWindow.CurrentWindow._viewMatrix, GLWindow.CurrentWindow._projectionMatrix);
             return Vector3.NormalizeFast(r.End - r.Start);
         }
 
-        private static Vector3 Get3DMouseCoords(Vector2 mouseCoords)
+        internal static Vector3 Get3DMouseCoords(Vector2 mouseCoords)
         {
             HelperMouseRay r = new HelperMouseRay(mouseCoords.X, mouseCoords.Y, GLWindow.CurrentWindow._viewMatrix, GLWindow.CurrentWindow._projectionMatrix);
             return Vector3.NormalizeFast(r.End - r.Start);

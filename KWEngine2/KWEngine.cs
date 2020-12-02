@@ -15,6 +15,31 @@ using System.Runtime.CompilerServices;
 namespace KWEngine2
 {
     /// <summary>
+    /// Bezeichnet den Ebenenvektor der senkrecht auf der gewünschten Ebene steht.
+    /// Soll die XZ-Achse gewählt werden, sollte demnach Plane.Y verwendet werden,
+    /// da der Vektor (0|1|0) senkrecht auf der XZ-Ebene steht.
+    /// </summary>
+    public enum Plane
+    {
+        /// <summary>
+        /// X
+        /// </summary>
+        X,
+        /// <summary>
+        /// Y
+        /// </summary>
+        Y,
+        /// <summary>
+        /// Z
+        /// </summary>
+        Z,
+        /// <summary>
+        /// Kamerablickebene
+        /// </summary>
+        Camera
+    }
+
+    /// <summary>
     /// Kernbibliothek der Engine
     /// </summary>
     public class KWEngine
@@ -55,6 +80,8 @@ namespace KWEngine2
             /// </summary>
             Disabled
         };
+
+        
 
         internal static int TextureDefault = -1;
         internal static int TextureBlack = -1;

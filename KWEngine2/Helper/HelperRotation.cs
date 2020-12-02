@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static KWEngine2.GameObjects.GameObject;
+using static KWEngine2.KWEngine;
 
 namespace KWEngine2.Helper
 {

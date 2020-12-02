@@ -1139,5 +1139,43 @@ namespace KWEngine2
         {
             return GameObject.PickGameObject(ms);
         }
+
+        /// <summary>
+        /// Konvertiert 2D-Mauskoordinaten in 3D-Koordinaten
+        /// </summary>
+        /// <param name="ms">Mausinformationen</param>
+        /// <param name="planeNormal">Kollisionsebene (Standard: Camera)</param>
+        /// <param name="planeHeight">Höhe der Kollisionsebene</param>
+        /// <returns>3D-Mauskoordinaten</returns>
+        protected static Vector3 GetMouseIntersectionPoint(MouseState ms, Plane planeNormal, float planeHeight)
+        {
+            Vector3 worldRay = GameObject.Get3DMouseCoords(HelperGL.GetNormalizedMouseCoords(ms.X, ms.Y, KWEngine.CurrentWindow));
+            Vector3 normal;
+            if (planeNormal == Plane.Y)
+                normal = new Vector3(0, 1, 0.000001f);
+            else if (planeNormal == Plane.X)
+                normal = new Vector3(1, 0, 0);
+            else if (planeNormal == Plane.Z)
+                normal = new Vector3(0, 0.000001f, 1);
+            else
+            {
+                if (KWEngine.CurrentWorld != null)
+                {
+                    normal = -KWEngine.CurrentWorld.GetCameraLookAtVector();
+                }
+                else
+                {
+                    normal = new Vector3(0, 1, 0.000001f);
+                }
+            }
+
+            bool result = GameObject.LinePlaneIntersection(out Vector3 intersection, worldRay, CurrentWorld.GetCameraPosition(), normal, normal * planeHeight);
+            if (result)
+            {
+                return intersection;
+            }
+            else
+                return normal * planeHeight;
+        }
     }
 }
