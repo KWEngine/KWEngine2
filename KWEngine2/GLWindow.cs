@@ -627,17 +627,20 @@ namespace KWEngine2
             base.OnResize(e);
 
             GL.Viewport(ClientRectangle);
+            if(ClientRectangle.Width > 0 && ClientRectangle.Height > 0)
+            {
+                InitializeFramebuffers();
 
-            InitializeFramebuffers();
+                _mousePointFPS.X = X + Width / 2;
+                _mousePointFPS.Y = Y + Height / 2;
 
-            _mousePointFPS.X = X + Width / 2;
-            _mousePointFPS.Y = Y + Height / 2;
+                CalculateProjectionMatrix();
+                UpdateWindowRect();
 
-            CalculateProjectionMatrix();
-            UpdateWindowRect();
-
-            bloomWidth = (float)(Math.Log(Width * Width) / Width) * ((float)Height / Width);
-            bloomHeight = (float)(Math.Log(Height * Height) / Height);
+                bloomWidth = (float)(Math.Log(Width * Width) / Width) * ((float)Height / Width);
+                bloomHeight = (float)(Math.Log(Height * Height) / Height);
+            }
+            
         }
 
         /// <summary>

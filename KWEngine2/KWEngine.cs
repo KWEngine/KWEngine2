@@ -370,7 +370,7 @@ namespace KWEngine2
 
         internal static void InitializeModels()
         {
-            Models.Add("KWCube", SceneImporter.LoadModel("kwcube.obj", false, SceneImporter.AssemblyMode.Internal));
+            Models.Add("KWCube", SceneImporter.LoadModel("kwcube.obj", true, SceneImporter.AssemblyMode.Internal));
             Models.Add("KWCube6", SceneImporter.LoadModel("kwcube6.obj", false, SceneImporter.AssemblyMode.Internal));
             KWRect = SceneImporter.LoadModel("kwrect.obj", false, SceneImporter.AssemblyMode.Internal);
             Models.Add("KWSphere", SceneImporter.LoadModel("kwsphere.obj", false, SceneImporter.AssemblyMode.Internal));
