@@ -53,6 +53,8 @@
     <Compile Include="Objects\Arena\Immovable.cs" />
     <Compile Include="Objects\Arena\PlatformUpDown.cs" />
     <Compile Include="Objects\Arena\Player.cs" />
+    <Compile Include="Objects\JumpAndRun\Platforms\Platform.cs" />
+    <Compile Include="Objects\JumpAndRun\Actors\Player.cs" />
     <Compile Include="Objects\SpaceInvaders\Box.cs" />
     <Compile Include="Objects\SpaceInvaders\Enemy.cs" />
     <Compile Include="Objects\SpaceInvaders\EnemySimple.cs" />
@@ -62,6 +64,7 @@
     <Compile Include="Objects\SweepAndPruneTest\Player.cs" />
     <Compile Include="Objects\SweepAndPruneTest\Shot.cs" />
     <Compile Include="Objects\SweepAndPruneTest\SweepCube.cs" />
+    <Compile Include="Worlds\GameWorldJumpAndRun.cs" />
     <Compile Include="Worlds\GameWorldSpaceInvaders.cs" />
     <Compile Include="Worlds\GameWorldArena.cs" />
     <Compile Include="Worlds\GameWorldSweepAndPruneTest.cs" />
@@ -98,6 +101,24 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Models\ArenaOuter\ArenaPlatforms.fbx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Models\JumpAndRun\Ortiz.fbx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Models\JumpAndRun\Platform02.mtl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Models\JumpAndRun\Platform02.obj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Models\JumpAndRun\Platform10.mtl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Models\JumpAndRun\Platform10.obj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Models\JumpAndRun\UBot.fbx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Models\labyrinth\walls.mtl">
@@ -370,6 +391,21 @@
     <Content Include="Models\ArenaOuter\Props_Dumpster.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Models\JumpAndRun\Ortiz_diffuse.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Models\JumpAndRun\Ortiz_normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Models\JumpAndRun\Ortiz_specular.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Models\JumpAndRun\ubot_diffuse.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Models\JumpAndRun\ubot_specular.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Models\labyrinth\walls_clean.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -461,6 +497,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Models\UBot\ubot_specular.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Textures\bg_greenmountains.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Textures\button01.png">

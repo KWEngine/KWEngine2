@@ -10,6 +10,7 @@ namespace KWEngine2Test.Worlds
         private HUDObject _button = null;
         private HUDObject _button2 = null;
         private HUDObject _button3 = null;
+        private HUDObject _button4 = null;
 
         public override void Act(KeyboardState kb, MouseState ms, float deltaTimeFactor)
         {
@@ -61,6 +62,21 @@ namespace KWEngine2Test.Worlds
             {
                 _button3.SetGlow(1, 0, 0, 0);
             }
+
+            if (_button4.IsMouseCursorOnMe(ms))
+            {
+                _button4.SetGlow(0.5f, 1, 0.5f, 0.3f);
+
+                if (ms.LeftButton == ButtonState.Pressed)
+                {
+                    CurrentWindow.SetWorld(new GameWorldJumpAndRun());
+                    return;
+                }
+            }
+            else
+            {
+                _button4.SetGlow(1, 0, 0, 0);
+            }
         }
      
         public override void Prepare()
@@ -77,24 +93,30 @@ namespace KWEngine2Test.Worlds
             c.SetModel("KWCube");
             c.SetGlow(1, 1, 1, 0.5f);
             c.SetPosition(0, 4, 0);
-            AddGameObject(c);
+            //AddGameObject(c);
 
-            _button = new HUDObject(HUDObjectType.Image, width / 2, height / 2 - 128);
+            _button = new HUDObject(HUDObjectType.Image, width / 2, height / 2 - 276);
             _button.SetTexture(@".\textures\button01.png");
             _button.SetScale(imageWidth, imageHeight);
             AddHUDObject(_button);
 
-            _button2 = new HUDObject(HUDObjectType.Image, width / 2, height / 2 + 48);
+            _button2 = new HUDObject(HUDObjectType.Image, width / 2, height / 2 - 100);
             _button2.SetTexture(@".\textures\button02.png");
             _button2.SetScale(imageWidth, imageHeight);
             _button2.SetColor(1, 0.75f, 1, 1);
             AddHUDObject(_button2);
 
-            _button3 = new HUDObject(HUDObjectType.Image, width / 2, height / 2 + 224);
+            _button3 = new HUDObject(HUDObjectType.Image, width / 2, height / 2 + 76);
             _button3.SetTexture(@".\textures\button03.png");
             _button3.SetScale(imageWidth, imageHeight);
             _button3.SetColor(1, 1, 0.5f, 1);
             AddHUDObject(_button3);
+
+            _button4 = new HUDObject(HUDObjectType.Image, width / 2, height / 2 + 252);
+            _button4.SetTexture(@".\textures\button03.png");
+            _button4.SetScale(imageWidth, imageHeight);
+            _button4.SetColor(1, 1, 0.5f, 1);
+            AddHUDObject(_button4);
 
             DebugShowPerformanceInTitle = KWEngine.PerformanceUnit.FramesPerSecond;
         }
