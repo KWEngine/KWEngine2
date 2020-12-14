@@ -113,7 +113,7 @@ namespace KWEngine2Test.Worlds
             AddHUDObject(_button3);
 
             _button4 = new HUDObject(HUDObjectType.Image, width / 2, height / 2 + 252);
-            _button4.SetTexture(@".\textures\button03.png");
+            _button4.SetTexture(@".\textures\button04.png");
             _button4.SetScale(imageWidth, imageHeight);
             _button4.SetColor(1, 1, 0.5f, 1);
             AddHUDObject(_button4);
