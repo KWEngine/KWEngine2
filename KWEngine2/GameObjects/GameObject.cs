@@ -981,7 +981,7 @@ namespace KWEngine2.GameObjects
         /// Bewegt das Objekt in Blickrichtung
         /// </summary>
         /// <param name="amount">Anzahl der Bewegungseinheiten</param>
-        protected void Move(float amount)
+        public void Move(float amount)
         {
             Position += Vector3.Multiply(GetLookAtVector(), amount);
         }
@@ -990,7 +990,7 @@ namespace KWEngine2.GameObjects
         /// Bewegt das Objekt in Blickrichtung (ohne Höhenunterschied)
         /// </summary>
         /// <param name="amount">Anzahl der Bewegungseinheiten</param>
-        protected void MoveXZ(float amount)
+        public void MoveXZ(float amount)
         {
             Vector3 tmp = GetLookAtVector();
             tmp.Y = 0;
@@ -1004,7 +1004,7 @@ namespace KWEngine2.GameObjects
         /// <param name="x">x</param>
         /// <param name="y">y</param>
         /// <param name="z">z</param>
-        protected void MoveOffset(float x, float y, float z)
+        public void MoveOffset(float x, float y, float z)
         {
             Position = new Vector3(Position.X + x, Position.Y + y, Position.Z + z);
         }
@@ -1013,7 +1013,7 @@ namespace KWEngine2.GameObjects
         /// Bewegt das Objekt relativ zur aktuellen Position entlang der gegebenen Achsen
         /// </summary>
         /// <param name="offset">Offset-Vektor</param>
-        protected void MoveOffset(Vector3 offset)
+        public void MoveOffset(Vector3 offset)
         {
             Position = new Vector3(Position.X + offset.X, Position.Y + offset.Y, Position.Z + offset.Z);
         }
@@ -1035,7 +1035,7 @@ namespace KWEngine2.GameObjects
         /// </summary>
         /// <param name="v">Richtungsvektor</param>
         /// <param name="units">Bewegungseinheiten</param>
-        protected void MoveAlongVector(Vector3 v, float units)
+        public void MoveAlongVector(Vector3 v, float units)
         {
             Position = new Vector3(Position.X + v.X * units, Position.Y + v.Y * units, Position.Z + v.Z * units);
         }
