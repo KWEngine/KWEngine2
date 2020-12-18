@@ -1746,7 +1746,7 @@ namespace KWEngine2.GameObjects
         /// </summary>
         /// <param name="ms">Mausinformationen</param>
         /// <returns>true, wenn der Mauszeiger auf dem Objekt liegt</returns>
-        protected bool IsMouseCursorInsideMyHitbox(MouseState ms)
+        public bool IsMouseCursorInsideMyHitbox(MouseState ms)
         {
             Vector3 worldRay = Get3DMouseCoords(HelperGL.GetNormalizedMouseCoords(ms.X, ms.Y, CurrentWindow));
             Vector3 normal;
