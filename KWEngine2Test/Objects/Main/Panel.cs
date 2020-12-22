@@ -17,7 +17,7 @@ namespace KWEngine2Test.Objects.Main
         public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
         {
             
-            _intensity = _gain ? _intensity + 0.02f : _intensity - 0.02f;
+            _intensity = _gain ? _intensity + 0.02f * deltaTimeFactor : _intensity - 0.02f * deltaTimeFactor;
             if(_intensity > 1f)
             {
                 _gain = false;

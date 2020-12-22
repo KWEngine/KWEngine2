@@ -36,12 +36,12 @@ namespace KWEngine2Test.Objects.JumpAndRun.Actors
                 if (ks[Key.A])
                 {
                     SetRotation(0, -90, 0);
-                    MoveOffset(-0.1f, 0, 0);
+                    MoveOffset(-0.1f * deltaTimeFactor, 0, 0);
                 }
                 if (ks[Key.D])
                 {
                     SetRotation(0, 90, 0);
-                    MoveOffset(0.1f, 0, 0);
+                    MoveOffset(0.1f * deltaTimeFactor, 0, 0);
                 }
                 _running = true;
                 _attacking = false;
@@ -87,7 +87,7 @@ namespace KWEngine2Test.Objects.JumpAndRun.Actors
 
             DoStates();
             DoCollisionDetection();
-            DoAnimation(deltaTimeFactor);
+            DoAnimation();
 
             if (Position.Y < -5)
             {
@@ -100,8 +100,8 @@ namespace KWEngine2Test.Objects.JumpAndRun.Actors
         {
             if (_state == PlayerState.Jump)
             {
-                MoveOffset(0, _momentum, 0);
-                _momentum -= _gravity;
+                MoveOffset(0, _momentum * KWEngine.DeltaTimeFactor, 0);
+                _momentum -= _gravity * KWEngine.DeltaTimeFactor;
                 if (_momentum < 0)
                 {
                     _momentum = 0;
@@ -110,8 +110,8 @@ namespace KWEngine2Test.Objects.JumpAndRun.Actors
             }
             else if (_state == PlayerState.Fall)
             {
-                MoveOffset(0, _momentum, 0);
-                _momentum -= _gravity;
+                MoveOffset(0, _momentum * KWEngine.DeltaTimeFactor, 0);
+                _momentum -= _gravity * KWEngine.DeltaTimeFactor;
             }
             else if (_state == PlayerState.OnFloor)
             {
@@ -162,7 +162,7 @@ namespace KWEngine2Test.Objects.JumpAndRun.Actors
                 _percentage = 0.5f;
             }
         }
-        private void DoAnimation(float deltaTimeFactor)
+        private void DoAnimation()
         {
             if (this.HasAnimations)
             {
@@ -171,23 +171,23 @@ namespace KWEngine2Test.Objects.JumpAndRun.Actors
                     if (_running)
                     {
                         this.AnimationID = 2;
-                        _percentage = (_percentage + 0.040f * deltaTimeFactor) % 1.0f;
+                        _percentage = (_percentage + 0.040f * KWEngine.DeltaTimeFactor) % 1.0f;
                     }
                     else if (_attacking)
                     {
                         this.AnimationID = 1;
-                        _percentage = (_percentage + 0.045f * deltaTimeFactor);
+                        _percentage = (_percentage + 0.045f * KWEngine.DeltaTimeFactor);
                     }
                     else
                     {
                         this.AnimationID = 0;
-                        _percentage = (_percentage + 0.0025f * deltaTimeFactor) % 1.0f;
+                        _percentage = (_percentage + 0.0025f * KWEngine.DeltaTimeFactor) % 1.0f;
                     }
                 }
                 else if (_state == PlayerState.Jump || _state == PlayerState.Fall)
                 {
                     this.AnimationID = 3;
-                    _percentage = (_percentage + 0.025f * deltaTimeFactor) % 1.0f;
+                    _percentage = (_percentage + 0.025f * KWEngine.DeltaTimeFactor) % 1.0f;
                 }
 
                 AnimationPercentage = _percentage;

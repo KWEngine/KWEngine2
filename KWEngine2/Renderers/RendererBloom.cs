@@ -14,20 +14,25 @@ namespace KWEngine2.Renderers
     {
         private int mUniform_TextureBloom = -1;
         private int mUniform_Horizontal = -1;
+        private int mUniform_BloomRadius = -1;
 
-        internal void DrawBloom(GeoModel quad, ref Matrix4 mvp, bool bloomDirectionHorizontal, int width, int height, int bloomTexture)
+        internal void DrawBloom(GeoModel quad, ref Matrix4 mvp, bool bloomDirectionHorizontal, int bloomTexture)
         {
             GL.UniformMatrix4(mUniform_MVP, false, ref mvp);
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, bloomTexture);
             GL.Uniform1(mUniform_TextureBloom, 0);
-
+            GL.Uniform1(mUniform_BloomRadius, KWEngine._bloomRadius);
             GL.Uniform1(mUniform_Horizontal, bloomDirectionHorizontal ? 1 : 0);
+
+            float factor = KWEngine.PostProcessQuality == KWEngine.PostProcessingQuality.High ? 1 : KWEngine.PostProcessQuality == KWEngine.PostProcessingQuality.Standard ? 0.6f : 0.25f;
+
             GL.Uniform2(
-                mUniform_Resolution, 
-                KWEngine.PostProcessQuality == KWEngine.PostProcessingQuality.High ? 0.06f * GLWindow.CurrentWindow.bloomWidth : 0.09f * GLWindow.CurrentWindow.bloomWidth,
-                KWEngine.PostProcessQuality == KWEngine.PostProcessingQuality.High ? 0.06f * GLWindow.CurrentWindow.bloomHeight : 0.09f * GLWindow.CurrentWindow.bloomHeight);
+                mUniform_Resolution,
+                1f / (KWEngine.CurrentWindow.Width * factor),
+                1f / (KWEngine.CurrentWindow.Height * factor)
+                );
 
             GL.BindVertexArray(quad.Meshes.Values.ElementAt(0).VAO);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, quad.Meshes.Values.ElementAt(0).VBOIndex);
@@ -49,12 +54,10 @@ namespace KWEngine2.Renderers
             using (Stream s = assembly.GetManifestResourceStream(resourceNameVertexShader))
             {
                 mShaderVertexId = LoadShader(s, ShaderType.VertexShader, mProgramId);
-                //Console.WriteLine(GL.GetShaderInfoLog(mShaderVertexId));
             }
             using (Stream s = assembly.GetManifestResourceStream(resourceNameFragmentShader))
             {
                 mShaderFragmentId = LoadShader(s, ShaderType.FragmentShader, mProgramId);
-                //Console.WriteLine(GL.GetShaderInfoLog(mShaderFragmentId));
             }
 
 
@@ -80,6 +83,7 @@ namespace KWEngine2.Renderers
             mUniform_TextureBloom = GL.GetUniformLocation(mProgramId, "uTextureBloom");
             mUniform_Horizontal = GL.GetUniformLocation(mProgramId, "uHorizontal");
             mUniform_Resolution = GL.GetUniformLocation(mProgramId, "uResolution");
+            mUniform_BloomRadius = GL.GetUniformLocation(mProgramId, "uBloomRadius");
         }
 
         internal override void Draw(GameObject g, ref Matrix4 viewProjection)

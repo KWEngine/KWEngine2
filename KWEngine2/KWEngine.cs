@@ -81,7 +81,21 @@ namespace KWEngine2
             Disabled
         };
 
+        internal static float _bloomRadius = 1;
         
+        /// <summary>
+        /// Radius des Glow-Effekts (Standard: 1, Minimum: 0.001)
+        /// </summary>
+        public static float GlowRadius {
+            get
+            {
+                return _bloomRadius;
+            }
+            set
+            {
+                _bloomRadius = HelperGL.Clamp(value, 0.001f, float.MaxValue);
+            }
+        }
 
         internal static int TextureDefault = -1;
         internal static int TextureBlack = -1;
@@ -126,6 +140,17 @@ namespace KWEngine2
         /// Zeigt die Performance im Titelbereich des Fensters an
         /// </summary>
         public static PerformanceUnit DebugShowPerformanceInTitle { get; set; } = PerformanceUnit.Disabled;
+
+        /// <summary>
+        /// Erfragt den aktuellen DeltaTimeFactor für den Frame
+        /// </summary>
+        public static float DeltaTimeFactor
+        {
+            get
+            {
+                return DeltaTime.GetDeltaTimeFactor();
+            }
+        }
 
         /// <summary>
         /// Qualität der Post-Processing-Effekte (Glühen)

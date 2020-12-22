@@ -749,7 +749,7 @@ namespace KWEngine2
                 RendererBloom r = (RendererBloom)KWEngine.Renderers["Bloom"];
                 RendererMerge m = (RendererMerge)KWEngine.Renderers["Merge"];
                 GL.UseProgram(r.GetProgramId());
-                GL.Viewport(0, 0, Width / 2, Height / 2);
+                GL.Viewport(0, 0, Width, Height);
                 int loopCount =
                     KWEngine.PostProcessQuality == KWEngine.PostProcessingQuality.High ? 6 :
                     KWEngine.PostProcessQuality == KWEngine.PostProcessingQuality.Standard ? 4 : 2;
@@ -777,8 +777,6 @@ namespace KWEngine2
                         _bloomQuad,
                         ref _modelViewProjectionMatrixBloom,
                         i % 2 == 0,
-                        Width / 2,
-                        Height / 2,
                         sourceTex
                     );
                 }
@@ -823,7 +821,7 @@ namespace KWEngine2
                         GL.DeleteTextures(9, new int[] { TextureMainDepth, TextureMain, TextureShadowMap, TextureShadowMap2, TextureBloom1, TextureBloom2, TextureMainFinal, TextureBloomFinal, TextureBloom });
                         GL.DeleteFramebuffers(6, new int[] { FramebufferShadowMap, FramebufferShadowMap2, FramebufferBloom1, FramebufferBloom2, FramebufferMainMultisample, FramebufferMainFinal, });
 
-                        Thread.Sleep(150);
+                        Thread.Sleep(250);
                     }
 
                     InitFramebufferOriginal();
@@ -1095,7 +1093,7 @@ namespace KWEngine2
             renderedTextureTemp = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, renderedTextureTemp);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
-                Width / 2, Height / 2, 0, PixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
+                Width, Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (float)TextureParameterName.ClampToEdge);
@@ -1125,7 +1123,7 @@ namespace KWEngine2
             int renderedTextureTemp2 = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, renderedTextureTemp2);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
-                Width / 2, Height / 2, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+                Width, Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (float)TextureParameterName.ClampToEdge);

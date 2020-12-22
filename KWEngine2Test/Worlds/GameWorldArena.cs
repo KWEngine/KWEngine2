@@ -21,6 +21,33 @@ namespace KWEngine2Test.Worlds
                 CurrentWindow.SetWorld(new GameWorldStart());
                 return;
             }
+
+            if (kb[Key.P])
+            {
+                KWEngine.GlowRadius += 0.01f;
+                Console.WriteLine(KWEngine.GlowRadius);
+            }
+            if (kb[Key.O])
+            {
+                KWEngine.GlowRadius -= 0.01f;
+                Console.WriteLine(KWEngine.GlowRadius);
+            }
+
+            if (kb[Key.J])
+            {
+                KWEngine.PostProcessQuality = KWEngine.PostProcessingQuality.Low;
+                Console.WriteLine("Low");
+            }
+            if (kb[Key.K])
+            {
+                KWEngine.PostProcessQuality = KWEngine.PostProcessingQuality.Standard;
+                Console.WriteLine("Medium");
+            }
+            if (kb[Key.L])
+            {
+                KWEngine.PostProcessQuality = KWEngine.PostProcessingQuality.High;
+                Console.WriteLine("High");
+            }
         }
 
         public override void Prepare()
@@ -68,6 +95,7 @@ namespace KWEngine2Test.Worlds
             testPlatform.SetPosition(15, 1.5f, 0);
             testPlatform.IsCollisionObject = true;
             testPlatform.IsShadowCaster = true;
+            //testPlatform.SetGlow(1, 0, 0, 1);
             AddGameObject(testPlatform);
 
             _player = new Player();

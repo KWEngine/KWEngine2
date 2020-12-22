@@ -81,7 +81,7 @@ namespace KWEngine2Test.Worlds
      
         public override void Prepare()
         {
-            KWEngine.PostProcessQuality = KWEngine.PostProcessingQuality.Standard;
+            //KWEngine.PostProcessQuality = KWEngine.PostProcessingQuality.Standard;
             //KWEngine.MouseSensitivity = -0.001f;
 
             int imageWidth = 190;
@@ -115,7 +115,7 @@ namespace KWEngine2Test.Worlds
             _button4 = new HUDObject(HUDObjectType.Image, width / 2, height / 2 + 252);
             _button4.SetTexture(@".\textures\button04.png");
             _button4.SetScale(imageWidth, imageHeight);
-            _button4.SetColor(1, 1, 0.5f, 1);
+            _button4.SetColor(0, 1f, 1f, 1);
             AddHUDObject(_button4);
 
             DebugShowPerformanceInTitle = KWEngine.PerformanceUnit.FramesPerSecond;

@@ -17,6 +17,12 @@ namespace KWEngine2Test.Worlds
 
         public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
         {
+            if (ks[Key.Escape])
+            {
+                CurrentWindow.SetWorld(new GameWorldStart());
+                return;
+            }
+
             if (_player != null)
             {
                 SetCameraPosition(_player.Position.X, 0, 50);
@@ -43,6 +49,7 @@ namespace KWEngine2Test.Worlds
             _player = new Player();
             _player.SetModel("UBot");
             _player.SetScale(2);
+            _player.SetColor(0.9f, 0.9f, 0.9f);
             _player.SetRotation(0, 90, 0);
             _player.Name = "Heinz";
             _player.SetPosition(0, 4f, 0);
