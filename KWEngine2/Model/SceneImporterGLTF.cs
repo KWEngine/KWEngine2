@@ -135,7 +135,7 @@ namespace KWEngine2.Model
 
         private static void FindRootBone(Scene scene, ref Gltf gltf, ref GeoModel model)
         {
-            if (gltf.Skins.Length > 0 && gltf.Skins[0].Joints.Length > 0)
+            if (gltf.Skins != null && gltf.Skins.Length > 0 && gltf.Skins[0].Joints.Length > 0)
             {
                 string armatureNodeName = gltf.Skins[0].Name;
                 foreach (GeoNode n in model.NodesWithoutHierarchy)
@@ -999,29 +999,35 @@ namespace KWEngine2.Model
 
         private static float[] GetTangentDataForMeshPrimitive(Gltf scene, MeshPrimitive mprim, ref GeoModel model)
         {
-            int vertexIndex = (int)mprim.Attributes["TANGENT"];
-            Accessor indexAccessor = scene.Accessors[vertexIndex];
-
-            byte[] data = GetByteDataFromAccessor(scene, indexAccessor, ref model);
-
-            int bytesPerData = GetBytesPerData(indexAccessor);
-            float[] tangentData = new float[data.Length / bytesPerData];
-            for (int i = 0, j = 0; i < data.Length; i += bytesPerData)
+            if (mprim.Attributes.ContainsKey("TANGENT"))
             {
-                if (bytesPerData == 1)
+                int vertexIndex = (int)mprim.Attributes["TANGENT"];
+                Accessor indexAccessor = scene.Accessors[vertexIndex];
+
+                byte[] data = GetByteDataFromAccessor(scene, indexAccessor, ref model);
+
+                int bytesPerData = GetBytesPerData(indexAccessor);
+                float[] tangentData = new float[data.Length / bytesPerData];
+                for (int i = 0, j = 0; i < data.Length; i += bytesPerData)
                 {
-                    tangentData[j++] = data[i];
+                    if (bytesPerData == 1)
+                    {
+                        tangentData[j++] = data[i];
+                    }
+                    else if (bytesPerData == 2)
+                    {
+                        tangentData[j++] = BitConverter.ToUInt16(data, i);
+                    }
+                    else
+                    {
+                        tangentData[j++] = BitConverter.ToSingle(data, i);
+                    }
                 }
-                else if (bytesPerData == 2)
-                {
-                    tangentData[j++] = BitConverter.ToUInt16(data, i);
-                }
-                else
-                {
-                    tangentData[j++] = BitConverter.ToSingle(data, i);
-                }
+                return tangentData;
             }
-            return tangentData;
+            else
+                return null;
+            
         }
 
         private static float[] GetUVDataForMeshPrimitive(Gltf scene, MeshPrimitive mprim, ref GeoModel model, int index = 0)

@@ -262,7 +262,7 @@ namespace KWEngine2.Model
 
         internal void VBOGenerateTangents(float[] normals, float[] tangents)
         {
-            if (normals.Length > 0)
+            if (tangents != null && tangents.Length > 0)
             {
                 VBOTangent = GL.GenBuffer();
                 GL.BindBuffer(BufferTarget.ArrayBuffer, VBOTangent);
@@ -271,24 +271,27 @@ namespace KWEngine2.Model
                 GL.EnableVertexAttribArray(4);
                 GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 
-                //BiTangents
-                float[] bitangents = new float[tangents.Length];
-                for (int i = 0; i < normals.Length; i += 3)
+                if (tangents != null && tangents.Length > 0)
                 {
-                    Vector3 n = new Vector3(normals[i], normals[i + 1], normals[i + 2]);
-                    Vector3 t = new Vector3(tangents[i], tangents[i + 1], tangents[i + 2]);
-                    Vector3 bt = Vector3.Cross(n, t);
-                    bitangents[i] = bt.X;
-                    bitangents[i+1] = bt.Y;
-                    bitangents[i+2] = bt.Z;
-                }
+                    //BiTangents
+                    float[] bitangents = new float[tangents.Length];
+                    for (int i = 0; i < normals.Length; i += 3)
+                    {
+                        Vector3 n = new Vector3(normals[i], normals[i + 1], normals[i + 2]);
+                        Vector3 t = new Vector3(tangents[i], tangents[i + 1], tangents[i + 2]);
+                        Vector3 bt = Vector3.Cross(n, t);
+                        bitangents[i] = bt.X;
+                        bitangents[i + 1] = bt.Y;
+                        bitangents[i + 2] = bt.Z;
+                    }
 
-                VBOBiTangent = GL.GenBuffer();
-                GL.BindBuffer(BufferTarget.ArrayBuffer, VBOBiTangent);
-                GL.BufferData(BufferTarget.ArrayBuffer, bitangents.Length * 4, bitangents, BufferUsageHint.StaticDraw);
-                GL.VertexAttribPointer(5, 3, VertexAttribPointerType.Float, false, 0, 0);
-                GL.EnableVertexAttribArray(5);
-                GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+                    VBOBiTangent = GL.GenBuffer();
+                    GL.BindBuffer(BufferTarget.ArrayBuffer, VBOBiTangent);
+                    GL.BufferData(BufferTarget.ArrayBuffer, bitangents.Length * 4, bitangents, BufferUsageHint.StaticDraw);
+                    GL.VertexAttribPointer(5, 3, VertexAttribPointerType.Float, false, 0, 0);
+                    GL.EnableVertexAttribArray(5);
+                    GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+                }
             }
         }
 
