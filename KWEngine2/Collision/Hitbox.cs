@@ -40,9 +40,9 @@ namespace KWEngine2.Collision
 
         }
 
-        internal bool GetVertices(out float[] vertices)
+        internal float[] GetVertices()
         {
-            vertices = new float[mVertices.Length * 3];
+            float[] vertices = new float[mVertices.Length * 3];
             for(int i = 0, j = 0; i < mVertices.Length; i++)
             {
                 vertices[j + 0] = mVertices[i].X;
@@ -50,14 +50,13 @@ namespace KWEngine2.Collision
                 vertices[j + 2] = mVertices[i].Z;
                 j += 3;
             }
-            return mVertices.Length != 8;
+            return vertices;
         }
 
         public bool IsActive { get; internal set; } = true;
 
         private static Vector3 MTVTemp = new Vector3(0, 0, 0);
         private static Vector3 MTVTempUp = new Vector3(0, 0, 0);
-        private Matrix4 mTempMatrix = Matrix4.Identity;
         private Matrix4 mModelMatrixFinal = Matrix4.Identity;
 
         public GameObject Owner { get; private set; }

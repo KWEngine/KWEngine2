@@ -458,10 +458,11 @@ namespace KWEngine2.Model
                         GL.EnableVertexAttribArray(5);
                         GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 
-                        mmp.Indices = mIndices.ToArray();
+                        uint[] indices = mIndices.ToArray();
+                        mmp.IndexCount = indices.Length;
                         // Indices:
                         GL.BindBuffer(BufferTarget.ElementArrayBuffer, mmp.VBOIndex);
-                        GL.BufferData(BufferTarget.ElementArrayBuffer, mIndices.Count * 4, mmp.Indices, BufferUsageHint.StaticDraw);
+                        GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * 4, indices, BufferUsageHint.StaticDraw);
                         GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 
 

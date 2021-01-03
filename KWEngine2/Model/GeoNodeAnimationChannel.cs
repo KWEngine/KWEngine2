@@ -11,5 +11,6 @@ namespace KWEngine2.Model
         public List<GeoAnimationKeyframe> ScaleKeys { get; internal set; }
         public List<GeoAnimationKeyframe> RotationKeys { get; internal set; }
         public List<GeoAnimationKeyframe> TranslationKeys { get; internal set; }
+        public string NodeName { get; internal set; } = null;
     }
 }

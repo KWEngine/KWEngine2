@@ -23,10 +23,10 @@ namespace KWEngine2.Model
                     return FileType.DirectX;
                 case "dae":
                     return FileType.Collada;
-                //case "glb":
-                //    return FileType.GLTF;
-                //case "gltf":
-                //    return FileType.GLTF;
+                case "glb":
+                    return FileType.GLTF;
+                case "gltf":
+                    return FileType.GLTF;
                 case "obj":
                     return FileType.Wavefront;
                 case "fbx":
@@ -46,74 +46,84 @@ namespace KWEngine2.Model
             importer.SetConfig(new VertexBoneWeightLimitConfig(KWEngine.MAX_BONE_WEIGHTS));
             importer.SetConfig(new MaxBoneCountConfig(KWEngine.MAX_BONES));
             FileType type = CheckFileEnding(filename);
-            Scene scene = null;
-            if (am != AssemblyMode.File)
+            if(type == FileType.GLTF)
             {
-                if (type == FileType.Invalid)
-                {
-                    throw new Exception("Model file has invalid type.");
-                }
-                string resourceName;
-                Assembly assembly;
+                GeoModel model = SceneImporterGLTF.LoadModel(filename, flipTextureCoordinates);
 
-                if (am == AssemblyMode.Internal)
-                {
-                    assembly = Assembly.GetExecutingAssembly();
-                    resourceName = "KWEngine2.Assets.Models." + filename;
-                }
-                else
-                {
-                    assembly = Assembly.GetEntryAssembly();
-                    resourceName = assembly.GetName().Name + "." + filename;
-                }
 
-                using (Stream s = assembly.GetManifestResourceStream(resourceName))
-                {
-                    PostProcessSteps steps =
-                          PostProcessSteps.LimitBoneWeights
-                        | PostProcessSteps.Triangulate
-                        | PostProcessSteps.ValidateDataStructure
-                        | PostProcessSteps.GenerateUVCoords
-                        | PostProcessSteps.CalculateTangentSpace;
-                    if(filename != "kwcube.obj" && filename !="kwcube6.obj")
-                        steps |= PostProcessSteps.JoinIdenticalVertices;
-                    if (type == FileType.DirectX)
-                        steps |= PostProcessSteps.FlipWindingOrder;
-                    if (flipTextureCoordinates)
-                        steps |= PostProcessSteps.FlipUVs;
-                    scene = importer.ImportFileFromStream(s, steps);
-                }
+                return model;
             }
             else
             {
-                if (type != FileType.Invalid)
+                Scene scene = null;
+                if (am != AssemblyMode.File)
                 {
-                    PostProcessSteps steps =
+                    if (type == FileType.Invalid)
+                    {
+                        throw new Exception("Model file has invalid type.");
+                    }
+                    string resourceName;
+                    Assembly assembly;
+
+                    if (am == AssemblyMode.Internal)
+                    {
+                        assembly = Assembly.GetExecutingAssembly();
+                        resourceName = "KWEngine2.Assets.Models." + filename;
+                    }
+                    else
+                    {
+                        assembly = Assembly.GetEntryAssembly();
+                        resourceName = assembly.GetName().Name + "." + filename;
+                    }
+
+                    using (Stream s = assembly.GetManifestResourceStream(resourceName))
+                    {
+                        PostProcessSteps steps =
                               PostProcessSteps.LimitBoneWeights
                             | PostProcessSteps.Triangulate
-                            //| PostProcessSteps.FixInFacingNormals
                             | PostProcessSteps.ValidateDataStructure
                             | PostProcessSteps.GenerateUVCoords
-                            | PostProcessSteps.CalculateTangentSpace
-                            | PostProcessSteps.JoinIdenticalVertices
-                            ;
-                    if (type == FileType.DirectX)
-                        steps |= PostProcessSteps.FlipWindingOrder;
-                    if (flipTextureCoordinates)
-                        steps |= PostProcessSteps.FlipUVs;
-
-                    scene = importer.ImportFile(filename, steps);
+                            | PostProcessSteps.CalculateTangentSpace;
+                        if (filename != "kwcube.obj" && filename != "kwcube6.obj")
+                            steps |= PostProcessSteps.JoinIdenticalVertices;
+                        if (type == FileType.DirectX)
+                            steps |= PostProcessSteps.FlipWindingOrder;
+                        if (flipTextureCoordinates)
+                            steps |= PostProcessSteps.FlipUVs;
+                        scene = importer.ImportFileFromStream(s, steps);
+                    }
                 }
                 else
                 {
-                    throw new Exception("Could not load model: only OBJ, DAE, FBX and X are supported (GLTF support coming soon).");
-                }
-            }
-            if (scene == null)
-                throw new Exception("Could not load or find model: " + filename);
+                    if (type != FileType.Invalid)
+                    {
+                        PostProcessSteps steps =
+                                  PostProcessSteps.LimitBoneWeights
+                                | PostProcessSteps.Triangulate
+                                //| PostProcessSteps.FixInFacingNormals
+                                | PostProcessSteps.ValidateDataStructure
+                                | PostProcessSteps.GenerateUVCoords
+                                | PostProcessSteps.CalculateTangentSpace
+                                | PostProcessSteps.JoinIdenticalVertices
+                                ;
+                        if (type == FileType.DirectX)
+                            steps |= PostProcessSteps.FlipWindingOrder;
+                        if (flipTextureCoordinates)
+                            steps |= PostProcessSteps.FlipUVs;
 
-            GeoModel model = ProcessScene(scene, am == AssemblyMode.File ? filename.ToLower().Trim() : filename, am) ;
-            return model;
+                        scene = importer.ImportFile(filename, steps);
+                    }
+                    else
+                    {
+                        throw new Exception("Could not load model: only OBJ, DAE, FBX and X are supported (GLTF support coming soon).");
+                    }
+                }
+                if (scene == null)
+                    throw new Exception("Could not load or find model: " + filename);
+
+                GeoModel model = ProcessScene(scene, am == AssemblyMode.File ? filename.ToLower().Trim() : filename, am);
+                return model;
+            }
         }
 
         private static GeoModel ProcessScene(Scene scene, string filename, AssemblyMode am)
@@ -890,7 +900,8 @@ namespace KWEngine2.Model
                     GeoVertex geoVertex = new GeoVertex(i, vertex.X, vertex.Y, vertex.Z);
                     geoMesh.Vertices[i] = geoVertex;
                 }
-                geoMesh.Indices = mesh.GetUnsignedIndices();
+                uint[] indices = mesh.GetUnsignedIndices();
+                geoMesh.IndexCount = indices.Length;
 
                 if (model.HasBones)
                 {
@@ -913,13 +924,13 @@ namespace KWEngine2.Model
 
                             //Debug.WriteLine("Setting Vertex " + vw.VertexID + " with BoneID " + i + " and Weight: " + vw.Weight + " to Slot #" + weightIndexToBeSet);
                             geoMesh.Vertices[vw.VertexID].Weights[weightIndexToBeSet] = vw.Weight;
-                            geoMesh.Vertices[vw.VertexID].BoneIDs[weightIndexToBeSet] = i;
+                            geoMesh.Vertices[vw.VertexID].BoneIDs[weightIndexToBeSet] = (uint)i;
                             geoMesh.Vertices[vw.VertexID].WeightSet++;
                         }
                     }
                 }
 
-                geoMesh.VBOGenerateIndices();
+                geoMesh.VBOGenerateIndices(indices);
                 geoMesh.VBOGenerateVerticesAndBones(model.HasBones);
                 geoMesh.VBOGenerateNormals(mesh);
                 geoMesh.VBOGenerateTangents(mesh);
@@ -935,10 +946,7 @@ namespace KWEngine2.Model
 
                 ProcessMaterialsForMesh(scene, mesh, ref model, ref geoMesh, model.Filename == "kwcube.obj" || model.Filename == "kwcube6.obj");
 
-
-
                 geoMesh.VAOUnbind();
-
                 model.Meshes.Add(geoMesh.Name, geoMesh);
             }
 

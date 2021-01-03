@@ -82,34 +82,31 @@ namespace KWEngine2.Renderers
             
             GL.Disable(EnableCap.Blend);
 
-            lock (g)
+            for (int i = 0; i < g.Hitboxes.Count; i++)
             {
-                for (int i = 0; i < g.Hitboxes.Count; i++)
+                if (g.Hitboxes[i].IsActive)
                 {
-                    if (g.Hitboxes[i].IsActive)
-                    {
-                        GL.UseProgram(mProgramId);
+                    GL.UseProgram(mProgramId);
 
-                        bool isFullHitbox = g.Hitboxes[i].GetVertices(out float[] v);
-                        GL.UniformMatrix4(mUniform_MVP, false, ref viewProjection);
-                        GL.Uniform3(mUniform_BaseColor, 1.0f, 1.0f, 1.0f);
+                    float[] v = g.Hitboxes[i].GetVertices();
+                    GL.UniformMatrix4(mUniform_MVP, false, ref viewProjection);
+                    GL.Uniform3(mUniform_BaseColor, 1.0f, 1.0f, 1.0f);
 
-                        int tmpVAO = GL.GenVertexArray();
-                        GL.BindVertexArray(tmpVAO);
-                        int tmp = GL.GenBuffer();
-                        GL.BindBuffer(BufferTarget.ArrayBuffer, tmp);
-                        GL.BufferData(BufferTarget.ArrayBuffer, v.Length * 4, v, BufferUsageHint.StaticDraw);
-                        GL.VertexAttribPointer(mAttribute_vpos, 3, VertexAttribPointerType.Float, false, 0, 0);
-                        GL.EnableVertexAttribArray(mAttribute_vpos);
-                        GL.DrawArrays(PrimitiveType.Points, 0, v.Length / 3);
-                        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-                        GL.DisableVertexAttribArray(0);
+                    int tmpVAO = GL.GenVertexArray();
+                    GL.BindVertexArray(tmpVAO);
+                    int tmp = GL.GenBuffer();
+                    GL.BindBuffer(BufferTarget.ArrayBuffer, tmp);
+                    GL.BufferData(BufferTarget.ArrayBuffer, v.Length * 4, v, BufferUsageHint.StaticDraw);
+                    GL.VertexAttribPointer(mAttribute_vpos, 3, VertexAttribPointerType.Float, false, 0, 0);
+                    GL.EnableVertexAttribArray(mAttribute_vpos);
+                    GL.DrawArrays(PrimitiveType.Points, 0, v.Length / 3);
+                    GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+                    GL.DisableVertexAttribArray(0);
 
-                        GL.DeleteBuffer(tmp);
-                        GL.DeleteVertexArray(tmpVAO);
+                    GL.DeleteBuffer(tmp);
+                    GL.DeleteVertexArray(tmpVAO);
 
-                        GL.UseProgram(0);
-                    }
+                    GL.UseProgram(0);
                 }
             }
         }

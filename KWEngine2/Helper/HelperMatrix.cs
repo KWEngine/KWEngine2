@@ -16,6 +16,28 @@ namespace KWEngine2.Helper
             0.0f, 0.0f, 0.5f, 0.0f,
             0.5f, 0.5f, 0.5f, 1.0f);
 
+
+        public static Matrix4 ConvertGLTFTRSToOpenTKMatrix(float[] scale, float[] rotation, float[] translation)
+        {
+            OpenTK.Quaternion r = new OpenTK.Quaternion(rotation[0], rotation[1], rotation[2], rotation[3]);
+            Matrix4 rotationMatrix = Matrix4.CreateFromQuaternion(r);
+            Matrix4 scaleMatrix = Matrix4.CreateScale(scale[0], scale[1], scale[2]);
+            Matrix4 translationMatrix = Matrix4.CreateTranslation(translation[0], translation[1], translation[2]);
+
+            return scaleMatrix * rotationMatrix * translationMatrix;
+        }
+
+        public static Matrix4 ConvertGLTFFloatArraytoOpenTKMatrix(float[] source)
+        {
+            Matrix4 convertedMatrix = new Matrix4(
+                source[0], source[1], source[2], source[3],
+                source[4], source[5], source[6], source[7],
+                source[8], source[9], source[10], source[11],
+                source[12], source[13], source[14], source[15]
+                );
+            return convertedMatrix;
+        }
+
         public static void ConvertAssimpToOpenTKMatrix(Matrix4x4 source, out Matrix4 convertedMatrix)
         {
             convertedMatrix = new Matrix4(source.A1, source.A2, source.A3, source.A4,

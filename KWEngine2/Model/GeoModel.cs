@@ -1,7 +1,7 @@
 ﻿using OpenTK;
+using OpenTK.Graphics.OpenGL4;
 using System;
 using System.Collections.Generic;
-using OpenTK.Graphics.OpenGL4;
 using System.IO;
 
 namespace KWEngine2.Model
@@ -131,5 +131,7 @@ namespace KWEngine2.Model
                 }
             }
         }
+
+        internal int GLBOffset { get; set; } = -1;
     }
 }

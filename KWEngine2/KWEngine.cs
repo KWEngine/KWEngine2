@@ -613,7 +613,8 @@ namespace KWEngine2
             terrainModel.Meshes = new Dictionary<string, GeoMesh>();
             terrainModel.IsValid = true;
 
-            GeoMeshHitbox meshHitBox = new GeoMeshHitbox(0 + width / 2, 0 + height / 2, 0 + depth / 2, 0 - width / 2, 0 - height / 2, 0 - depth / 2);
+            Assimp.Mesh m = null;
+            GeoMeshHitbox meshHitBox = new GeoMeshHitbox(0 + width / 2, 0 + height / 2, 0 + depth / 2, 0 - width / 2, 0 - height / 2, 0 - depth / 2, m);
             meshHitBox.Model = terrainModel;
             meshHitBox.Name = name;
 

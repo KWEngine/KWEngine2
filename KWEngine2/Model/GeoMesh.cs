@@ -39,13 +39,11 @@ namespace KWEngine2.Model
         public OpenTK.Graphics.OpenGL4.PrimitiveType Primitive;
         public int IndexCount
         {
-            get
-            {
-                return Indices.Length;
-            }
+            get;
+            internal set;
         }
 
-        public uint[] Indices { get; internal set; }
+        //public uint[] Indices { get; internal set; }
         public GeoMaterial Material { get; internal set; }
 
         internal void VAOGenerateAndBind()
@@ -62,7 +60,7 @@ namespace KWEngine2.Model
         internal void VBOGenerateVerticesAndBones(bool hasBones)
         {
             float[] verticesF = new float[Vertices.Length * 3];
-            int[] boneIds = new int[Vertices.Length * 3];
+            uint[] boneIds = new uint[Vertices.Length * 3];
             float[] boneWeights = new float[Vertices.Length * 3];
 
             for (int i = 0, arrayIndex = 0; i < Vertices.Length; i++, arrayIndex += 3)
@@ -81,12 +79,6 @@ namespace KWEngine2.Model
                     boneWeights[arrayIndex + 1] = Vertices[i].Weights[1];
                     boneWeights[arrayIndex + 2] = Vertices[i].Weights[2];
                 }
-                /*
-                Console.Write("V" + i.ToString().PadLeft(5, '0') + ": ");
-                Console.Write(boneIds[arrayIndex] + " (" + Math.Round(boneWeights[arrayIndex], 2) + "), ");
-                Console.Write(boneIds[arrayIndex+1] + " (" + Math.Round(boneWeights[arrayIndex+1], 2) + "), ");
-                Console.WriteLine(boneIds[arrayIndex+2] + " (" + Math.Round(boneWeights[arrayIndex+2], 2) + "), ");
-                */
             }
             VBOPosition = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBOPosition);
@@ -95,12 +87,14 @@ namespace KWEngine2.Model
             GL.EnableVertexAttribArray(0);
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 
+            Vertices = null; // Not needed anymore. Let the GC clear it...
+
             if (hasBones)
             {
                 VBOBoneIDs = GL.GenBuffer();
                 GL.BindBuffer(BufferTarget.ArrayBuffer, VBOBoneIDs);
                 GL.BufferData(BufferTarget.ArrayBuffer, boneIds.Length * 4, boneIds, BufferUsageHint.StaticDraw);
-                GL.VertexAttribIPointer(6, 3, VertexAttribIntegerType.Int, 0, IntPtr.Zero);
+                GL.VertexAttribIPointer(6, 3, VertexAttribIntegerType.UnsignedInt, 0, IntPtr.Zero);
                 GL.EnableVertexAttribArray(6);
                 GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 
@@ -134,6 +128,19 @@ namespace KWEngine2.Model
             }
         }
 
+        internal void VBOGenerateNormals(float[] normals)
+        {
+            if (normals.Length > 0)
+            {
+                VBONormal = GL.GenBuffer();
+                GL.BindBuffer(BufferTarget.ArrayBuffer, VBONormal);
+                GL.BufferData(BufferTarget.ArrayBuffer, normals.Length * 4, normals, BufferUsageHint.StaticDraw);
+                GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 0, 0);
+                GL.EnableVertexAttribArray(1);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            }
+        }
+
         internal void VBOGenerateTextureCoords1(Mesh mesh, Scene scene, int isKWCube = 0)
         {
             if (mesh.HasTextureCoords(0))
@@ -144,9 +151,6 @@ namespace KWEngine2.Model
                 {
                     if (isKWCube == 2)
                     {
-                        //values[arrayIndex] = 1 - mesh.TextureCoordinateChannels[0][i].X;
-                        //values[arrayIndex + 1] = 1 - mesh.TextureCoordinateChannels[0][i].Y;
-
                         values[arrayIndex] = mesh.TextureCoordinateChannels[0][i].X;
                         values[arrayIndex + 1] = mesh.TextureCoordinateChannels[0][i].Y;
                     }
@@ -170,6 +174,32 @@ namespace KWEngine2.Model
                 GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             }
 
+        }
+
+        internal void VBOGenerateTextureCoords1(float[] uvs)
+        {
+            if (uvs != null && uvs.Length > 0)
+            {
+                VBOTexture1 = GL.GenBuffer();
+                GL.BindBuffer(BufferTarget.ArrayBuffer, VBOTexture1);
+                GL.BufferData(BufferTarget.ArrayBuffer, uvs.Length * 4, uvs, BufferUsageHint.StaticDraw);
+                GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 0, 0);
+                GL.EnableVertexAttribArray(2);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            }
+        }
+
+        internal void VBOGenerateTextureCoords2(float[] uvs)
+        {
+            if (uvs != null && uvs.Length > 0)
+            {
+                VBOTexture1 = GL.GenBuffer();
+                GL.BindBuffer(BufferTarget.ArrayBuffer, VBOTexture2);
+                GL.BufferData(BufferTarget.ArrayBuffer, uvs.Length * 4, uvs, BufferUsageHint.StaticDraw);
+                GL.VertexAttribPointer(3, 2, VertexAttribPointerType.Float, false, 0, 0);
+                GL.EnableVertexAttribArray(3);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            }
         }
 
         internal void VBOGenerateTextureCoords2(Mesh mesh)
@@ -230,11 +260,43 @@ namespace KWEngine2.Model
             }
         }
 
-        internal void VBOGenerateIndices()
+        internal void VBOGenerateTangents(float[] normals, float[] tangents)
+        {
+            if (normals.Length > 0)
+            {
+                VBOTangent = GL.GenBuffer();
+                GL.BindBuffer(BufferTarget.ArrayBuffer, VBOTangent);
+                GL.BufferData(BufferTarget.ArrayBuffer, tangents.Length * 4, tangents, BufferUsageHint.StaticDraw);
+                GL.VertexAttribPointer(4, 3, VertexAttribPointerType.Float, false, 0, 0);
+                GL.EnableVertexAttribArray(4);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+
+                //BiTangents
+                float[] bitangents = new float[tangents.Length];
+                for (int i = 0; i < normals.Length; i += 3)
+                {
+                    Vector3 n = new Vector3(normals[i], normals[i + 1], normals[i + 2]);
+                    Vector3 t = new Vector3(tangents[i], tangents[i + 1], tangents[i + 2]);
+                    Vector3 bt = Vector3.Cross(n, t);
+                    bitangents[i] = bt.X;
+                    bitangents[i+1] = bt.Y;
+                    bitangents[i+2] = bt.Z;
+                }
+
+                VBOBiTangent = GL.GenBuffer();
+                GL.BindBuffer(BufferTarget.ArrayBuffer, VBOBiTangent);
+                GL.BufferData(BufferTarget.ArrayBuffer, bitangents.Length * 4, bitangents, BufferUsageHint.StaticDraw);
+                GL.VertexAttribPointer(5, 3, VertexAttribPointerType.Float, false, 0, 0);
+                GL.EnableVertexAttribArray(5);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            }
+        }
+
+        internal void VBOGenerateIndices(uint[] indices)
         {
             VBOIndex = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, VBOIndex);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, Indices.Length * 4, Indices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * 4, indices, BufferUsageHint.StaticDraw);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
         }
 

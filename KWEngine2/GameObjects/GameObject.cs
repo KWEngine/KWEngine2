@@ -399,17 +399,17 @@ namespace KWEngine2.GameObjects
             return Hitboxes[_largestHitboxIndex];
         }
 
-        internal Matrix4 CreateModelMatrix()
+        internal Matrix4 CreateModelMatrix(ref Vector3 s, ref Quaternion r, ref Vector3 t)
         {
-            Matrix4 m = Matrix4.CreateFromQuaternion(_rotation);
+            Matrix4 m = Matrix4.CreateFromQuaternion(r);
 
-            m.Row0 *= _scale.X;
-            m.Row1 *= _scale.Y;
-            m.Row2 *= _scale.Z;
+            m.Row0 *= s.X;
+            m.Row1 *= s.Y;
+            m.Row2 *= s.Z;
 
-            m.Row3.X = _position.X;
-            m.Row3.Y = _position.Y;
-            m.Row3.Z = _position.Z;
+            m.Row3.X = t.X;
+            m.Row3.Y = t.Y;
+            m.Row3.Z = t.Z;
             m.Row3.W = 1.0f;
 
             return m;
@@ -417,7 +417,7 @@ namespace KWEngine2.GameObjects
 
         internal void UpdateModelMatrixAndHitboxes()
         {
-            _modelMatrix = CreateModelMatrix();
+            _modelMatrix = CreateModelMatrix(ref _scale, ref _rotation, ref _position);
             Vector3 sceneCenter = new Vector3(0, 0, 0);
             Vector3 tmpDims = new Vector3(0, 0, 0);
             float minX = float.MaxValue;
@@ -1106,19 +1106,17 @@ namespace KWEngine2.GameObjects
 
             if (channel != null)
             {
-                Matrix4 scalingMatrix = Matrix4.CreateScale(CalcInterpolatedScaling(timestamp, ref channel));
-                Matrix4 rotationMatrix = Matrix4.CreateFromQuaternion(CalcInterpolatedRotation(timestamp, ref channel));
-                Matrix4 translationMatrix = Matrix4.CreateTranslation(CalcInterpolatedTranslation(timestamp, ref channel));
-                nodeTransformation =
-                    scalingMatrix
-                    * rotationMatrix
-                    * translationMatrix;
+                Vector3 s = channel.ScaleKeys == null ? nodeTransformation.ExtractScale() : CalcInterpolatedScaling(timestamp, ref channel);
+                Quaternion r = channel.RotationKeys == null ? nodeTransformation.ExtractRotation() : CalcInterpolatedRotation(timestamp, ref channel);
+                Vector3 t = channel.TranslationKeys == null ? nodeTransformation.ExtractTranslation() : CalcInterpolatedTranslation(timestamp, ref channel);
+
+                nodeTransformation = CreateModelMatrix(ref s, ref r, ref t);
             }
             Matrix4 globalTransform = nodeTransformation * parentTransform;
 
-            foreach(GeoMesh mesh in Model.Meshes.Values)
+            if (channel != null)
             {
-                if (mesh.BoneNames.Count > 0)
+                foreach (GeoMesh mesh in Model.Meshes.Values)
                 {
                     int index = mesh.BoneNames.IndexOf(node.Name);
                     if (index >= 0)
@@ -1137,6 +1135,10 @@ namespace KWEngine2.GameObjects
       
         private Vector3 CalcInterpolatedScaling(float timestamp, ref GeoNodeAnimationChannel channel)
         {
+            if(channel.ScaleKeys == null)
+            {
+                return new Vector3(1, 1, 1);
+            }
             if (channel.ScaleKeys.Count == 1)
             {
                 return channel.ScaleKeys[0].Scale;
@@ -1180,6 +1182,10 @@ namespace KWEngine2.GameObjects
 
         private Vector3 CalcInterpolatedTranslation(float timestamp, ref GeoNodeAnimationChannel channel)
         {
+            if (channel.TranslationKeys == null)
+            {
+                return new Vector3(0,0,0);
+            }
             if (channel.TranslationKeys.Count == 1)
             {
                 return channel.TranslationKeys[0].Translation;
@@ -1223,6 +1229,10 @@ namespace KWEngine2.GameObjects
 
         private Quaternion CalcInterpolatedRotation(float timestamp, ref GeoNodeAnimationChannel channel)
         {
+            if (channel.RotationKeys == null)
+            {
+                return new Quaternion(0, 0, 0, 1);
+            }
             if (channel.RotationKeys.Count == 1)
             {
                 return channel.RotationKeys[0].Rotation;
