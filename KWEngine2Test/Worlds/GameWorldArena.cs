@@ -56,7 +56,8 @@ namespace KWEngine2Test.Worlds
             //SetSunPosition(200, 200, 50);
             //SetSunColor(1, 0.75f, 0.5f, 1);
             SunAmbientFactor = 0.8f;
-            SetSunPosition(25, 50, 100);
+            SetSunPosition(25, 20, 50);
+            SetSunTarget(10, 0, 0);
             //KWEngine.ShadowMapCoefficient = 0.00075f;
             //DebugShowHitboxes = true;
             //DebugShadowCaster = true;
@@ -74,7 +75,7 @@ namespace KWEngine2Test.Worlds
             main.SetModel("Main");
             main.IsShadowCaster = true;
             AddGameObject(main);
-
+            
             Immovable upper = new Immovable();
             upper.SetModel("Upper");
             upper.IsShadowCaster = true;
@@ -90,13 +91,13 @@ namespace KWEngine2Test.Worlds
             tables.IsCollisionObject = true;
             tables.IsShadowCaster = true;
             AddGameObject(tables);
-
+            
             Immovable hbMain = new Immovable();
             hbMain.SetModel("HBMain");
             hbMain.IsCollisionObject = true;
             hbMain.Opacity = 0;
             AddGameObject(hbMain);
-
+            
             Immovable hbUpper = new Immovable();
             hbUpper.SetModel("HBUpper");
             hbUpper.IsCollisionObject = true;

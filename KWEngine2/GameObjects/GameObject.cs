@@ -952,6 +952,18 @@ namespace KWEngine2.GameObjects
             _tintColor.Z = blue >= 0 && blue <= 1 ? blue : 1;
         }
 
+        /// <summary>
+        /// Strahlfarbe
+        /// </summary>
+        /// <param name="red">Rot</param>
+        /// <param name="green">Grün</param>
+        /// <param name="blue">Blau</param>
+        /// <param name="intensity">Intensität</param>
+        public void SetColorEmissive(float red, float green, float blue, float intensity)
+        {
+            ColorEmissive = new Vector4(red, green, blue, intensity);
+        }
+
         private void UpdateLookAtVector()
         {
             if (CurrentWorld != null && CurrentWorld.IsFirstPersonMode && CurrentWorld.GetFirstPersonObject().Equals(this))

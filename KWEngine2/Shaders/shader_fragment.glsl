@@ -65,12 +65,12 @@ float calculateDarkening(float cosTheta, vec4 shadowCoord)
 	bias = clamp(bias, 0.0 ,0.01);
 	shadowCoord.z -= bias;
 	float darkening = 0.0;
-	//darkening += textureProjOffset(uTextureShadowMap, shadowCoord, ivec2(-1,-1));
-	//darkening += textureProjOffset(uTextureShadowMap, shadowCoord, ivec2(-1,1));
+	darkening += textureProjOffset(uTextureShadowMap, shadowCoord, ivec2(-1,-1));
+	darkening += textureProjOffset(uTextureShadowMap, shadowCoord, ivec2(-1,1));
 	darkening += textureProjOffset(uTextureShadowMap, shadowCoord, ivec2(0,0));
-	//darkening += textureProjOffset(uTextureShadowMap, shadowCoord, ivec2(1,1));
-	//darkening += textureProjOffset(uTextureShadowMap, shadowCoord, ivec2(1,-1));
-	//darkening /= 5.0;
+	darkening += textureProjOffset(uTextureShadowMap, shadowCoord, ivec2(1,1));
+	darkening += textureProjOffset(uTextureShadowMap, shadowCoord, ivec2(1,-1));
+	darkening /= 5.0;
 	return darkening;
 }
 
@@ -80,12 +80,12 @@ float calculateDarkening2(float cosTheta, vec4 shadowCoord)
 	bias = clamp(bias, 0.0 ,0.01);
 	shadowCoord.z -= bias;
 	float darkening = 0.0;
-	//darkening += textureProjOffset(uTextureShadowMap2, shadowCoord, ivec2(-1,-1));
-	//darkening += textureProjOffset(uTextureShadowMap2, shadowCoord, ivec2(-1,1));
+	darkening += textureProjOffset(uTextureShadowMap2, shadowCoord, ivec2(-1,-1));
+	darkening += textureProjOffset(uTextureShadowMap2, shadowCoord, ivec2(-1,1));
 	darkening += textureProjOffset(uTextureShadowMap2, shadowCoord, ivec2(0,0));
-	//darkening += textureProjOffset(uTextureShadowMap2, shadowCoord, ivec2(1,1));
-	//darkening += textureProjOffset(uTextureShadowMap2, shadowCoord, ivec2(1,-1));
-	//darkening /= 5.0;
+	darkening += textureProjOffset(uTextureShadowMap2, shadowCoord, ivec2(1,1));
+	darkening += textureProjOffset(uTextureShadowMap2, shadowCoord, ivec2(1,-1));
+	darkening /= 5.0;
 	return darkening;
 }
 
@@ -93,10 +93,9 @@ void main()
 {
 	// Texture mapping:
 	vec3 texColor = uBaseColor;
-	vec4 texColor4 = vec4(1.0, 1.0, 1.0, 1.0);
 	if(uUseTextureDiffuse > 0)
 	{
-		texColor4 = texture(uTextureDiffuse, vTexture);
+		vec4 texColor4 = texture(uTextureDiffuse, vTexture);
 		if(texColor4.w <= 0.5)
 		{
 			discard;
@@ -227,7 +226,7 @@ void main()
 
 	colorComponentTotal += totalSpecColor;
 
-	vec3 finalColor =(colorComponentTotal + ambient) * uBaseColor.xyz * uTintColor.xyz * texColor;
+	vec3 finalColor =(colorComponentTotal + ambient) * uTintColor.xyz * texColor;
 	
 	float dotOutline = max(1.0 - 4.0 * pow(abs(dot(uCameraDirection, vNormal)), 2.0), 0.0) * uOutline.w;
 
