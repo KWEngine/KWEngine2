@@ -113,11 +113,14 @@ namespace KWEngine2Test.Objects.Arena
             foreach (Intersection i in intersections)
             {
                 Vector3 mtv = i.MTV;
-                if(i.Object is Immovable && (i.Object as Immovable).IsStair && i.MTVUp.Y > 0)
+                if(i.MeshName.Contains("_floor") && i.MTVUp.Y > 0)
                 {
-                    mtv = i.MTVUp;
+                    MoveOffset(i.MTVUp);
                 }
-                MoveOffset(mtv);
+                else
+                {
+                    MoveOffset(mtv);
+                }
 
                 if (mtv.Y > 0.00001f)
                 {

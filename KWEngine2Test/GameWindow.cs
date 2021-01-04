@@ -7,7 +7,7 @@ namespace KWEngine2Test
     class GameWindow : GLWindow
     {
         public GameWindow()
-            : base(1280, 720, OpenTK.GameWindowFlags.Default, 4, false, false, 8)
+            : base(1280, 720, OpenTK.GameWindowFlags.Default, 1, true, false, 4)
         {
             SetWorld(new GameWorldStart());
         }
