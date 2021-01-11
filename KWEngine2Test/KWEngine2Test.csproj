@@ -55,6 +55,8 @@
     <Compile Include="Objects\Arena\Player.cs" />
     <Compile Include="Objects\JumpAndRun\Platforms\Platform.cs" />
     <Compile Include="Objects\JumpAndRun\Actors\Player.cs" />
+    <Compile Include="Objects\School\Immovable.cs" />
+    <Compile Include="Objects\School\Player.cs" />
     <Compile Include="Objects\SpaceInvaders\Box.cs" />
     <Compile Include="Objects\SpaceInvaders\Enemy.cs" />
     <Compile Include="Objects\SpaceInvaders\EnemySimple.cs" />
@@ -64,6 +66,7 @@
     <Compile Include="Objects\SweepAndPruneTest\Player.cs" />
     <Compile Include="Objects\SweepAndPruneTest\Shot.cs" />
     <Compile Include="Objects\SweepAndPruneTest\SweepCube.cs" />
+    <Compile Include="Worlds\GameWorldSchool.cs" />
     <Compile Include="Worlds\GameWorldJumpAndRun.cs" />
     <Compile Include="Worlds\GameWorldSpaceInvaders.cs" />
     <Compile Include="Worlds\GameWorldArena.cs" />

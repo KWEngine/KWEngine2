@@ -53,65 +53,11 @@ namespace KWEngine2Test.Worlds
         public override void Prepare()
         {
             FOV = 90;
-            //SetSunPosition(200, 200, 50);
-            //SetSunColor(1, 0.75f, 0.5f, 1);
-            SunAmbientFactor = 0.8f;
-            SetSunPosition(25, 20, 50);
-            SetSunTarget(10, 0, 0);
-            //KWEngine.ShadowMapCoefficient = 0.00075f;
-            //DebugShowHitboxes = true;
-            //DebugShadowCaster = true;
-
+            SetSunPosition(200, 200, 50);
+            SetSunColor(1, 0.75f, 0.5f, 1);
+            KWEngine.ShadowMapCoefficient = 0.00075f;
+           
             
-            KWEngine.LoadModelFromFile("Main", @".\models\forum\forum_main.fbx");
-            KWEngine.LoadModelFromFile("Upper", @".\models\forum\forum_upper.fbx");
-            KWEngine.LoadModelFromFile("Stairs", @".\models\forum\forum_stairs.fbx");
-            KWEngine.LoadModelFromFile("Tables", @".\models\forum\forum_tables.fbx");
-            KWEngine.LoadModelFromFile("HBMain", @".\models\forum\forum_hitbox_main.fbx");
-            KWEngine.LoadModelFromFile("HBUpper", @".\models\forum\forum_hitbox_upper.fbx");
-            KWEngine.LoadModelFromFile("HBStairs", @".\models\forum\forum_hitbox_stairs.fbx");
-
-            Immovable main = new Immovable();
-            main.SetModel("Main");
-            main.IsShadowCaster = true;
-            AddGameObject(main);
-            
-            Immovable upper = new Immovable();
-            upper.SetModel("Upper");
-            upper.IsShadowCaster = true;
-            AddGameObject(upper);
-
-            Immovable stairs = new Immovable();
-            stairs.SetModel("Stairs");
-            stairs.IsShadowCaster = true;
-            AddGameObject(stairs);
-
-            Immovable tables = new Immovable();
-            tables.SetModel("Tables");
-            tables.IsCollisionObject = true;
-            tables.IsShadowCaster = true;
-            AddGameObject(tables);
-            
-            Immovable hbMain = new Immovable();
-            hbMain.SetModel("HBMain");
-            hbMain.IsCollisionObject = true;
-            hbMain.Opacity = 0;
-            AddGameObject(hbMain);
-            
-            Immovable hbUpper = new Immovable();
-            hbUpper.SetModel("HBUpper");
-            hbUpper.IsCollisionObject = true;
-            hbUpper.Opacity = 0;
-            AddGameObject(hbUpper);
-
-            Immovable hbStairs = new Immovable();
-            hbStairs.SetModel("HBStairs");
-            hbStairs.IsCollisionObject = true;
-            hbStairs.Opacity = 0;
-            AddGameObject(hbStairs);
-            
-
-            /*
             KWEngine.LoadModelFromFile("ArenaOuter", @".\Models\ArenaOuter\ArenaOuter.fbx");
             KWEngine.LoadModelFromFile("ArenaPlatform", @".\Models\ArenaOuter\ArenaPlatform.obj");
             KWEngine.LoadModelFromFile("ArenaPlatforms", @".\Models\ArenaOuter\ArenaPlatforms.fbx");
@@ -153,21 +99,20 @@ namespace KWEngine2Test.Worlds
             testPlatform.IsShadowCaster = true;
             //testPlatform.SetGlow(1, 0, 0, 1);
             AddGameObject(testPlatform);
-            */
+            
 
             _player = new Player();
             _player.SetModel("KWCube");
-            _player.SetScale(0.5f, 1, 0.5f);
+            _player.SetScale(1, 2, 1);
             _player.IsShadowCaster = false;
             _player.IsCollisionObject = true;
-            _player.SetPosition(0, 0.5f, 0);
-            _player.FPSEyeOffset = 1.25f;
+            _player.SetPosition(25, 1f, 25);
+            _player.FPSEyeOffset = 0.75f;
             _player.UpdateLast = true;
             AddGameObject(_player);
-            SetFirstPersonObject(_player, 0);
+            SetFirstPersonObject(_player, 230);
 
-            SetTextureSkybox(@".\textures\skybox1.jpg");
-            //SetTextureSkyboxRotation(90);
+            SetTextureSkybox(@".\textures\skybox1.jpg", 1, 0.8f, 0.6f);
             DebugShowPerformanceInTitle = KWEngine.PerformanceUnit.FramesPerSecond;
 
         }
