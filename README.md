@@ -1,7 +1,7 @@
 # KWEngine2
 Iteration 2 of the OpenGL C# 3D game engine.
 
-Latest version is: 2.2
+Latest version is: 2.3
 
 A multithreaded version is still in experimental state. Please stick to the single threaded approach for now.
 
