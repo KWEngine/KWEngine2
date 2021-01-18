@@ -402,14 +402,15 @@ namespace KWEngine2.Model
         {
             GeoMaterial geoMaterial = new GeoMaterial();
             int materialId = currentPrimitive.Material == null ? -1 : (int)currentPrimitive.Material;
-            if(materialId < 0)
+
+            if (materialId < 0)
             {
                 geoMaterial.BlendMode = OpenTK.Graphics.OpenGL4.BlendingFactor.OneMinusSrcAlpha;
-                geoMaterial.ColorDiffuse = new Vector4(1, 1, 1, 1);
+                geoMaterial.ColorAlbedo = new Vector4(1, 1, 1, 1);
                 geoMaterial.ColorEmissive = new Vector4(0, 0, 0, 1);
-                geoMaterial.SpecularPower = 0;
-                geoMaterial.SpecularArea = 1024;
-                geoMaterial.TextureSpecularIsRoughness = false;
+                geoMaterial.TextureRoughnessIsSpecular = false;
+                geoMaterial.Roughness = 1;
+                geoMaterial.Metalness = 0;
                 if (mesh.Name != null && mesh.Name.ToLower().Contains("_invisible"))
                 {
                     geoMaterial.Opacity = 0;
@@ -420,13 +421,11 @@ namespace KWEngine2.Model
                 Material material = scene.Materials[materialId];
                 geoMaterial.Name = material.Name;
                 geoMaterial.BlendMode = OpenTK.Graphics.OpenGL4.BlendingFactor.OneMinusSrcAlpha;
-                geoMaterial.ColorDiffuse = new Vector4(material.PbrMetallicRoughness.BaseColorFactor[0], material.PbrMetallicRoughness.BaseColorFactor[1], material.PbrMetallicRoughness.BaseColorFactor[2], material.PbrMetallicRoughness.BaseColorFactor[3]);
+                geoMaterial.ColorAlbedo = new Vector4(material.PbrMetallicRoughness.BaseColorFactor[0], material.PbrMetallicRoughness.BaseColorFactor[1], material.PbrMetallicRoughness.BaseColorFactor[2], material.PbrMetallicRoughness.BaseColorFactor[3]);
                 geoMaterial.ColorEmissive = new Vector4(material.EmissiveFactor[0], material.EmissiveFactor[1], material.EmissiveFactor[2], 1f);
-                geoMaterial.ColorMetallic = material.PbrMetallicRoughness.MetallicFactor;
-                geoMaterial.ColorRoughness = material.PbrMetallicRoughness.RoughnessFactor;
-                geoMaterial.SpecularArea = 1024;
-                geoMaterial.SpecularPower = 2f - 2 * material.PbrMetallicRoughness.RoughnessFactor; // TODO: find better translation for roughness -> specular
-                geoMaterial.IsPBRMaterial = false;
+                geoMaterial.Metalness = material.PbrMetallicRoughness.MetallicFactor;
+                geoMaterial.Roughness = material.PbrMetallicRoughness.RoughnessFactor;
+
                 if (mesh.Name != null && mesh.Name.ToLower().Contains("_invisible"))
                 {
                     geoMaterial.Opacity = 0;
@@ -457,10 +456,10 @@ namespace KWEngine2.Model
                             tex.UVTransform = new OpenTK.Vector2(1, 1);
                             tex.Filename = filename;
                             tex.UVMapIndex = material.PbrMetallicRoughness.BaseColorTexture.TexCoord;
-                            tex.Type = GeoTexture.TexType.Diffuse;
+                            tex.Type = TextureType.Albedo;
                             tex.OpenGLID = glTextureId;
                         }
-                        geoMaterial.TextureDiffuse = tex;
+                        geoMaterial.TextureAlbedo = tex;
                     }
                 }
 
@@ -480,15 +479,16 @@ namespace KWEngine2.Model
                         tex.UVTransform = new OpenTK.Vector2(material.NormalTexture.Scale, material.NormalTexture.Scale);
                         tex.Filename = filename;
                         tex.UVMapIndex = material.NormalTexture.TexCoord;
-                        tex.Type = GeoTexture.TexType.Normal;
+                        tex.Type = TextureType.Normal;
                         tex.OpenGLID = glTextureId;
                     }
                     geoMaterial.TextureNormal = tex;
                 }
 
-                // Specular/Roughness texture:
+                // Metalness texture:
                 if (material.PbrMetallicRoughness.MetallicRoughnessTexture != null)
                 {
+                    geoMaterial.TextureRoughnessInMetalness = true;
                     Texture tinfo = scene.Textures[material.PbrMetallicRoughness.MetallicRoughnessTexture.Index];
                     int sourceId = tinfo.Source != null ? (int)tinfo.Source : -1;
                     int sampleId = tinfo.Sampler != null ? (int)tinfo.Sampler : -1;
@@ -501,15 +501,15 @@ namespace KWEngine2.Model
                         if (!duplicateFound)
                         {
                             byte[] rawTextureData = GetTextureDataFromAccessor(scene, i, ref model, out string filename);
-                            int glTextureId = HelperTexture.LoadTextureForModelGLB(rawTextureData, true);
+                            int glTextureId = HelperTexture.LoadTextureForModelGLB(rawTextureData);
                             tex.UVTransform = new OpenTK.Vector2(1, 1);
                             tex.Filename = filename;
                             tex.UVMapIndex = material.PbrMetallicRoughness.BaseColorTexture.TexCoord;
-                            tex.Type = GeoTexture.TexType.Specular;
+                            tex.Type = TextureType.Metalness;
                             tex.OpenGLID = glTextureId;
                         }
-                        geoMaterial.TextureSpecular = tex;
-                        geoMaterial.TextureSpecularIsRoughness = true;
+                        geoMaterial.TextureMetalness = tex;
+                        geoMaterial.TextureRoughnessIsSpecular = true;
                     }
                 }
 
@@ -529,13 +529,13 @@ namespace KWEngine2.Model
                         tex.UVTransform = new OpenTK.Vector2(1, 1);
                         tex.Filename = filename;
                         tex.UVMapIndex = material.PbrMetallicRoughness.BaseColorTexture.TexCoord;
-                        tex.Type = GeoTexture.TexType.Emissive;
+                        tex.Type = TextureType.Emissive;
                         tex.OpenGLID = glTextureId;
                     }
                     geoMaterial.TextureEmissive = tex;
                 }
 
-                // TODO: implement lightmap texture on second UV-Index as soon as gltf supports lightmaps
+                // TODO: implement metalness texture & lightmap texture on second UV-Index as soon as gltf supports lightmaps
             }
             geoMesh.Material = geoMaterial;
         }

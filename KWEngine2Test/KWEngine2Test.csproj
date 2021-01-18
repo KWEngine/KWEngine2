@@ -55,6 +55,7 @@
     <Compile Include="Objects\Arena\Player.cs" />
     <Compile Include="Objects\JumpAndRun\Platforms\Platform.cs" />
     <Compile Include="Objects\JumpAndRun\Actors\Player.cs" />
+    <Compile Include="Objects\PointLight.cs" />
     <Compile Include="Objects\School\Immovable.cs" />
     <Compile Include="Objects\School\Player.cs" />
     <Compile Include="Objects\SpaceInvaders\Box.cs" />
@@ -62,10 +63,12 @@
     <Compile Include="Objects\SpaceInvaders\EnemySimple.cs" />
     <Compile Include="Objects\SpaceInvaders\Player.cs" />
     <Compile Include="Objects\SpaceInvaders\Shot.cs" />
+    <Compile Include="Objects\Sphere.cs" />
     <Compile Include="Objects\SweepAndPruneTest\Enemy.cs" />
     <Compile Include="Objects\SweepAndPruneTest\Player.cs" />
     <Compile Include="Objects\SweepAndPruneTest\Shot.cs" />
     <Compile Include="Objects\SweepAndPruneTest\SweepCube.cs" />
+    <Compile Include="Worlds\GameWorldPBRTest.cs" />
     <Compile Include="Worlds\GameWorldSchool.cs" />
     <Compile Include="Worlds\GameWorldJumpAndRun.cs" />
     <Compile Include="Worlds\GameWorldSpaceInvaders.cs" />
@@ -104,6 +107,21 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Models\ArenaOuter\ArenaPlatforms.fbx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Models\ArenaOuter\materialtest.fbx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Models\ArenaOuter\materialtest.glb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Models\ArenaOuter\materialtest.mtl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Models\ArenaOuter\materialtest.obj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Models\cubetest.fbx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Models\Forum\forum_hitbox_main.fbx">
@@ -439,6 +457,21 @@
     <Content Include="Models\ArenaOuter\Billboards.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Models\ArenaOuter\Metal022_1K_Color.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Models\ArenaOuter\Metal022_1K_Metalness.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Models\ArenaOuter\Metal022_1K_Normal.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Models\ArenaOuter\Metal022_1K_Roughness.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Models\ArenaOuter\Metal022_1K_Specular.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Models\ArenaOuter\PolygonScifi_01_A.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -464,6 +497,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Models\labyrinth\walls_clean.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Textures\Metal022_1K_Color.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Textures\Metal022_1K_Metalness.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Textures\Metal022_1K_Normal.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Textures\Metal022_1K_Roughness.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Models\pbrtest\SciFiBox_Base_Color.png">
@@ -580,6 +625,24 @@
     <Content Include="Textures\heightmap.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Textures\MetalPlates006_1K_Color.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Textures\MetalPlates006_1K_ColorBright.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Textures\MetalPlates006_1K_Displacement.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Textures\MetalPlates006_1K_Metalness.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Textures\MetalPlates006_1K_Normal.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Textures\MetalPlates006_1K_Roughness.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Textures\mpanel_diffuse.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -595,10 +658,10 @@
     <Content Include="Textures\pavement01_normal.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Textures\sand_diffuse.png">
+    <Content Include="Textures\sand_diffuse.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Textures\sand_normal.png">
+    <Content Include="Textures\sand_normal.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Textures\skybox1.jpg">

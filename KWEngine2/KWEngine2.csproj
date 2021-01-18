@@ -25,6 +25,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -36,6 +37,7 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\KWEngine2.xml</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -114,6 +116,7 @@
     <Compile Include="GameObjects\LightObject.cs" />
     <Compile Include="GameObjects\ParticleObject.cs" />
     <Compile Include="Helper\HelperCamera.cs" />
+    <Compile Include="Helper\HelperDDS.cs" />
     <Compile Include="Helper\HelperFont.cs" />
     <Compile Include="Helper\HelperFrustum.cs" />
     <Compile Include="Helper\HelperGLLoader.cs" />
@@ -123,6 +126,7 @@
     <Compile Include="Helper\LoadPackage.cs" />
     <Compile Include="Helper\ParticleInfo.cs" />
     <Compile Include="Helper\Sector.cs" />
+    <Compile Include="Helper\TextureSet.cs" />
     <Compile Include="KWEngine.cs" />
     <Compile Include="GameObjects\GameObject.cs" />
     <Compile Include="GLWindow.cs" />
@@ -158,9 +162,9 @@
     <Compile Include="Renderers\RendererShadow.cs" />
     <Compile Include="Renderers\RendererExplosion.cs" />
     <Compile Include="Renderers\RendererSimple.cs" />
-    <Compile Include="Renderers\RendererStandardPBR.cs" />
-    <Compile Include="Renderers\RendererTerrain.cs" />
     <Compile Include="Renderers\RendererStandard.cs" />
+    <Compile Include="Renderers\RendererTerrain.cs" />
+    <Compile Include="Renderers\RendererOld.cs" />
     <Compile Include="World.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -173,7 +177,6 @@
     <EmbeddedResource Include="Assets\Models\kwsphere.obj" />
     <EmbeddedResource Include="Assets\Models\kwcube6.mtl" />
     <EmbeddedResource Include="Assets\Models\kwcube6.obj" />
-    <EmbeddedResource Include="Assets\Fonts\Anonymous.ttf" />
     <EmbeddedResource Include="Assets\Models\csystem.mtl" />
     <EmbeddedResource Include="Assets\Models\csystem.obj" />
     <EmbeddedResource Include="Assets\Models\csystemX.mtl" />
@@ -194,7 +197,9 @@
     <EmbeddedResource Include="Assets\Models\dollar.obj" />
     <None Include="KWEngine2_Klassendiagramm.cd" />
     <None Include="OpenTK.dll.config" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <EmbeddedResource Include="Shaders\shader_fragment.glsl" />
     <EmbeddedResource Include="Shaders\shader_vertex.glsl" />
     <EmbeddedResource Include="Shaders\shader_fragment_shadow.glsl" />
@@ -221,37 +226,42 @@
     <EmbeddedResource Include="Shaders\shader_vertex_merge.glsl" />
     <EmbeddedResource Include="Shaders\shader_fragment_test.glsl" />
     <EmbeddedResource Include="Shaders\shader_vertex_test.glsl" />
+    <EmbeddedResource Include="Shaders\shader_fragment_terrain_pbr.glsl" />
+    <EmbeddedResource Include="Shaders\shader_vertex_terrain_pbr.glsl" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <EmbeddedResource Include="Assets\Fonts\anonymous.dds" />
+    <EmbeddedResource Include="Assets\Fonts\anonymous2.dds" />
+    <EmbeddedResource Include="Assets\Fonts\anonymous3.dds" />
     <Content Include="Assets\readme.txt" />
     <None Include="OpenAL32.x86">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <EmbeddedResource Include="Assets\Textures\white.png" />
+    <EmbeddedResource Include="Assets\Textures\fire01.dds" />
+    <EmbeddedResource Include="Assets\Textures\fire02.dds" />
+    <EmbeddedResource Include="Assets\Textures\fire03.dds" />
+    <EmbeddedResource Include="Assets\Textures\fire04.dds" />
+    <EmbeddedResource Include="Assets\Textures\particleburst_bubbles.dds" />
+    <EmbeddedResource Include="Assets\Textures\particleburst_bubbles_unicolor.dds" />
+    <EmbeddedResource Include="Assets\Textures\particleburst_explosioncolored.dds" />
+    <EmbeddedResource Include="Assets\Textures\particleburst_firework.dds" />
+    <EmbeddedResource Include="Assets\Textures\particleburst_hearts.dds" />
+    <EmbeddedResource Include="Assets\Textures\particleburst_plusplusplus.dds" />
+    <EmbeddedResource Include="Assets\Textures\particleburst_shield.dds" />
+    <EmbeddedResource Include="Assets\Textures\particleburst_teleport1.dds" />
+    <EmbeddedResource Include="Assets\Textures\particleburst_teleport2.dds" />
+    <EmbeddedResource Include="Assets\Textures\particleburst_teleport3.dds" />
+    <EmbeddedResource Include="Assets\Textures\smoke01.dds" />
+    <EmbeddedResource Include="Assets\Textures\smoke02.dds" />
+    <EmbeddedResource Include="Assets\Textures\smoke03.dds" />
     <Content Include="OpenAL32.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="Assets\Textures\fire01.png" />
-    <EmbeddedResource Include="Assets\Textures\fire02.png" />
-    <EmbeddedResource Include="Assets\Textures\fire03.png" />
-    <EmbeddedResource Include="Assets\Textures\fire04.png" />
-    <EmbeddedResource Include="Assets\Textures\particleburst_bubbles.png" />
-    <EmbeddedResource Include="Assets\Textures\particleburst_bubbles_unicolor.png" />
-    <EmbeddedResource Include="Assets\Textures\particleburst_explosioncolored.png" />
-    <EmbeddedResource Include="Assets\Textures\particleburst_firework.png" />
-    <EmbeddedResource Include="Assets\Textures\particleburst_hearts.png" />
-    <EmbeddedResource Include="Assets\Textures\particleburst_plusplusplus.png" />
-    <EmbeddedResource Include="Assets\Textures\particleburst_shield.png" />
-    <EmbeddedResource Include="Assets\Textures\particleburst_teleport1.png" />
-    <EmbeddedResource Include="Assets\Textures\particleburst_teleport2.png" />
-    <EmbeddedResource Include="Assets\Textures\particleburst_teleport3.png" />
-    <EmbeddedResource Include="Assets\Textures\smoke01.png" />
-    <EmbeddedResource Include="Assets\Textures\smoke02.png" />
-    <EmbeddedResource Include="Assets\Textures\smoke03.png" />
     <EmbeddedResource Include="Assets\Textures\checkerboard.png" />
     <EmbeddedResource Include="Assets\Textures\black.png" />
     <EmbeddedResource Include="Assets\Textures\alpha.png" />
-    <Content Include="Assets\Textures\readme.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets')" />

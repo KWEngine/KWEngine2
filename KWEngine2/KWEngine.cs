@@ -15,6 +15,113 @@ using System.Runtime.CompilerServices;
 namespace KWEngine2
 {
     /// <summary>
+    /// Einheit zur Anzeige der Frame-Performance
+    /// </summary>
+    public enum PerformanceUnit
+    {
+        /// <summary>
+        /// Deaktiviert
+        /// </summary>
+        Disabled,
+        /// <summary>
+        /// Millisekunden
+        /// </summary>
+        FrameTimeInMilliseconds,
+        /// <summary>
+        /// Bilder pro Sekunde
+        /// </summary>
+        FramesPerSecond
+    }
+
+    /// <summary>
+    /// Qualität des Glow-Effekts
+    /// </summary>
+    public enum PostProcessingQuality
+    {
+        /// <summary>
+        /// Hoch
+        /// </summary>
+        High,
+        /// <summary>
+        /// Standard
+        /// </summary>
+        Standard,
+        /// <summary>
+        /// Niedrig
+        /// </summary>
+        Low,
+        /// <summary>
+        /// Ausgeschaltet
+        /// </summary>
+        Disabled
+    };
+
+    /// <summary>
+    /// Seite des KWCube
+    /// </summary>
+    public enum CubeSide
+    {
+        /// <summary>
+        /// Alle Würfelseiten
+        /// </summary>
+        All = 10,
+        /// <summary>
+        /// Frontseite (+Z)
+        /// </summary>
+        Front = 0,
+        /// <summary>
+        /// Rückseite (-Z)
+        /// </summary>
+        Back = 1,
+        /// <summary>
+        /// Links (-X)
+        /// </summary>
+        Left = 2,
+        /// <summary>
+        /// Rechts (+X)
+        /// </summary>
+        Right = 3,
+        /// <summary>
+        /// Oben (+Y)
+        /// </summary>
+        Top = 4,
+        /// <summary>
+        /// Unten (-Y)
+        /// </summary>
+        Bottom = 5
+    }
+    /// <summary>
+    /// Art der Textur (Standard: Diffuse)
+    /// </summary>
+    public enum TextureType
+    {
+        /// <summary>
+        /// Standardtextur
+        /// </summary>
+        Albedo,
+        /// <summary>
+        /// Normal Map
+        /// </summary>
+        Normal,
+        /// <summary>
+        /// Metalness Map (PBR Workflow)
+        /// </summary>
+        Metalness,
+        /// <summary>
+        /// Roughness Map (PBR Workflow)
+        /// </summary>
+        Roughness,
+        /// <summary>
+        /// Light Map
+        /// </summary>
+        Light,
+        /// <summary>
+        /// Emissive Map
+        /// </summary>
+        Emissive
+    };
+
+    /// <summary>
     /// Bezeichnet den Ebenenvektor der senkrecht auf der gewünschten Ebene steht.
     /// Soll die XZ-Achse gewählt werden, sollte demnach Plane.Y verwendet werden,
     /// da der Vektor (0|1|0) senkrecht auf der XZ-Ebene steht.
@@ -59,30 +166,10 @@ namespace KWEngine2
         internal static Matrix4 Identity = Matrix4.Identity;
         private static Vector3 _worldUp = new Vector3(0, 1, 0);
 
-        /// <summary>
-        /// Qualität des Glow-Effekts
-        /// </summary>
-        public enum PostProcessingQuality {
-            /// <summary>
-            /// Hoch
-            /// </summary>
-            High, 
-            /// <summary>
-            /// Standard
-            /// </summary>
-            Standard,
-            /// <summary>
-            /// Niedrig
-            /// </summary>
-            Low,
-            /// <summary>
-            /// Ausgeschaltet
-            /// </summary>
-            Disabled
-        };
+
 
         internal static float _bloomRadius = 1;
-        
+
         /// <summary>
         /// Radius des Glow-Effekts (Standard: 1, Minimum: 0.001)
         /// </summary>
@@ -99,7 +186,10 @@ namespace KWEngine2
 
         internal static int TextureDefault = -1;
         internal static int TextureBlack = -1;
+        internal static int TextureWhite = -1;
         internal static int TextureAlpha = -1;
+        internal static int TextureCubemapEmpty = -1;
+        internal static int TextureDepthEmpty = -1;
         internal static float TimeElapsed = 0;
 
         internal static float _broadPhaseToleranceWidth = 1f;
@@ -117,24 +207,7 @@ namespace KWEngine2
         }
 
 
-        /// <summary>
-        /// Einheit zur Anzeige der Frame-Performance
-        /// </summary>
-        public enum PerformanceUnit
-        {
-            /// <summary>
-            /// Deaktiviert
-            /// </summary>
-            Disabled,
-            /// <summary>
-            /// Millisekunden
-            /// </summary>
-            FrameTimeInMilliseconds,
-            /// <summary>
-            /// Bilder pro Sekunde
-            /// </summary>
-            FramesPerSecond
-        }
+
 
         /// <summary>
         /// Zeigt die Performance im Titelbereich des Fensters an
@@ -161,65 +234,7 @@ namespace KWEngine2
 
         internal static Dictionary<World, Dictionary<string, int>> CustomTextures { get; set; } = new Dictionary<World, Dictionary<string, int>>();
 
-        /// <summary>
-        /// Seite des KWCube
-        /// </summary>
-        public enum CubeSide {
-            /// <summary>
-            /// Alle Würfelseiten
-            /// </summary>
-            All, 
-            /// <summary>
-            /// Frontseite (+Z)
-            /// </summary>
-            Front, 
-            /// <summary>
-            /// Rückseite (-Z)
-            /// </summary>
-            Back, 
-            /// <summary>
-            /// Links (-X)
-            /// </summary>
-            Left, 
-            /// <summary>
-            /// Rechts (+X)
-            /// </summary>
-            Right, 
-            /// <summary>
-            /// Oben (+Y)
-            /// </summary>
-            Top, 
-            /// <summary>
-            /// Unten (-Y)
-            /// </summary>
-            Bottom }
-        /// <summary>
-        /// Art der Textur (Standard: Diffuse)
-        /// </summary>
-        public enum TextureType { 
-            /// <summary>
-            /// Standardtexture
-            /// </summary>
-            Diffuse, 
-            /// <summary>
-            /// Normal Map
-            /// </summary>
-            Normal, 
-            /// <summary>
-            /// Specular Map
-            /// </summary>
-            Specular
-                /*,
-            /// <summary>
-            /// Metallic Map (PBR Workflow)
-            /// </summary>
-            Metallic,
-            /// <summary>
-            /// Roughness Map (PBR Workflow)
-            /// </summary>
-            Roughness
-            */
-        };
+
 
         /// <summary>
         /// Welt-Vektor, der angibt, wo 'oben' ist
@@ -241,32 +256,33 @@ namespace KWEngine2
         /// <summary>
         /// Schriftart der Engine
         /// </summary>
-        public static string Font { get; internal set; } = null;
-        
+        public static int Font { get; internal set; } = 0;
+        internal static int[] FontTextureArray { get; set; } = new int[3];
 
-        internal static void InitializeFont(string filename)
+        internal static void InitializeFont(string filename, int index)
         {
             var assembly = Assembly.GetExecutingAssembly();
             var resourceName = "KWEngine2.Assets.Fonts." + filename;
+            //HelperFont.AddFontFromResource(Collection, assembly, resourceName);
 
-            HelperFont.AddFontFromResource(Collection, assembly, resourceName);
-            Font = "Anonymous";
-
-            HelperFont.GenerateTextures();
+            int textureId = HelperFont.GenerateTexture(resourceName, assembly);
+            FontTextureArray[index] = textureId;
         }
 
         /// <summary>
-        /// Setzt die Schriftart der Engine (Schriftart sollte vom Typ 'monospace' sein)
+        /// Setzt die Schriftart der Engine
         /// </summary>
-        /// <param name="filename">Dateiname mit relativem Pfad</param>
-        public static void SetFont(string filename)
+        /// <param name="index">Gültige Werte: 0-2</param>
+        public static void SetFont(int index)
         {
-            Collection.Dispose();
-            Collection = new PrivateFontCollection();
-            HelperFont.AddFontFromFile(Collection, filename);
-            Font = filename;
-
-            HelperFont.GenerateTextures();
+            if(index >= 0 && index <= 2)
+            {
+                Font = index;
+            }
+            else
+            {
+                throw new Exception("Font index out of bounds. Please use a font index 0 <= n <= 2");
+            }
         }
 
 
@@ -289,7 +305,7 @@ namespace KWEngine2
         internal static GeoModel KWSkull;
         internal static GeoModel KWDollar;
         internal static RendererSimple RendererSimple;
-        internal static RendererStandardPBR RendererPBR;
+        //internal static RendererStandardPBR RendererPBR;
         internal static float CSScale = 4.5f;
         internal static Matrix4 CoordinateSystemMatrix = Matrix4.CreateScale(CSScale);
         internal static Matrix4 CoordinateSystemMatrixX = Matrix4.CreateScale(CSScale);
@@ -317,7 +333,7 @@ namespace KWEngine2
             {
                 GeoMesh mesh = CoordinateSystem.Meshes[meshName];
 
-                GL.Uniform3(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorDiffuse.X, mesh.Material.ColorDiffuse.Y, mesh.Material.ColorDiffuse.Z);
+                GL.Uniform3(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z);
 
                 GL.BindVertexArray(mesh.VAO);
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
@@ -338,7 +354,7 @@ namespace KWEngine2
             {
                 GeoMesh mesh = CoordinateSystemX.Meshes[meshName];
 
-                GL.Uniform3(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorDiffuse.X, mesh.Material.ColorDiffuse.Y, mesh.Material.ColorDiffuse.Z);
+                GL.Uniform3(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z);
 
                 GL.BindVertexArray(mesh.VAO);
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
@@ -359,7 +375,7 @@ namespace KWEngine2
             {
                 GeoMesh mesh = CoordinateSystemY.Meshes[meshName];
 
-                GL.Uniform3(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorDiffuse.X, mesh.Material.ColorDiffuse.Y, mesh.Material.ColorDiffuse.Z);
+                GL.Uniform3(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z);
 
                 GL.BindVertexArray(mesh.VAO);
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
@@ -380,7 +396,7 @@ namespace KWEngine2
             {
                 GeoMesh mesh = CoordinateSystemZ.Meshes[meshName];
 
-                GL.Uniform3(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorDiffuse.X, mesh.Material.ColorDiffuse.Y, mesh.Material.ColorDiffuse.Z);
+                GL.Uniform3(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z);
 
                 GL.BindVertexArray(mesh.VAO);
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
@@ -398,7 +414,7 @@ namespace KWEngine2
             Models.Add("KWCube", SceneImporter.LoadModel("kwcube.obj", true, SceneImporter.AssemblyMode.Internal));
             Models.Add("KWCube6", SceneImporter.LoadModel("kwcube6.obj", false, SceneImporter.AssemblyMode.Internal));
             KWRect = SceneImporter.LoadModel("kwrect.obj", false, SceneImporter.AssemblyMode.Internal);
-            Models.Add("KWSphere", SceneImporter.LoadModel("kwsphere.obj", false, SceneImporter.AssemblyMode.Internal));
+            Models.Add("KWSphere", SceneImporter.LoadModel("kwsphere.obj", true, SceneImporter.AssemblyMode.Internal));
             KWStar = SceneImporter.LoadModel("star.obj", false, SceneImporter.AssemblyMode.Internal);
             Models.Add("KWStar", KWStar);
             KWHeart = SceneImporter.LoadModel("heart.obj", false, SceneImporter.AssemblyMode.Internal);
@@ -421,6 +437,7 @@ namespace KWEngine2
 
         internal static void InitializeShaders()
         {
+            //Renderers.Add("Standard", new RendererStandard());
             Renderers.Add("Standard", new RendererStandard());
             Renderers.Add("Shadow", new RendererShadow());
             Renderers.Add("Bloom", new RendererBloom());
@@ -433,7 +450,7 @@ namespace KWEngine2
             Renderers.Add("Merge", new RendererMerge());
 
             RendererSimple = new RendererSimple();
-            RendererPBR = new RendererStandardPBR();
+            //RendererPBR = new RendererStandardPBR();
         }
 
         internal static void InitializeParticles()
@@ -441,57 +458,57 @@ namespace KWEngine2
             int tex;
             
             // Bursts:
-            tex = HelperTexture.LoadTextureInternal("fire01.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("fire01.dds");
             ParticleDictionary.Add(ParticleType.BurstFire1, new ParticleInfo(tex, 8, 64));
 
-            tex = HelperTexture.LoadTextureInternal("fire02.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("fire02.dds");
             ParticleDictionary.Add(ParticleType.BurstFire2, new ParticleInfo(tex, 7, 49));
 
-            tex = HelperTexture.LoadTextureInternal("fire03.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("fire03.dds");
             ParticleDictionary.Add(ParticleType.BurstFire3, new ParticleInfo(tex, 9, 81));
 
-            tex = HelperTexture.LoadTextureInternal("fire04.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("fire04.dds");
             ParticleDictionary.Add(ParticleType.BurstElectricity, new ParticleInfo(tex, 4, 16));
 
-            tex = HelperTexture.LoadTextureInternal("particleburst_bubbles.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("particleburst_bubbles.dds");
             ParticleDictionary.Add(ParticleType.BurstBubblesColored, new ParticleInfo(tex, 6, 36));
 
-            tex = HelperTexture.LoadTextureInternal("particleburst_bubbles_unicolor.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("particleburst_bubbles_unicolor.dds");
             ParticleDictionary.Add(ParticleType.BurstBubblesMonochrome, new ParticleInfo(tex, 6, 36));
 
-            tex = HelperTexture.LoadTextureInternal("particleburst_explosioncolored.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("particleburst_explosioncolored.dds");
             ParticleDictionary.Add(ParticleType.BurstFirework1, new ParticleInfo(tex, 7, 49));
 
-            tex = HelperTexture.LoadTextureInternal("particleburst_firework.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("particleburst_firework.dds");
             ParticleDictionary.Add(ParticleType.BurstFirework2, new ParticleInfo(tex, 7, 49));
 
-            tex = HelperTexture.LoadTextureInternal("particleburst_hearts.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("particleburst_hearts.dds");
             ParticleDictionary.Add(ParticleType.BurstHearts, new ParticleInfo(tex, 7, 49));
 
-            tex = HelperTexture.LoadTextureInternal("particleburst_plusplusplus.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("particleburst_plusplusplus.dds");
             ParticleDictionary.Add(ParticleType.BurstOneUps, new ParticleInfo(tex, 6, 36));
 
-            tex = HelperTexture.LoadTextureInternal("particleburst_shield.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("particleburst_shield.dds");
             ParticleDictionary.Add(ParticleType.BurstShield, new ParticleInfo(tex, 6, 36));
 
-            tex = HelperTexture.LoadTextureInternal("particleburst_teleport1.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("particleburst_teleport1.dds");
             ParticleDictionary.Add(ParticleType.BurstTeleport1, new ParticleInfo(tex, 4, 16));
 
-            tex = HelperTexture.LoadTextureInternal("particleburst_teleport2.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("particleburst_teleport2.dds");
             ParticleDictionary.Add(ParticleType.BurstTeleport2, new ParticleInfo(tex, 4, 16));
 
-            tex = HelperTexture.LoadTextureInternal("particleburst_teleport3.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("particleburst_teleport3.dds");
             ParticleDictionary.Add(ParticleType.BurstTeleport3, new ParticleInfo(tex, 4, 16));
 
             // Loops:
 
-            tex = HelperTexture.LoadTextureInternal("smoke01.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("smoke01.dds");
             ParticleDictionary.Add(ParticleType.LoopSmoke1, new ParticleInfo(tex, 4, 16));
 
-            tex = HelperTexture.LoadTextureInternal("smoke02.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("smoke02.dds");
             ParticleDictionary.Add(ParticleType.LoopSmoke2, new ParticleInfo(tex, 7, 46));
 
-            tex = HelperTexture.LoadTextureInternal("smoke03.png");
+            tex = HelperTexture.LoadTextureCompressedNoMipMap("smoke03.dds");
             ParticleDictionary.Add(ParticleType.LoopSmoke3, new ParticleInfo(tex, 6, 32));
         }
 
@@ -543,9 +560,9 @@ namespace KWEngine2
             }
         }
 
-        private static int _shadowMapSize = 4096;
+        private static int _shadowMapSize = 2048;
         /// <summary>
-        /// Größe der Shadow Map (Standard: 4096)
+        /// Größe der Shadow Map (Standard: 2048)
         /// </summary>
         public static int ShadowMapSize 
         {
@@ -561,8 +578,8 @@ namespace KWEngine2
                 }
                 else
                 {
-                    Debug.WriteLine("Cannot set shadow map to a size < 512 or > 8192. Resetting it to 4096.");
-                    _shadowMapSize = 4096;
+                    Debug.WriteLine("Cannot set shadow map to a size < 512 or > 8192. Resetting it to 2048.");
+                    _shadowMapSize = 2048;
                 }
                 GLWindow.CurrentWindow.InitializeFramebuffers();
 
@@ -626,15 +643,15 @@ namespace KWEngine2
             terrainMesh.Terrain = t;
             GeoMaterial mat = new GeoMaterial();
             mat.BlendMode = OpenTK.Graphics.OpenGL4.BlendingFactor.OneMinusSrcAlpha;
-            mat.ColorDiffuse = new Vector4(1, 1, 1, 1);
+            mat.ColorAlbedo = new Vector4(1, 1, 1, 1);
             mat.ColorEmissive = new Vector4(0, 0, 0, 0);
             mat.Name = name + "-Material";
-            mat.SpecularArea = 512;
-            mat.SpecularPower = 0;
+            //mat.SpecularArea = 512;
+            //mat.SpecularPower = 0;
 
             GeoTexture texDiffuse = new GeoTexture(name + "-TextureDiffuse");
             texDiffuse.Filename = texture;
-            texDiffuse.Type = GeoTexture.TexType.Diffuse;
+            texDiffuse.Type = TextureType.Albedo;
             texDiffuse.UVMapIndex = 0;
             texDiffuse.UVTransform = new Vector2(texRepeatX, texRepeatZ);
 
@@ -646,13 +663,15 @@ namespace KWEngine2
             }
             else
             {
-                texDiffuse.OpenGLID = isFile ? HelperTexture.LoadTextureForModelExternal(texture) : HelperTexture.LoadTextureForModelInternal(texture);
-                if (dictFound)
+                int texId = isFile ? HelperTexture.LoadTextureForModelExternal(texture) : HelperTexture.LoadTextureForModelInternal(texture);
+                texDiffuse.OpenGLID = texId > 0 ? texId : KWEngine.TextureDefault;
+                
+                if (dictFound && texId > 0)
                 {
                     texDict.Add(texture, texDiffuse.OpenGLID);
                 }
             }
-            mat.TextureDiffuse = texDiffuse;
+            mat.TextureAlbedo = texDiffuse;
 
 
             terrainMesh.Material = mat;

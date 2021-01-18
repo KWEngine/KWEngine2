@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("C# 3D Gaming Engine")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Lutz Karau, Markus Wienhöfer")]
-[assembly: AssemblyProduct("KWEngine2 (Updated on: 2021-01-04)")]
+[assembly: AssemblyProduct("KWEngine2 (Updated on: 2021-01-18)")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -33,6 +33,6 @@ using System.Runtime.InteropServices;
 // Sie können alle Werte angeben oder Standardwerte für die Build- und Revisionsnummern verwenden,
 // indem Sie "*" wie unten gezeigt eingeben:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.2.0.1")]
-[assembly: AssemblyFileVersion("2.2.0.1")]
+[assembly: AssemblyVersion("2.3.0.0")]
+[assembly: AssemblyFileVersion("2.3.0.0")]
 [assembly: NeutralResourcesLanguage("de")]

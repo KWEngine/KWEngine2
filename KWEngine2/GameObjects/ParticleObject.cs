@@ -152,7 +152,7 @@ namespace KWEngine2.GameObjects
         /// </summary>
         /// <param name="position">Position</param>
         /// <param name="scale">Größe in x-, y- und z-Richtung</param>
-        /// <param name="type">Art</param>
+        /// <param name="type">Art der Partikelanimation</param>
         public ParticleObject(Vector3 position, Vector3 scale, ParticleType type)
         {
             _scale.X = HelperGL.Clamp(scale.X, 0.001f, float.MaxValue);
@@ -167,6 +167,32 @@ namespace KWEngine2.GameObjects
             _type = type;
 
             _info = KWEngine.ParticleDictionary[_type];
+            _modelMatrix = Matrix4.CreateScale(_scaleCurrent) * _rotation * Matrix4.CreateTranslation(Position);
+        }
+
+        /// <summary>
+        /// Konstruktormethode für Partikel
+        /// </summary>
+        /// <param name="x">x-Position</param>
+        /// <param name="y">y-Position</param>
+        /// <param name="z">z-Position</param>
+        /// <param name="scale">Skalierung</param>
+        /// <param name="type">Art der Partikelanimation</param>
+        public ParticleObject(float x, float y, float z, float scale, ParticleType type)
+        {
+            _scale.X = HelperGL.Clamp(scale, 0.0001f, float.MaxValue);
+            _scale.Y = HelperGL.Clamp(scale, 0.0001f, float.MaxValue);
+            _scale.Z = HelperGL.Clamp(scale, 0.0001f, float.MaxValue);
+            _scaleCurrent.X = HelperGL.Clamp(scale, 0.0001f, float.MaxValue);
+            _scaleCurrent.Y = HelperGL.Clamp(scale, 0.0001f, float.MaxValue);
+            _scaleCurrent.Z = HelperGL.Clamp(scale, 0.0001f, float.MaxValue);
+
+            Position = new Vector3(x, y, z);
+
+            _type = type;
+
+            _info = KWEngine.ParticleDictionary[_type];
+            _modelMatrix = Matrix4.CreateScale(_scaleCurrent) * _rotation * Matrix4.CreateTranslation(Position);
         }
 
         internal void Act()

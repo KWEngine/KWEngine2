@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KWEngine2.Model
 {
-    internal class GeoModelCube6 : GeoModelCube
-    {
-    }
+    //internal class GeoModelCube6 : GeoModelCube
+    //{
+    //}
 }

@@ -50,13 +50,13 @@ namespace KWEngine2.GameObjects
 
         private Vector3 _lookAtVector = new Vector3(0, 0, 1);
 
-        internal Vector2 LeftRightMost { get; set; } = new Vector2(0,0);
+        internal Vector2 LeftRightMost { get; set; } = new Vector2(0, 0);
         internal Vector2 BackFrontMost { get; set; } = new Vector2(0, 0);
         internal Vector2 BottomTopMost { get; set; } = new Vector2(0, 0);
 
         internal enum Override { SpecularEnable, SpecularPower, SpecularArea, TextureDiffuse, TextureNormal, TextureSpecular, TextureTransform, TextureMetallic, TextureRoughness }
 
-        internal Dictionary<string, Dictionary<Override, object>> _overrides = new Dictionary<string, Dictionary<Override, object>>();        
+        //internal Dictionary<string, Dictionary<Override, object>> _overrides = new Dictionary<string, Dictionary<Override, object>>();        
 
         /// <summary>
         /// Aktuelles Fenster
@@ -72,7 +72,7 @@ namespace KWEngine2.GameObjects
             }
         }
         internal int _largestHitboxIndex = -1;
-        internal GeoModelCube _cubeModel = null;
+        //internal GeoModelCube _cubeModel = null;
         internal List<Hitbox> Hitboxes = new List<Hitbox>();
         internal Matrix4[] ModelMatrixForRenderPass = null;
         internal Dictionary<string, Matrix4[]> BoneTranslationMatrices { get; set; }
@@ -117,11 +117,11 @@ namespace KWEngine2.GameObjects
                 _tintColor.X = HelperGL.Clamp(value.X, 0, 1);
                 _tintColor.Y = HelperGL.Clamp(value.Y, 0, 1);
                 _tintColor.Z = HelperGL.Clamp(value.Z, 0, 1);
-               
+
             }
         }
 
-        private Vector4 _emissiveColor = new Vector4(0,0,0,0);
+        private Vector4 _emissiveColor = new Vector4(0, 0, 0, 0);
         /// <summary>
         /// Strahlfarbe
         /// </summary>
@@ -160,7 +160,7 @@ namespace KWEngine2.GameObjects
                 _glow.W = HelperGL.Clamp(value.W, 0, 1);
             }
         }
-        
+
         /// <summary>
         /// Setzt die Glühfarbe
         /// </summary>
@@ -305,7 +305,7 @@ namespace KWEngine2.GameObjects
                 }
                 else
                     return Rotation;
-                
+
             }
         }
 
@@ -465,7 +465,7 @@ namespace KWEngine2.GameObjects
             Vector3 upRightBack = new Vector3(GetCenterPointForAllHitboxes().X + GetMaxDimensions().X / 2, GetCenterPointForAllHitboxes().Y + GetMaxDimensions().Y / 2, GetCenterPointForAllHitboxes().Z - GetMaxDimensions().Z / 2);
             _sceneDiameter = (upRightBack - downLeftFront).LengthFast;
 
-            if(KWEngine.CurrentWorld != null)
+            if (KWEngine.CurrentWorld != null)
                 DistanceToCamera = (uint)((KWEngine.CurrentWorld.GetCameraPosition() - GetCenterPointForAllHitboxes()).LengthSquared * 10000);
         }
 
@@ -563,35 +563,36 @@ namespace KWEngine2.GameObjects
 
             if (m.Name == "kwcube.obj")
             {
-                _cubeModel = new GeoModelCube1
-                {
-                    Owner = this
-                };
                 ModelMatrixForRenderPass = new Matrix4[1];
+                this.mTextureSet = new TextureSet(1);
+                _metalnessOverride = new bool[1];
+                _roughnessOverride = new bool[1];
+                _roughness = new float[1];
+                _metalness = new float[1];
             }
             else if (m.Name == "kwcube6.obj")
             {
-                _cubeModel = new GeoModelCube6
-                {
-                    Owner = this
-                };
                 ModelMatrixForRenderPass = new Matrix4[1];
+                this.mTextureSet = new TextureSet(6);
+                _metalnessOverride = new bool[6];
+                _roughnessOverride = new bool[6];
+                _roughness = new float[6];
+                _metalness = new float[6];
             }
             else
             {
-                _cubeModel = null;
-
-                //Init overrides:
-                _overrides.Clear();
+                //Init:
                 List<string> l = new List<string>();
                 foreach (GeoMesh mesh in _model.Meshes.Values)
-                {
                     l.Add(mesh.Name);
-                    _overrides[mesh.Name] = new Dictionary<Override, object>();
-                }
                 _meshNameList = l.AsReadOnly();
                 ModelMatrixForRenderPass = new Matrix4[_meshNameList.Count];
-                
+                this.mTextureSet = new TextureSet(_meshNameList.Count);
+                _metalnessOverride = new bool[_meshNameList.Count];
+                _roughnessOverride = new bool[_meshNameList.Count];
+                _roughness = new float[_meshNameList.Count];
+                _metalness = new float[_meshNameList.Count];
+
             }
             for (int i = 0; i < ModelMatrixForRenderPass.Length; i++)
             {
@@ -622,7 +623,7 @@ namespace KWEngine2.GameObjects
                         BoneTranslationMatrices[mesh.Name][i] = Matrix4.Identity;
                 }
             }
-            
+
         }
 
         /// <summary>
@@ -641,7 +642,7 @@ namespace KWEngine2.GameObjects
         public Vector3 GetRotationEulerAngles()
         {
             return HelperRotation.ConvertQuaternionToEulerAngles(Rotation);
-            
+
         }
 
         /// <summary>
@@ -682,7 +683,7 @@ namespace KWEngine2.GameObjects
             }
 
             Vector3 position = GetCenterPointForAllHitboxes();
-            if(CurrentWorld.IsFirstPersonMode && CurrentWorld.GetFirstPersonObject().Equals(this))
+            if (CurrentWorld.IsFirstPersonMode && CurrentWorld.GetFirstPersonObject().Equals(this))
             {
                 position = new Vector3(Position.X, Position.Y + FPSEyeOffset, Position.Z);
             }
@@ -730,17 +731,17 @@ namespace KWEngine2.GameObjects
 
         internal void CheckBounds()
         {
-            if(_sceneCenter.X > CurrentWorld.WorldCenter.X + CurrentWorld.WorldDistance
+            if (_sceneCenter.X > CurrentWorld.WorldCenter.X + CurrentWorld.WorldDistance
                 || _sceneCenter.X < CurrentWorld.WorldCenter.X - CurrentWorld.WorldDistance
 
-                ||_sceneCenter.Y > CurrentWorld.WorldCenter.Y + CurrentWorld.WorldDistance
+                || _sceneCenter.Y > CurrentWorld.WorldCenter.Y + CurrentWorld.WorldDistance
                 || _sceneCenter.Y < CurrentWorld.WorldCenter.Y - CurrentWorld.WorldDistance
 
                 || _sceneCenter.Z > CurrentWorld.WorldCenter.Z + CurrentWorld.WorldDistance
                 || _sceneCenter.Z < CurrentWorld.WorldCenter.Z - CurrentWorld.WorldDistance
                 )
             {
-                Console.WriteLine("Object '" + this.Name + " " + this.Model.Name  + "' position is beyond world's boundaries (currently: " + CurrentWorld.WorldDistance + " units from " + CurrentWorld.WorldCenter +  "). Removing object.");
+                Console.WriteLine("Object '" + this.Name + " " + this.Model.Name + "' position is beyond world's boundaries (currently: " + CurrentWorld.WorldDistance + " units from " + CurrentWorld.WorldCenter + "). Removing object.");
                 CurrentWorld.RemoveGameObject(this);
             }
         }
@@ -1137,17 +1138,17 @@ namespace KWEngine2.GameObjects
                     }
                 }
             }
-            
+
             for (int i = 0; i < node.Children.Count; i++)
             {
                 ReadNodeHierarchy(timestamp, ref animation, animationId, node.Children[i], ref globalTransform);
             }
 
         }
-      
+
         private Vector3 CalcInterpolatedScaling(float timestamp, ref GeoNodeAnimationChannel channel)
         {
-            if(channel.ScaleKeys == null)
+            if (channel.ScaleKeys == null)
             {
                 return new Vector3(1, 1, 1);
             }
@@ -1196,7 +1197,7 @@ namespace KWEngine2.GameObjects
         {
             if (channel.TranslationKeys == null)
             {
-                return new Vector3(0,0,0);
+                return new Vector3(0, 0, 0);
             }
             if (channel.TranslationKeys.Count == 1)
             {
@@ -1343,7 +1344,7 @@ namespace KWEngine2.GameObjects
                 foreach (Type t in types)
                     if (go.GetType().Equals(t) || go.GetType().IsSubclassOf(t))
                         found = true;
-                if(!found)
+                if (!found)
                     continue;
 
                 foreach (Hitbox hbother in go.Hitboxes)
@@ -1373,7 +1374,7 @@ namespace KWEngine2.GameObjects
                     }
                 }
             }
-            
+
             return null;
         }
 
@@ -1456,7 +1457,7 @@ namespace KWEngine2.GameObjects
             Vector3 offset = new Vector3(offsetX, offsetY, offsetZ);
 
             //Objekte außerhalb der Reichweite ausfiltern:
-            foreach(GameObject go in _collisionCandidates)
+            foreach (GameObject go in _collisionCandidates)
             {
                 if (!go.IsCollisionObject || go.Equals(this))
                 {
@@ -1518,9 +1519,9 @@ namespace KWEngine2.GameObjects
                 return intersections;
             }
             Vector3 offset = new Vector3(offsetX, offsetY, offsetZ);
-            
+
             //Objekte außerhalb der Reichweite ausfiltern:
-            foreach(GameObject go in _collisionCandidates)
+            foreach (GameObject go in _collisionCandidates)
             {
                 if (!go.IsCollisionObject || go.Equals(this)) // skip?
                 {
@@ -1566,28 +1567,17 @@ namespace KWEngine2.GameObjects
             return g.DistanceToCamera > this.DistanceToCamera ? 1 : -1;
         }
 
-        internal void SetTextureTerrainInternal(ref GeoTexture newTex, string texture, bool isFile)
+        internal void SetTextureTerrainInternal(ref GeoTexture newTex, string texture)
         {
             lock (KWEngine.CustomTextures)
             {
-
-
                 if (KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(texture))
                 {
                     newTex.OpenGLID = KWEngine.CustomTextures[KWEngine.CurrentWorld][texture];
                 }
                 else
                 {
-                    int id;
-                    if (isFile)
-                    {
-                        id = HelperTexture.LoadTextureForModelExternal(texture);
-                    }
-                    else
-                    {
-                        Assembly a = Assembly.GetEntryAssembly();
-                        id = HelperTexture.LoadTextureForModelInternal(texture);
-                    }
+                    int id = HelperTexture.LoadTextureForModelExternal(texture);
                     if (id > 0)
                     {
                         newTex.OpenGLID = id;
@@ -1602,61 +1592,156 @@ namespace KWEngine2.GameObjects
             }
         }
 
-        internal void SetTextureInternal(string texture, TextureType type, CubeSide side, bool isFile)
+        internal void SetTextureInternal(string texture, TextureType type, CubeSide side)
         {
             CheckModelAndWorld();
-
-            if (_cubeModel != null)
+            if (!(Model.IsTerrain || Model.Name == "kwsphere.obj" || Model.Name == "kwcube.obj" || Model.Name == "kwcube6.obj" || Model.Name == "kwrect.obj"))
             {
-                if (_cubeModel is GeoModelCube1 && side != CubeSide.All)
-                {
-                    throw new Exception("Cannot set side texture on single sided cube model. Please use KWCube6 as model.");
-                }
-                _cubeModel.SetTexture(texture, side, type, isFile);
+                throw new Exception("Cannot set texture on models other than KWCube, KWSphere or Terrain.");
             }
-            else
+
+            if (Model.IsTerrain)
             {
-                if (Model.Name == "kwsphere.obj" || Model.Name == "kwrect.obj")
+                GeoMesh terrainMesh = Model.Meshes.Values.ElementAt(0);
+                GeoTexture newTex = new GeoTexture(texture)
                 {
-                    SetTextureForMesh(0, texture, type);
-                }
-                else if (Model.IsTerrain)
+                    Filename = texture,
+                    Type = type
+                };
+
+                if (KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(texture))
                 {
-                    GeoMesh terrainMesh = Model.Meshes.Values.ElementAt(0);
-                    GeoTexture newTex = new GeoTexture(texture)
-                    {
-                        Filename = texture
-                    };
-
-                    if (KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(texture))
-                    {
-                        newTex.OpenGLID = KWEngine.CustomTextures[KWEngine.CurrentWorld][texture];
-                    }
-                    else
-                    {
-                        SetTextureTerrainInternal(ref newTex, texture, isFile);
-                    }
-
-                    if (type == TextureType.Diffuse)
-                    {
-                        newTex.Type = GeoTexture.TexType.Diffuse;
-                        terrainMesh.Material.TextureDiffuse = newTex;
-                    }
-                    else if (type == TextureType.Normal)
-                    {
-                        newTex.Type = GeoTexture.TexType.Normal;
-                        terrainMesh.Material.TextureNormal = newTex;
-                    }
-                    else
-                    {
-                        newTex.Type = GeoTexture.TexType.Specular;
-                        terrainMesh.Material.TextureSpecular = newTex;
-                    }
+                    newTex.OpenGLID = KWEngine.CustomTextures[KWEngine.CurrentWorld][texture];
                 }
                 else
                 {
-                    throw new Exception("Cannot set textures for model " + Model.Name + " because it is not a KWCube, KWSphere or KWRect. Use SetTextureForMesh() instead.");
+                    SetTextureTerrainInternal(ref newTex, texture);
                 }
+
+                if (type == TextureType.Albedo)
+                {
+                    terrainMesh.Material.TextureAlbedo = newTex;
+                }
+                else if (type == TextureType.Normal)
+                {
+                    terrainMesh.Material.TextureNormal = newTex;
+                }
+                else if (type == TextureType.Roughness)
+                {
+                    terrainMesh.Material.TextureRoughness = newTex;
+                }
+                else if (type == TextureType.Metalness)
+                {
+                    terrainMesh.Material.TextureMetalness = newTex;
+                }
+            }
+            else
+            {
+                int texId = -1;
+                if (KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(texture))
+                {
+                    texId = KWEngine.CustomTextures[KWEngine.CurrentWorld][texture];
+                }
+                else
+                {
+                    texId = HelperTexture.LoadTextureForModelExternal(texture);
+                }
+
+                mTextureSet.SetTexture(texId, (int)side, type);
+            }
+        }
+
+        internal float[] _roughness;
+        internal float[] _metalness;
+        internal bool[] _roughnessOverride;
+        internal bool[] _metalnessOverride;
+
+        /// <summary>
+        /// Setzt die Rauheit der Objektoberfläche
+        /// </summary>
+        /// <param name="r">Rauheitsfaktor (Werte zwischen 0 und 1 sind erlaubt)</param>
+        public void SetRoughness(float r)
+        {
+            if (Model == null)
+                throw new Exception("Cannot set roughness - model is not set.");
+
+            /*
+            if (!(Model.Name == "kwsphere.obj" || Model.Name == "kwcube.obj" || Model.Name == "kwcube6.obj"))
+            {
+                throw new Exception("Cannot set roughness on models other than KWCube and KWSphere");
+            }
+            */
+            if (IsCubeOrSphere())
+            {
+                for (int i = 0; i < mTextureSet.roughness.Length; i++)
+                {
+                    if (mTextureSet.roughness[i] > 0)
+                    {
+                        throw new Exception("Cannot set roughness - your model's roughness texture has priority!");
+                    }
+                }
+            }
+            else
+            {
+                foreach(GeoMesh mesh in Model.Meshes.Values)
+                {
+                    if(mesh.Material.TextureRoughness.OpenGLID > 0)
+                    {
+                        throw new Exception("Cannot set roughness - your model's roughness texture has priority!");
+                    }
+                }
+            }
+
+            r = HelperGL.Clamp(r, 0, 1);
+            for (int i = 0; i < _roughness.Length; i++)
+            {
+                _roughness[i] = r;
+                _roughnessOverride[i] = true;
+            }
+        }
+
+        /// <summary>
+        /// Setzt die Metalligkeit der Objektoberfläche
+        /// </summary>
+        /// <param name="m">Metalligkeitsfaktor (Werte zwischen 0 und 1 sind erlaubt)</param>
+        public void SetMetalness(float m)
+        {
+            if (Model == null)
+                throw new Exception("Cannot set roughness - model is not set.");
+
+            /*
+            if (!(Model.Name == "kwsphere.obj" || Model.Name == "kwcube.obj" || Model.Name == "kwcube6.obj"))
+            {
+                throw new Exception("Cannot set metalness on models other than KWCube and KWSphere");
+            }
+            */
+
+            if (IsCubeOrSphere())
+            {
+                for (int i = 0; i < mTextureSet.metalness.Length; i++)
+                {
+                    if (mTextureSet.metalness[i] > 0)
+                    {
+                        throw new Exception("Cannot set metalness - your model's metalness texture has priority!");
+                    }
+                }
+            }
+            else
+            {
+                foreach (GeoMesh mesh in Model.Meshes.Values)
+                {
+                    if (mesh.Material.TextureMetalness.OpenGLID > 0)
+                    {
+                        throw new Exception("Cannot set metalness - your model's metalness texture has priority!");
+                    }
+                }
+            }
+
+            m = HelperGL.Clamp(m, 0, 1);
+            for (int i = 0; i < _metalness.Length; i++)
+            {
+                _metalness[i] = m;
+                _metalnessOverride[i] = true;
             }
         }
 
@@ -1666,16 +1751,15 @@ namespace KWEngine2.GameObjects
         /// <param name="texture">Texturdatei</param>
         /// <param name="type">Art der Textur (Standard: Diffuse)</param>
         /// <param name="side">Seite des Würfels (für KWCube-Modelle)</param>
-        /// <param name="isFile">false, falls der Pfad Teil der EXE-Datei ist</param>
-        public void SetTexture(string texture, TextureType type = TextureType.Diffuse, CubeSide side = CubeSide.All, bool isFile = true)
+        public void SetTexture(string texture, TextureType type = TextureType.Albedo, CubeSide side = CubeSide.All)
         {
             if (CurrentWindow._multithreaded)
             {
-                Action a = () => SetTextureInternal(texture, type, side, isFile);
+                Action a = () => SetTextureInternal(texture, type, side);
                 HelperGLLoader.AddCall(this, a);
             }
             else
-                SetTextureInternal(texture, type, side, isFile);
+                SetTextureInternal(texture, type, side);
         }
 
         /// <summary>
@@ -1688,30 +1772,13 @@ namespace KWEngine2.GameObjects
         {
             CheckModelAndWorld();
             CheckIfNotTerrain();
+            if (!(Model.Name == "kwsphere.obj" || Model.Name == "kwcube.obj" || Model.Name == "kwcube6.obj" || Model.Name == "kwrect.obj"))
+            {
+                throw new Exception("Cannot set texture repeat values on models other than KWCube or KWSphere.");
+            }
 
-            if (_cubeModel != null)
-            {
-                if (_cubeModel is GeoModelCube1 && side != CubeSide.All)
-                {
-                    throw new Exception("Cannot set side texture repeat on single sided cube model. Please use KWCube6 as model.");
-                }
-                else if(!(x > 0 && y > 0))
-                {
-                    throw new Exception("Texture repeat values must be > 0.");
-                }
-                _cubeModel.SetTextureRepeat(x, y, side);
-            }
-            else
-            {
-                if (Model.Name == "kwsphere.obj" || Model.Name == "kwrect.obj")
-                {
-                    SetTextureRepeatForMesh(0, x, y);
-                }
-                else
-                {
-                    throw new Exception("Cannot set textures for model " + Model.Name + " KWCube, KWSphere or KWRect. Use SetTextureRepeatForMesh() instead.");
-                }
-            }
+            mTextureSet.SetUVTransform((int)side, x, y);
+
         }
 
         /// <summary>
@@ -2050,56 +2117,6 @@ namespace KWEngine2.GameObjects
             return Vector3.NormalizeFast(r.End - r.Start);
         }
 
-        internal void SetTextureForMeshInternal(string meshName, string texture, TextureType textureType, bool isFile)
-        {
-            CheckModel();
-            CheckIfNotTerrain();
-            if (_cubeModel != null)
-            {
-                SetTextureInternal(texture, textureType, CubeSide.All, isFile);
-                Debug.WriteLine("Method call forwarded to SetTexture() for KWCube instances. Please use SetTexture() for KWCube instances.");
-                return;
-            }
-
-            if (textureType != TextureType.Diffuse && textureType != TextureType.Normal && textureType != TextureType.Specular)
-            {
-                throw new Exception("SetTextureForMesh() currently supports diffuse, normal and specular texture types only. Sorry.");
-            }
-
-
-            int id = 0;
-            foreach (GeoMesh mesh in Model.Meshes.Values)
-            {
-                if (mesh.Name.ToLower().Contains(meshName.ToLower()))
-                {
-                    SetTextureForMeshInternal(id, texture, textureType, isFile);
-                    return;
-                }
-                id++;
-            }
-            throw new Exception("Mesh with name " + meshName + " not found.");
-        }
-
-        /// <summary>
-        /// Setzt die Textur für einen bestimmtem Mesh-Namen (Teil des Modells)
-        /// </summary>
-        /// <param name="meshName">Mesh</param>
-        /// <param name="texture">Texturdatei</param>
-        /// <param name="textureType">Texturtyp (Standard: Diffuse)</param>
-        /// <param name="isFile">false, wenn die Datei Teil der EXE ist ("Eingebettete Ressource")</param>
-        public void SetTextureForMesh(string meshName, string texture, TextureType textureType = TextureType.Diffuse, bool isFile = true)
-        {
-            if (CurrentWindow._multithreaded)
-            {
-                Action a = () => SetTextureForMeshInternal(meshName, texture, textureType, isFile);
-                HelperGLLoader.AddCall(this, a);
-            }
-            else
-            {
-                SetTextureForMeshInternal(meshName, texture, textureType, isFile);
-            }
-        }
-
         private void CheckIfNotTerrain()
         {
             if (Model != null && Model.IsTerrain)
@@ -2107,30 +2124,20 @@ namespace KWEngine2.GameObjects
         }
 
         /// <summary>
-        /// Setzt die Texturwiederholungen für eine bestimmte Mesh-ID (Teil des Modells)
+        /// Setzt die Texturwiederholungen für eine KWCube- oder KWSphere-Instanz
         /// </summary>
-        /// <param name="meshId">Mesh-ID (bei 0 beginnend)</param>
         /// <param name="repeatX">Breitenwiederholungen</param>
         /// <param name="repeatY">Höhenwiederholungen</param>
-        public void SetTextureRepeatForMesh(int meshId, float repeatX, float repeatY)
+        public void SetTextureRepeat(float repeatX, float repeatY)
         {
             CheckModel();
             CheckIfNotTerrain();
-            
-            if (_cubeModel != null)
+            if (!(Model.Name == "kwsphere.obj" || Model.Name == "kwcube.obj" || Model.Name == "kwcube6.obj" || Model.Name == "kwrect.obj"))
             {
-                SetTextureRepeat(repeatX, repeatY, CubeSide.All);
-                Debug.WriteLine("Method call forwarded to SetTextureRepeat() for KWCube instances. Please use SetTextureRepeat() for KWCube instances.");
-                return;
+                throw new Exception("Cannot set texture on models other than KWCube or KWSphere.");
             }
 
-            GeoMesh mesh = Model.Meshes.Values.ElementAt(meshId);
-            if (mesh != null)
-            {
-                if(_overrides[mesh.Name].ContainsKey(Override.TextureTransform))
-                    _overrides[mesh.Name].Remove(Override.TextureTransform);
-                _overrides[mesh.Name].Add(Override.TextureTransform, new Vector2(repeatX, repeatY));
-            }
+            SetTextureRepeat(repeatX, repeatY, CubeSide.All);
         }
 
         internal void SetTextureTerrainBlendMappingInternal(string blendTexture, string redTexture, string greenTexture, string blueTexture, bool isFile)
@@ -2247,246 +2254,6 @@ namespace KWEngine2.GameObjects
                 SetTextureTerrainBlendMappingInternal(blendTexture, redTexture, greenTexture, blueTexture, isFile);
         }
 
-        internal void SetTextureForMeshInternal(int meshID, string texture, TextureType textureType = TextureType.Diffuse, bool isFile = true)
-        {
-            CheckModel();
-            CheckIfNotTerrain();
-            if (_cubeModel != null)
-            {
-                SetTextureInternal(texture, textureType, CubeSide.All, isFile);
-                Debug.WriteLine("Method call forwarded to SetTexture() for KWCube instances. Please use SetTexture() for KWCube instances.");
-                return;
-            }
-
-            if (textureType != TextureType.Diffuse && textureType != TextureType.Normal && textureType != TextureType.Specular)
-            {
-                throw new Exception("SetTextureForMesh() currently supports diffuse, normal and specular texture types only. Sorry.");
-            }
-
-            GeoMesh mesh = Model.Meshes.Values.ElementAt(meshID);
-
-
-            GeoTexture tex = new GeoTexture();
-            int texId = -1;
-            string texName = "";
-            foreach (string texturefilename in Model.Textures.Keys)
-            {
-                string nameStrippedLowered = SceneImporter.StripPathFromFile(texturefilename).ToLower();
-                if (nameStrippedLowered.Contains(texture.Trim().ToLower()))
-                {
-                    texId = Model.Textures[texturefilename].OpenGLID;
-                    texName = texturefilename;
-                    break;
-                }
-            }
-            if (texId < 0)
-            {
-                lock (KWEngine.CustomTextures)
-                {
-                    if (KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(texture))
-                    {
-                        texId = KWEngine.CustomTextures[KWEngine.CurrentWorld][texture];
-                    }
-                    else
-                    {
-                        texId = isFile ? HelperTexture.LoadTextureForModelExternal(texture) : HelperTexture.LoadTextureForModelInternal(texture);
-                        if (texId > 0)
-                            KWEngine.CustomTextures[KWEngine.CurrentWorld].Add(texture, texId);
-                    }
-                }
-                if (texId < 0)
-                {
-                    throw new Exception("Cannot find custom texture " + texture + ". Is your path correct?");
-                }
-                texName = texture;
-                
-            }
-
-            tex.UVMapIndex = 0;
-            tex.UVTransform = new Vector2(1, 1);
-            tex.OpenGLID = texId;
-            tex.Filename = texName;
-            if (textureType == TextureType.Diffuse)
-            {
-                if (_overrides[mesh.Name].ContainsKey(Override.TextureDiffuse))
-                    _overrides[mesh.Name].Remove(Override.TextureDiffuse);
-                _overrides[mesh.Name].Add(Override.TextureDiffuse, tex);
-            }
-            else if (textureType == TextureType.Normal)
-            {
-                if (_overrides[mesh.Name].ContainsKey(Override.TextureNormal))
-                    _overrides[mesh.Name].Remove(Override.TextureNormal);
-                _overrides[mesh.Name].Add(Override.TextureNormal, tex);
-            }
-            else
-            {
-                if (_overrides[mesh.Name].ContainsKey(Override.TextureSpecular))
-                    _overrides[mesh.Name].Remove(Override.TextureSpecular);
-                _overrides[mesh.Name].Add(Override.TextureSpecular, tex);
-            }
-        }
-
-        /// <summary>
-        /// Setzt die Textur für eine bestimmte Mesh-ID (Teil des Modells)
-        /// </summary>
-        /// <param name="meshID">ID</param>
-        /// <param name="texture">Texturdatei</param>
-        /// <param name="textureType">Texturtyp</param>
-        /// <param name="isFile">false, wenn die Datei Teil der EXE ist ("Eingebettete Ressource")</param>
-        public void SetTextureForMesh(int meshID, string texture, TextureType textureType = TextureType.Diffuse, bool isFile = true)
-        {
-            if (CurrentWindow._multithreaded)
-            {
-                Action a = () => SetTextureForMeshInternal(meshID, texture, textureType, isFile);
-                HelperGLLoader.AddCall(this, a);
-            }
-            else
-                SetTextureForMeshInternal(meshID, texture, textureType, isFile);
-        }
-
-        /// <summary>
-        /// Erfragt eine Liste aller Mesh-Namen des Objekts
-        /// </summary>
-        /// <returns></returns>
-        public IReadOnlyCollection<string> GetMeshNameList()
-        {
-            CheckModel();
-
-            if(_cubeModel != null)
-            {
-                throw new Exception("GetMeshNameList() is not available on KWCube models.");
-            }
-
-            return _meshNameList;
-        }
-
-        /// <summary>
-        /// Setzt die Spiegelungsstärke des Objekts
-        /// </summary>
-        /// <param name="enable">an/aus</param>
-        /// <param name="power">Intensität (Standard: 1)</param>
-        /// <param name="area">Fläche (je größer der Wert, desto kleiner die Reflektionsfläche)</param>
-        public void SetSpecularOverride(bool enable, float power = 1, float area = 1024)
-        {
-            CheckModel();
-
-            if (Model.IsTerrain)
-            {
-                Model.Meshes.Values.ElementAt(0).Material.SpecularArea = HelperGL.Clamp(area, 2, 8192);
-                Model.Meshes.Values.ElementAt(0).Material.SpecularPower = enable ? HelperGL.Clamp(power, 0, 2048) : 0;
-            }
-            else if(_cubeModel != null)
-            {
-                _cubeModel.SpecularPower = enable ? HelperGL.Clamp(power, 0, 2048) : 0;
-                _cubeModel.SpecularArea = HelperGL.Clamp(area, 2, 8192);            
-            }
-            else
-            {
-                foreach (GeoMesh mesh in Model.Meshes.Values)
-                {
-                    if (enable)
-                    {
-                        if(_overrides[mesh.Name].ContainsKey(Override.SpecularPower))
-                            _overrides[mesh.Name].Remove(Override.SpecularPower);
-                        _overrides[mesh.Name].Add(Override.SpecularPower, HelperGL.Clamp(power, 0, 100));
-
-                        if (_overrides[mesh.Name].ContainsKey(Override.SpecularEnable))
-                            _overrides[mesh.Name].Remove(Override.SpecularEnable);
-                        _overrides[mesh.Name].Add(Override.SpecularEnable, enable);
-
-                        if (_overrides[mesh.Name].ContainsKey(Override.SpecularArea))
-                            _overrides[mesh.Name].Remove(Override.SpecularArea);
-                        _overrides[mesh.Name].Add(Override.SpecularArea, HelperGL.Clamp(area, 2, 8192));
-
-
-                    }
-                    else
-                    {
-                        if (_overrides[mesh.Name].ContainsKey(Override.SpecularPower))
-                            _overrides[mesh.Name].Remove(Override.SpecularPower);
-                        if (_overrides[mesh.Name].ContainsKey(Override.SpecularEnable))
-                            _overrides[mesh.Name].Remove(Override.SpecularEnable);
-                        if (_overrides[mesh.Name].ContainsKey(Override.SpecularArea))
-                            _overrides[mesh.Name].Remove(Override.SpecularArea);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        ///  Setzt die Spiegelungsstärke für einen Teil des 3D-Modells (Mesh)
-        /// </summary>
-        /// <param name="meshName">Name des Meshs</param>
-        /// <param name="enable">an/aus</param>
-        /// <param name="power">Intensität (Standard: 1)</param>
-        /// <param name="area">Fläche (je größer der Wert, desto kleiner die Reflektionsfläche)</param>
-        public void SetSpecularOverrideForMesh(string meshName, bool enable, float power = 1, float area = 1024)
-        {
-            CheckModel();
-            CheckIfNotTerrain();
-
-            if (_cubeModel != null)
-            {
-                SetSpecularOverride(enable, power, area);
-                return;
-            }
-
-            foreach (GeoMesh mesh in Model.Meshes.Values)
-            {
-                if (mesh.Name.ToLower().Contains(meshName.Trim().ToLower()))
-                {
-                    if (enable)
-                    {
-                        _overrides[mesh.Name].Remove(Override.SpecularPower);
-                        _overrides[mesh.Name].Add(Override.SpecularPower, HelperGL.Clamp(power, 0, 100));
-
-                        _overrides[mesh.Name].Remove(Override.SpecularEnable);
-                        _overrides[mesh.Name].Add(Override.SpecularEnable, enable);
-
-                        _overrides[mesh.Name].Remove(Override.SpecularArea);
-                        _overrides[mesh.Name].Add(Override.SpecularArea, HelperGL.Clamp(area, 2, 8192));
-                    }
-                    else
-                    {
-                        _overrides[mesh.Name].Remove(Override.SpecularPower);
-                        _overrides[mesh.Name].Remove(Override.SpecularEnable);
-                        _overrides[mesh.Name].Remove(Override.SpecularArea);
-                    }
-
-                    return;
-                }
-            }
-            throw new Exception("Mesh " + meshName + " not found in Model.");
-        }
-
-        /// <summary>
-        ///  Setzt die Spiegelungsstärke für einen Teil des 3D-Modells (Mesh)
-        /// </summary>
-        /// <param name="meshID">ID des Meshs</param>
-        /// <param name="enable">an/aus</param>
-        /// <param name="power">Intensität (Standard: 1)</param>
-        /// <param name="area">Fläche (je größer der Wert, desto kleiner die Reflektionsfläche)</param>
-        public void SetSpecularOverrideForMesh(int meshID, bool enable, float power = 1, float area = 1024)
-        {
-            if (_cubeModel != null)
-            {
-                SetSpecularOverride(enable, power, area);
-                return;
-            }
-
-            int c = 0;
-            foreach (GeoMesh mesh in Model.Meshes.Values)
-            {
-                if(c == meshID)
-                {
-                    SetSpecularOverrideForMesh(mesh.Name, enable, power, area);
-                    return;
-                }
-                c++;
-            }
-            throw new Exception("Mesh with ID " + meshID + " not found in Model.");
-        }
-
         /// <summary>
         /// Berechnet die Position eines Punkts, der um einen angegeben Punkt entlang einer Achse rotiert wird
         /// </summary>
@@ -2577,6 +2344,18 @@ namespace KWEngine2.GameObjects
         public override string ToString()
         {
             return Name + " (" + Model.Name + " | " + base.ToString() + ")";
+        }
+
+        internal bool IsCubeOrSphere()
+        {
+            return this.Model != null && (this.Model.Filename == "kwcube.obj" || this.Model.Filename == "kwsphere.obj" || this.Model.Filename == "kwcube6.obj");
+        }
+
+        internal TextureSet mTextureSet = new TextureSet(0);
+
+        internal TextureSet GetTextureSet()
+        {
+            return this.mTextureSet;
         }
     }
 }

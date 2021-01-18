@@ -52,6 +52,12 @@ namespace KWEngine2.Helper
             return fontBytes;
         }
 
+        public static int GenerateTexture(string resourceName, Assembly a)
+        {
+            Stream resourceStream = a.GetManifestResourceStream(resourceName);
+            return HelperTexture.LoadTextureCompressedNoMipMap(resourceStream);
+        }
+
         public static void GenerateTextures(int sizeOffset = 0, int offsetX = 0, int offsetY = 0)
         {
             for (byte i = 32; i < 255; i++)

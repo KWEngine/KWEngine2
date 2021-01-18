@@ -70,7 +70,7 @@ namespace KWEngine2.Renderers
                 foreach (string meshName in g.Model.Meshes.Keys)
                 {
                     index++;
-                    if(g._cubeModel is GeoModelCube6)
+                    if(g.Model.IsKWCube6)
                     {
                         index = 0;
                     }

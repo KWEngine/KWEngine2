@@ -127,7 +127,7 @@ namespace KWEngine2.Renderers
                 int index = 0;
                 foreach (string meshName in g.Model.Meshes.Keys)
                 {
-                    if (g._cubeModel is GeoModelCube6)
+                    if (g.Model.IsKWCube6)
                     {
                         index = 0;
                     }
@@ -142,15 +142,8 @@ namespace KWEngine2.Renderers
                         continue;
                     }
 
+                    GL.Uniform3(mUniform_BaseColor, mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z);
 
-                    if (g._cubeModel != null)
-                    {
-                        UploadMaterialForKWCube(g._cubeModel, mesh, g);
-                    }
-                    else
-                    {
-                        GL.Uniform3(mUniform_BaseColor, mesh.Material.ColorDiffuse.X, mesh.Material.ColorDiffuse.Y, mesh.Material.ColorDiffuse.Z);
-                    }
                     HelperGL.CheckGLErrors();
                     GL.BindVertexArray(mesh.VAO);
                     GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
@@ -162,46 +155,6 @@ namespace KWEngine2.Renderers
             }
 
             GL.UseProgram(0);
-        }
-
-        private void UploadMaterialForKWCube(GeoModelCube cubeModel, GeoMesh mesh, GameObject g)
-        {
-            if (mesh.Material.Name == "KWCube")
-            {
-                UploadMaterialForSide(CubeSide.Front, cubeModel, mesh);
-            }
-            else
-            {
-                if (mesh.Material.Name == "Front")
-                {
-                    UploadMaterialForSide(CubeSide.Front, cubeModel, mesh);
-                }
-                else if (mesh.Material.Name == "Back")
-                {
-                    UploadMaterialForSide(CubeSide.Back, cubeModel, mesh);
-                }
-                else if (mesh.Material.Name == "Left")
-                {
-                    UploadMaterialForSide(CubeSide.Left, cubeModel, mesh);
-                }
-                else if (mesh.Material.Name == "Right")
-                {
-                    UploadMaterialForSide(CubeSide.Right, cubeModel, mesh);
-                }
-                else if (mesh.Material.Name == "Top")
-                {
-                    UploadMaterialForSide(CubeSide.Top, cubeModel, mesh);
-                }
-                else if (mesh.Material.Name == "Bottom")
-                {
-                    UploadMaterialForSide(CubeSide.Bottom, cubeModel, mesh);
-                }
-            }
-        }
-
-        private void UploadMaterialForSide(CubeSide side, GeoModelCube cubeModel, GeoMesh mesh)
-        {
-            GL.Uniform3(mUniform_BaseColor, mesh.Material.ColorDiffuse.X, mesh.Material.ColorDiffuse.Y, mesh.Material.ColorDiffuse.Z);
         }
 
         internal override void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum, bool isSun)

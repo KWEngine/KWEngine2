@@ -37,7 +37,8 @@ namespace KWEngine2.GameObjects
         internal Vector4 _tint = new Vector4(1, 1, 1, 1);
         internal Vector4 _glow = new Vector4(0, 0, 0, 0);
         internal HUDObjectType _type = HUDObjectType.Image;
-        internal int[] _textureIds = new int[] { KWEngine.TextureDefault };
+        internal int _textureId = KWEngine.TextureAlpha;
+        internal int[] _offsets = new int[] { 0 };
         /// <summary>
         /// Position
         /// </summary>
@@ -121,21 +122,11 @@ namespace KWEngine2.GameObjects
 
         private void UpdateTextures()
         {
-            lock (_textureIds)
+            _textureId = KWEngine.FontTextureArray[KWEngine.Font];
+            for (int i = 0; i < _count; i++)
             {
-                _textureIds = new int[_count];
-                for (int i = 0; i < _count; i++)
-                {
-                    int letterIndex = HelperFont.LETTERS.IndexOf(_text[i]);
-                    if (letterIndex > 0)
-                    {
-                        _textureIds[i] = HelperFont.TEXTURES[letterIndex];
-                    }
-                    else
-                    {
-                        _textureIds[i] = KWEngine.TextureAlpha;
-                    }
-                }
+                int offset = (int)_text[i] - 32;
+                _offsets[i] = offset;
             }
         }
 
@@ -159,16 +150,17 @@ namespace KWEngine2.GameObjects
         /// <param name="text">Text</param>
         public void SetText(string text)
         {
-            if(_type == HUDObjectType.Text && text != null)
+            if(_type == HUDObjectType.Text && text != null && text.Length > 0)
             {
                 _text = text.Trim();
                 _count = _text.Length;
+                _offsets = new int[_count];
                 UpdatePositions();
                 UpdateTextures();
             }
             else
             {
-                throw new Exception("SetText() may only be called if the HUDObject is of type 'Text'.");
+                throw new Exception("SetText() may only be called if the HUDObject is of type 'Text'. Text may also be not empty.");
             }
         }
 
@@ -180,12 +172,12 @@ namespace KWEngine2.GameObjects
                 {
                     if (KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(filename))
                     {
-                        _textureIds[0] = KWEngine.CustomTextures[KWEngine.CurrentWorld][filename];
+                        _textureId = KWEngine.CustomTextures[KWEngine.CurrentWorld][filename];
                     }
                     else
                     {
-                        _textureIds[0] = isFile ? HelperTexture.LoadTextureForBackgroundExternal(filename) : HelperTexture.LoadTextureForBackgroundInternal(filename);
-                        KWEngine.CustomTextures[KWEngine.CurrentWorld].Add(filename, _textureIds[0]);
+                        _textureId = isFile ? HelperTexture.LoadTextureForBackgroundExternal(filename) : HelperTexture.LoadTextureForBackgroundInternal(filename);
+                        KWEngine.CustomTextures[KWEngine.CurrentWorld].Add(filename, _textureId);
                     }
                 }
                 _count = 1;

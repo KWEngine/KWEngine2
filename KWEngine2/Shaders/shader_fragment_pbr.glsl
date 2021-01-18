@@ -6,208 +6,161 @@ in		vec2 vTexture;
 in		vec2 vTexture2;
 in		mat3 vTBN;
 in		vec4 vShadowCoord;
+in		vec4 vShadowCoord2;
 
-uniform sampler2D uTextureDiffuse;
-uniform int uUseTextureDiffuse;
+uniform sampler2D uTextureAlbedo;
+uniform int uUseTextureAlbedo;
 
 uniform sampler2D uTextureNormal;
 uniform int uUseTextureNormal;
 
 uniform sampler2D uTextureRoughness;
 uniform int uUseTextureRoughness;
-
-uniform sampler2D uTextureMetallic;
-uniform int uUseTextureMetallic; 
-
+uniform int uUseTextureRoughnessIsSpecular;
 uniform float uRoughness;
+
+uniform sampler2D uTextureMetalness;
+uniform int uUseTextureMetalness;
 uniform float uMetalness;
 
 uniform sampler2D uTextureEmissive;
 uniform int uUseTextureEmissive;
+uniform vec4 uEmissiveColor;
 
 uniform sampler2D uTextureLightmap;
 uniform int uUseTextureLightmap;
 
 uniform sampler2DShadow uTextureShadowMap;
+uniform sampler2DShadow uTextureShadowMap2;
 
 uniform float uOpacity;
-uniform vec3 uBaseColor;
+uniform vec3 uAlbedoColor;
 uniform vec4 uGlow;
+uniform vec4 uOutline;
 uniform vec3 uTintColor;
-uniform vec4 uEmissiveColor;
+
 uniform float uSunAmbient;
-uniform int uSunAffection;
 uniform vec3 uSunPosition;
-uniform vec3 uSunDirection; // to sun!
 uniform vec4 uSunIntensity;
+
+uniform int uSunAffection;
 uniform int uLightAffection;
 
 uniform vec3 uCameraPos;
 uniform vec3 uCameraDirection;
 
-uniform float uSpecularArea;
-uniform float uSpecularPower;
+uniform samplerCube uTextureSkybox;
+uniform int uUseTextureSkybox;
+
+//uniform float uSpecularArea;
+//uniform float uSpecularPower;
 
 uniform float uBiasCoefficient;
+uniform float uBiasCoefficient2;
 
+uniform int uShadowLightPosition;
 uniform vec4 uLightsPositions[10];
 uniform vec4 uLightsTargets[10];
 uniform vec4 uLightsColors[10];
 uniform int uLightCount;
 
-uniform vec4 uMaterial;
-
 out vec4 color;
 out vec4 bloom;
 
-#define PI 3.1415926
+const float cpi = 3.14159265358979323846264338327950288419716939937510f;
 
-float calculateDarkening(float cosTheta, vec4 shadowCoord)
+float chiGGX(float f)
 {
-	float bias = uBiasCoefficient * sqrt ( 1.0f - cosTheta * cosTheta   ) / cosTheta;
-	bias = clamp(bias, 0.0 ,0.01);
+	return clamp(f * f, 0.0, 1.0);
+}
+
+float chiGGX2(float f)
+{
+	return f > 0.0 ? 1.0 : 0.0 ;
+}
+
+float computeGGXDistribution(float pDotNormalLight, float pRoughness)
+{
+	float fNormalDotLightSquared = pDotNormalLight * pDotNormalLight ;
+	float fRoughnessSquared = pRoughness * pRoughness;
+	float fDen = fNormalDotLightSquared * fRoughnessSquared + (1.0 - fNormalDotLightSquared);
+	return clamp((chiGGX(pDotNormalLight) * fRoughnessSquared) / (cpi * fDen * fDen), 0.0, 1.0);
+}
+
+float computeGGXPartialGeometryTerm(vec3 pSurfaceToCameraDirection, vec3 pSurfaceNormal, vec3 pLightViewHalfVector, float pRoughness)
+{
+	float fViewerDotLightViewHalf = max(dot(pSurfaceToCameraDirection, pLightViewHalfVector), 0.0);
+	float fChi = chiGGX2(fViewerDotLightViewHalf / max(dot(pSurfaceToCameraDirection, pSurfaceNormal), 0.0));
+	fViewerDotLightViewHalf *= fViewerDotLightViewHalf;
+	float fTan2 = (1.0 - fViewerDotLightViewHalf) / fViewerDotLightViewHalf;
+	return clamp((fChi * 2.0) / (1.0 + sqrt(1 + pRoughness * pRoughness * fTan2)), 0.0, 1.0) ;
+}
+
+float calculateDarkening(float cosTheta, vec4 shadowCoord, float coefficient, sampler2DShadow shadowMap)
+{
+	float bias = coefficient * sqrt ( 1.0f - cosTheta * cosTheta   ) / cosTheta;
+	bias = clamp(bias, 0.0, 0.01);
 	shadowCoord.z -= bias;
 	float darkening = 0.0;
-	darkening += textureProjOffset(uTextureShadowMap, shadowCoord, ivec2(-1,-1));
-	darkening += textureProjOffset(uTextureShadowMap, shadowCoord, ivec2(-1,1));
-	darkening += textureProjOffset(uTextureShadowMap, shadowCoord, ivec2(0,0));
-	darkening += textureProjOffset(uTextureShadowMap, shadowCoord, ivec2(1,1));
-	darkening += textureProjOffset(uTextureShadowMap, shadowCoord, ivec2(1,-1));
+	darkening += textureProjOffset(shadowMap, shadowCoord, ivec2(-1,-1));
+	darkening += textureProjOffset(shadowMap, shadowCoord, ivec2(-1,1));
+	darkening += textureProjOffset(shadowMap, shadowCoord, ivec2(0,0));
+	darkening += textureProjOffset(shadowMap, shadowCoord, ivec2(1,1));
+	darkening += textureProjOffset(shadowMap, shadowCoord, ivec2(1,-1));
 	darkening /= 5.0;
 	return darkening;
-}
-
-float saturate(in float value)
-{
-    return clamp(value, 0.0, 1.0);
-}
-
-
-// phong (lambertian) diffuse term
-float phong_diffuse()
-{
-    return (1.0 / PI);
-}
-
-
-// compute fresnel specular factor for given base specular and product
-// product could be NdV or VdH depending on used technique
-vec3 fresnel_factor(in vec3 f0, in float product)
-{
-    return mix(f0, vec3(1.0), pow(1.01 - product, 5.0));
-}
-
-float D_blinn(in float roughness, in float NdH)
-{
-    float m = roughness * roughness;
-    float m2 = m * m;
-    float n = 2.0 / m2 - 2.0;
-    return (n + 2.0) / (2.0 * PI) * pow(NdH, n);
-}
-
-float D_beckmann(in float roughness, in float NdH)
-{
-    float m = roughness * roughness;
-    float m2 = m * m;
-    float NdH2 = NdH * NdH;
-    return exp((NdH2 - 1.0) / (m2 * NdH2)) / (PI * m2 * NdH2 * NdH2);
-}
-
-float D_GGX(in float roughness, in float NdH)
-{
-    float m = roughness * roughness;
-    float m2 = m * m;
-    float d = (NdH * m2 - NdH) * NdH + 1.0;
-    return m2 / (PI * d * d);
-}
-
-float G_schlick(in float roughness, in float NdV, in float NdL)
-{
-    float k = roughness * roughness * 0.5;
-    float V = NdV * (1.0 - k) + k;
-    float L = NdL * (1.0 - k) + k;
-    return 0.25 / (V * L);
-}
-
-vec3 phong_specular(in vec3 V, in vec3 L, in vec3 N, in vec3 specular, in float roughness)
-{
-    vec3 R = reflect(-L, N);
-    float spec = max(0.0, dot(V, R));
-    float k = 1.999 / (roughness * roughness);
-    return min(1.0, 3.0 * 0.0398 * k) * pow(spec, min(10000.0, k)) * specular;
-}
-
-// simple blinn specular calculation with normalization
-vec3 blinn_specular(in float NdH, in vec3 specular, in float roughness)
-{
-    float k = 1.999 / (roughness * roughness);
-    return min(1.0, 3.0 * 0.0398 * k) * pow(NdH, min(10000.0, k)) * specular;
-}
-
-// cook-torrance specular calculation                      
-vec3 cooktorrance_specular(in float NdL, in float NdV, in float NdH, in vec3 specular, in float roughness)
-{
-    float D = D_GGX(roughness, NdH);
-    float G = G_schlick(roughness, NdV, NdL);
-    float rim = mix(1.0 - roughness * uMaterial.w * 0.9, 1.0, NdV);
-    return (1.0 / rim) * specular * G * D;
 }
 
 void main()
 {
 	// Texture mapping:
-	vec3 texColor = uBaseColor;
-	vec4 texColor4 = vec4(1.0, 1.0, 1.0, 1.0);
-	if(uUseTextureDiffuse > 0)
+	vec3 albedo = uAlbedoColor * uTintColor;
+	if(uUseTextureAlbedo > 0)
 	{
-		texColor4 = texture(uTextureDiffuse, vTexture);
+		vec4 texColor4 = texture(uTextureAlbedo, vTexture);
 		if(texColor4.w <= 0.5)
 		{
 			discard;
 		}
-		texColor = texColor4.xyz;
+		albedo = texColor4.xyz * uTintColor;
 		if(uUseTextureLightmap > 0)
 		{
-			texColor *= texture(uTextureLightmap, vTexture2).xyz;
+			albedo *= texture(uTextureLightmap, vTexture2).xyz;
 		}
 	}
 
-	// Normal mapping:
-	vec3 theNormal = vec3(0);
-	if(uUseTextureNormal > 0)
-    {
-            theNormal = normalize(texture(uTextureNormal, vTexture).xyz * 2.0 - 1.0);
-            theNormal = normalize(vTBN * theNormal);
-    }
-    else
-    {
-            theNormal = vNormal;
-    }
-
-	vec3 surfaceToCamera = normalize(uCameraPos - vPosition);
+	vec3 fragmentToCamera = normalize(uCameraPos - vPosition);
 	vec3 fragmentToSun = normalize(uSunPosition - vPosition);
 
-	// shadow mapping:
-	float dotNormalLight = max(dot(theNormal, uSunDirection), 0.0);								
-	float dotNormalLightShadow = max(dot(theNormal, fragmentToSun), 0.0);
-	float darkeningAbsolute = max(calculateDarkening(dotNormalLightShadow, vShadowCoord), 0.0);
-	float darkening = max(darkeningAbsolute, uSunAmbient);
-	
-	
-	// check if camera may see highlights:
-	float dotSunNormalInverted = max(0.0, dot(-theNormal, -uSunDirection));
 
-	// calculate ambient light:
-	vec3 ambient = vec3(0.0);
+	float dotSunSurface = 1.0;
+	float darkeningSun = 1.0;
+	float darkeningSpotlight = 1.0;
+
+	// Normal mapping:
+	vec3 theNormal = vNormal;
+	if(uUseTextureNormal > 0)
+    {
+        theNormal = texture(uTextureNormal, vTexture).xyz * 2.0 - 1.0;  // ? normalize necessary?
+        theNormal = vTBN * theNormal;									// ? normalize necessary?
+    }
+	
+
+	// Shadow mapping #1:
 	if(uSunAffection > 0)
 	{
-		ambient = uSunIntensity.xyz * (uSunIntensity.w * min(max(dotNormalLight, uSunAmbient), darkening));
-	}
-	else
-	{
-		ambient = vec3(uSunAmbient);
+		dotSunSurface = max(dot(theNormal, fragmentToSun), 0.0);								
+		if(uSunIntensity.w > 0)
+		{
+			float dotSunSurfaceVNormal = max(dot(vNormal, fragmentToSun), 0.0);
+			darkeningSun = max(calculateDarkening(dotSunSurfaceVNormal, vShadowCoord, uBiasCoefficient, uTextureShadowMap), 0.0);
+		}
 	}
 
+	
+
+	// Ambient and emissive:
+	vec3 ambient = vec3(uSunIntensity.xyz * uSunAmbient);
 	vec3 emissive = vec3(0.0);
 	if(uUseTextureEmissive > 0)
 	{
@@ -215,55 +168,135 @@ void main()
 	}
 	else
 	{
-		emissive = uEmissiveColor.xyz * uEmissiveColor.w;
+		emissive = uEmissiveColor.xyz;
 	}
-	ambient += emissive;
 
-	vec3 colorComponentTotal = vec3(0.0);
+
+
+	// Metalness / Reflections:
+	
+	vec3 refl = vec3(0.22 * uSunIntensity.xyz * uSunAmbient);
+	if(uUseTextureSkybox > 0)
+	{
+		vec3 reflectedCameraSurfaceNormal = reflect(-fragmentToCamera, theNormal);
+		refl = texture(uTextureSkybox, reflectedCameraSurfaceNormal).xyz * uSunIntensity.xyz * max(uSunAmbient, uSunIntensity.w);
+	}
+	vec3 reflection = refl;
+	vec3 metalness = vec3(uMetalness);
+	if(uUseTextureMetalness > 0)
+	{
+		metalness = texture(uTextureMetalness, vTexture).xyz;
+		if(uUseTextureRoughnessIsSpecular > 0)
+		{
+			metalness = vec3(metalness.r);
+		}
+		
+	}
+	reflection *= metalness;
+	reflection = min(refl, reflection);
+
+
+
+	// Roughness:
+	float roughness = uRoughness;
+	if(uUseTextureRoughness > 0)
+	{
+		vec3 roughnessRGB = texture(uTextureRoughness, vTexture).xyz;
+		roughness = (roughnessRGB.x + roughnessRGB.y + roughnessRGB.z) / 3.0;
+		if(uUseTextureRoughnessIsSpecular > 0)
+		{
+			roughness = 1.0 - roughness;
+		}
+	}
+	float distributionMicroFacet = computeGGXDistribution(dotSunSurface, roughness);
+	float geometryMicroFacet = computeGGXPartialGeometryTerm(fragmentToCamera, theNormal, (0.5 * fragmentToCamera + 0.5 * fragmentToSun), roughness);
+	float roughnessCalculated = distributionMicroFacet * geometryMicroFacet;
+
+
+	// Loop for lights:
+	vec3 colorComponentSpecularTotalFromLights = vec3(0.0);
+	vec3 colorComponentIntensityTotalFromLights = vec3(0.0);
 	if(uLightAffection > 0)
 	{
 		for(int i = 0; i < uLightCount; i++)
 		{
 			vec3 lightPos = uLightsPositions[i].xyz;
-			vec3 lightColor = uLightsColors[i].xyz;
-			vec3 lightDirection = normalize(uLightsTargets[i].xyz - lightPos); // light pos to light target
-
-			vec3 lightVector = lightPos - vPosition; // fragment to light
-			float distance = dot(lightVector, lightVector);
-			lightVector = normalize(lightVector);
-			float distanceFactor = (uLightsPositions[i].w * 10 / distance);
-
-			//check if camera may see highlights:
-			float dotLightNormalInverted;
-			// directional light falloff:
-			float differenceLightDirectionAndFragmentDirection = 1.0;
-			if(uLightsTargets[i].w > 0.0){ // directional
-				differenceLightDirectionAndFragmentDirection = max(dot(lightDirection, -lightVector), 0.0);
-				dotLightNormalInverted = max(dot(lightDirection, -theNormal), 0.0) * clamp(8.0 * distanceFactor, 0.0, 1.0);
-			}
-			else
+			vec3 fragmentToCurrentLightNotNormalized = lightPos - vPosition;
+			vec3 fragmentToCurrentLightNormalized = normalize(fragmentToCurrentLightNotNormalized);
+			
+			// Shadow mapping #2:
+			float darkeningCurrentLight = 1.0;
+			if(i == uShadowLightPosition)
 			{
-				dotLightNormalInverted = clamp(8.0 * distanceFactor, 0.0, 1.0);
+				float dotLightSurfaceVNormal = max(dot(vNormal, fragmentToCurrentLightNormalized), 0.0);
+				darkeningCurrentLight = max(calculateDarkening(dotLightSurfaceVNormal, vShadowCoord2, uBiasCoefficient2, uTextureShadowMap2), 0.0);
 			}
 
-			// Normal light affection:
-			float dotProduct = max(dot(theNormal, lightVector), 0.0);
-			float dotProductNormalLight = dotProduct * distanceFactor * differenceLightDirectionAndFragmentDirection;
+			float currentLightDistanceSq = dot(fragmentToCurrentLightNotNormalized, fragmentToCurrentLightNotNormalized);
+			float distanceFactor = (uLightsPositions[i].w / currentLightDistanceSq);
 
-			colorComponentTotal += lightColor * dotProductNormalLight * uLightsColors[i].w * pow(differenceLightDirectionAndFragmentDirection, 5.0);
+			// optional: spot light cone
+			float differenceLightDirectionAndFragmentDirection = 1.0;
+			if(uLightsTargets[i].w > 0.0)
+			{
+				vec3 lightDirection = normalize(uLightsTargets[i].xyz - lightPos);
+				differenceLightDirectionAndFragmentDirection = max(dot(lightDirection, -fragmentToCurrentLightNormalized), 0.0);
+			}
+
+			// light intensity:
+			float dotNormalCurrentLight = max(dot(theNormal, fragmentToCurrentLightNormalized), 0.0);
+			float currentLightIntensity = dotNormalCurrentLight * distanceFactor * pow(differenceLightDirectionAndFragmentDirection, 4.0);
+
+			// roughness:
+			float distributionMicroFacetCurrentLight = computeGGXDistribution(dotNormalCurrentLight, roughness);
+			float geometryMicroFacetCurrentLight = computeGGXPartialGeometryTerm(fragmentToCamera, theNormal, (0.5 * fragmentToCamera + 0.5 * fragmentToCurrentLightNormalized), roughness);
+			float microFacetContributionCurrentLight = distributionMicroFacetCurrentLight * geometryMicroFacetCurrentLight;
+
+			vec3 rgbSpecularCurrentLight = vec3(0.0);
+			if(dotNormalCurrentLight > 0 && darkeningCurrentLight > 0)
+			{
+				rgbSpecularCurrentLight = uLightsColors[i].xyz * uLightsColors[i].w * clamp(distanceFactor * 10, 0.0, 1.0) * differenceLightDirectionAndFragmentDirection;
+				rgbSpecularCurrentLight *= microFacetContributionCurrentLight;
+				rgbSpecularCurrentLight = min(uLightsColors[i].xyz * uLightsColors[i].w, rgbSpecularCurrentLight) ; // conservation of energy
+			}
+
+			colorComponentIntensityTotalFromLights += uLightsColors[i].xyz * uLightsColors[i].w * currentLightIntensity * darkeningCurrentLight;
+			colorComponentSpecularTotalFromLights += rgbSpecularCurrentLight;
 		}
 	}
 
-	vec3 finalColor =(colorComponentTotal + ambient) * uBaseColor.xyz * uTintColor.xyz * texColor;
+
+
+	// read pure texture and tone down for ambient:
+	vec3 rgbFragment = albedo * (1.0 - metalness) + emissive;
+
+	vec3 rgbSpecular = vec3(0.0);
+	if(dotSunSurface > 0 && darkeningSun > 0)
+	{
+		rgbSpecular = uSunIntensity.xyz * uSunIntensity.w;
+		rgbSpecular *= roughnessCalculated;
+		rgbSpecular = min(uSunIntensity.xyz * uSunIntensity.w, rgbSpecular) ; // conservation of energy
+		rgbFragment += rgbSpecular;
+	}
+	rgbFragment += colorComponentSpecularTotalFromLights;
+
+	// check sun light intensity:
+	float sunlightIntensity = uSunIntensity.w * dotSunSurface * darkeningSun;
+	rgbFragment *= (uSunIntensity.xyz * (sunlightIntensity + uSunAmbient)) + colorComponentIntensityTotalFromLights;
 	
-    color.x = finalColor.x;
-	color.y = finalColor.y;
-	color.z = finalColor.z;
+	// Add reflection from skybox:
+	rgbFragment += reflection;
+	
+	
+
+	float dotOutline = max(1.0 - 4.0 * pow(abs(dot(uCameraDirection, vNormal)), 2.0), 0.0) * uOutline.w;
+	color.xyz = rgbFragment + uOutline.xyz * dotOutline * 0.9;
 	color.w = uOpacity;
 
-	vec3 addedBloom = vec3(max(finalColor.x - 1.0, 0.0), max(finalColor.y - 1.0, 0.0), max(finalColor.z - 1.0, 0.0)) + (uEmissiveColor.xyz * 0.5);
-	bloom.x = addedBloom.x + uGlow.x * uGlow.w;
-	bloom.y = addedBloom.y + uGlow.y * uGlow.w;
-	bloom.z = addedBloom.z + uGlow.z * uGlow.w;
-	bloom.w = 1.0;
+	vec3 addedBloom = vec3(max(rgbFragment.x - 1.0, 0.0), max(rgbFragment.y - 1.0, 0.0), max(rgbFragment.z - 1.0, 0.0));
+	addedBloom /= 16.0;
+	bloom.x = addedBloom.x + uGlow.x * uGlow.w + uOutline.x * dotOutline * 0.15 + emissive.x * 0.125;
+	bloom.y = addedBloom.y + uGlow.y * uGlow.w + uOutline.y * dotOutline * 0.15 + emissive.y * 0.125;
+	bloom.z = addedBloom.z + uGlow.z * uGlow.w + uOutline.z * dotOutline * 0.15 + emissive.z * 0.125;
+	bloom.w = uEmissiveColor.w > 0.0 ? uEmissiveColor.w : 1.0;
 }

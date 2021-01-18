@@ -26,7 +26,7 @@ namespace KWEngine2.Renderers
             GL.Uniform1(mUniform_BloomRadius, KWEngine._bloomRadius);
             GL.Uniform1(mUniform_Horizontal, bloomDirectionHorizontal ? 1 : 0);
 
-            float factor = KWEngine.PostProcessQuality == KWEngine.PostProcessingQuality.High ? 1 : KWEngine.PostProcessQuality == KWEngine.PostProcessingQuality.Standard ? 0.6f : 0.25f;
+            float factor = KWEngine.PostProcessQuality == PostProcessingQuality.High ? 1 : KWEngine.PostProcessQuality == PostProcessingQuality.Standard ? 0.6f : 0.25f;
 
             GL.Uniform2(
                 mUniform_Resolution,

@@ -178,12 +178,17 @@ namespace KWEngine2
 
             KWEngine.TextureDefault = HelperTexture.LoadTextureInternal("checkerboard.png");
             KWEngine.TextureBlack = HelperTexture.LoadTextureInternal("black.png");
+            KWEngine.TextureWhite = HelperTexture.LoadTextureInternal("white.png");
             KWEngine.TextureAlpha = HelperTexture.LoadTextureInternal("alpha.png");
+            KWEngine.TextureDepthEmpty = HelperTexture.CreateEmptyDepthTexture();
+            KWEngine.TextureCubemapEmpty = HelperTexture.CreateEmptyCubemapTexture();
 
             KWEngine.InitializeShaders();
             KWEngine.InitializeModels();
             KWEngine.InitializeParticles();
-            KWEngine.InitializeFont("Anonymous.ttf");
+            KWEngine.InitializeFont("anonymous.dds", 0);
+            KWEngine.InitializeFont("anonymous2.dds", 1);
+            KWEngine.InitializeFont("anonymous3.dds", 2);
             _bloomQuad = KWEngine.KWRect;
 
 
@@ -449,7 +454,7 @@ namespace KWEngine2
             if (frameCounter > 100)
             {
                 int index = Title != null ? Title.LastIndexOf('|') : -1;
-                if (KWEngine.DebugShowPerformanceInTitle == KWEngine.PerformanceUnit.FrameTimeInMilliseconds)
+                if (KWEngine.DebugShowPerformanceInTitle == PerformanceUnit.FrameTimeInMilliseconds)
                 {
                     if (index < 0)
                     {
@@ -461,7 +466,7 @@ namespace KWEngine2
                         Title += " | " + Math.Round(frameData / frameCounter, 2) + " ms";
                     }
                 }
-                else if (KWEngine.DebugShowPerformanceInTitle == KWEngine.PerformanceUnit.FramesPerSecond)
+                else if (KWEngine.DebugShowPerformanceInTitle == PerformanceUnit.FramesPerSecond)
                 {
                     if (index < 0)
                     {
@@ -743,7 +748,7 @@ namespace KWEngine2
 
         private void ApplyBloom()
         {
-            if (KWEngine.PostProcessQuality != KWEngine.PostProcessingQuality.Disabled)
+            if (KWEngine.PostProcessQuality != PostProcessingQuality.Disabled)
             {
 
                 RendererBloom r = (RendererBloom)KWEngine.Renderers["Bloom"];
@@ -751,8 +756,8 @@ namespace KWEngine2
                 GL.UseProgram(r.GetProgramId());
                 GL.Viewport(0, 0, Width, Height);
                 int loopCount =
-                    KWEngine.PostProcessQuality == KWEngine.PostProcessingQuality.High ? 6 :
-                    KWEngine.PostProcessQuality == KWEngine.PostProcessingQuality.Standard ? 4 : 2;
+                    KWEngine.PostProcessQuality == PostProcessingQuality.High ? 6 :
+                    KWEngine.PostProcessQuality == PostProcessingQuality.Standard ? 4 : 2;
                 int sourceTex; // this is the texture that the bloom will be read from
                 for (int i = 0; i < loopCount; i++)
                 {
@@ -841,7 +846,7 @@ namespace KWEngine2
 
         private void DownsampleFramebuffer()
         {
-            if (KWEngine.PostProcessQuality != KWEngine.PostProcessingQuality.Disabled)
+            if (KWEngine.PostProcessQuality != PostProcessingQuality.Disabled)
             {
                 GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, FramebufferMainMultisample);
                 GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, FramebufferMainFinal);

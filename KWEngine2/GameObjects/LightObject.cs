@@ -51,7 +51,7 @@ namespace KWEngine2.GameObjects
                 }
             }
         }
-        private Vector4 Color { get; set; }
+        public Vector4 Color { get; internal set; }
         internal World World { get; set; }
         internal float FOVShadow2 { get; set; } = 60f;
         internal float ShadowMapBiasCoefficient = 0.005f;

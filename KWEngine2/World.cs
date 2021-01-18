@@ -206,20 +206,16 @@ namespace KWEngine2
         /// <param name="filename">Textur</param>
         /// <param name="repeatX">Wiederholung Breite</param>
         /// <param name="repeatY">Wiederholung Höhe</param>
-        /// <param name="red">Rotfärbung</param>
-        /// <param name="green">Grünfärbung</param>
-        /// <param name="blue">Blaufärbung</param>
-        /// <param name="intensity">Helligkeit</param>
         /// <param name="isFile">false, falls der Pfad Teil der EXE-Datei ist</param>
-        public void SetTextureBackground(string filename, float repeatX = 1, float repeatY = 1, float red = 1, float green = 1, float blue = 1, float intensity = 1, bool isFile = true)
+        public void SetTextureBackground(string filename, float repeatX = 1, float repeatY = 1, bool isFile = true)
         {
             if (GLWindow.CurrentWindow._multithreaded)
             {
-                Action a = () => SetTextureBackgroundInternal(filename, repeatX, repeatY, red, green, blue, intensity, isFile);
+                Action a = () => SetTextureBackgroundInternal(filename, repeatX, repeatY, 1, 1, 1, 1, isFile);
                 HelperGLLoader.AddCall(this, a);
             }
             else
-                SetTextureBackgroundInternal(filename, repeatX, repeatY, red, green, blue, intensity, isFile);
+                SetTextureBackgroundInternal(filename, repeatX, repeatY, 1, 1, 1, 1, isFile);
 
         }
 
@@ -227,21 +223,17 @@ namespace KWEngine2
         /// Setzt das 3D-Hintergrundbild
         /// </summary>
         /// <param name="filename">Skybox-Textur</param>
-        /// <param name="red">Rotfärbung</param>
-        /// <param name="green">Grünfärbung</param>
-        /// <param name="blue">Blaufärbung</param>
-        /// <param name="intensity">Helligkeit</param>
         /// <param name="isFile">false, falls der Pfad Teil der EXE-Datei ist</param>
-        public void SetTextureSkybox(string filename, float red = 1, float green = 1, float blue = 1, float intensity = 1, bool isFile = true)
+        public void SetTextureSkybox(string filename, bool isFile = true)
         {
             if (GLWindow.CurrentWindow._multithreaded)
             {
-                Action a = () => SetTextureSkyboxInternal(filename, red, green, blue, intensity, isFile);
+                Action a = () => SetTextureSkyboxInternal(filename, 1, 1, 1, 1, isFile);
                 HelperGLLoader.AddCall(this, a);
             }
             else
             {
-                SetTextureSkyboxInternal(filename, red, green, blue, intensity, isFile);
+                SetTextureSkyboxInternal(filename, 1, 1, 1, 1, isFile);
             }
         }
 
@@ -463,7 +455,10 @@ namespace KWEngine2
             p.Z += +0.000001f;
             _sunPosition = p;
             _viewMatrixShadow = Matrix4.LookAt(_sunPosition, _sunTarget, KWEngine.WorldUp);
+            _sunDirectionInverted = Vector3.NormalizeFast(_sunPosition - _sunTarget);
         }
+
+        internal Vector3 _sunDirectionInverted = new Vector3(0.577350f, 0.577350f, 0.577350f);
 
         /// <summary>
         /// Setzt das Blickziel der Sonne
@@ -484,10 +479,20 @@ namespace KWEngine2
         {
             _sunTarget = p;
             _viewMatrixShadow = Matrix4.LookAt(_sunPosition, _sunTarget, KWEngine.WorldUp);
+            _sunDirectionInverted = Vector3.NormalizeFast(_sunPosition - _sunTarget);
         }
 
         /// <summary>
         /// Helligkeit des Umgebungslichts (dort wo die Sonne nicht scheint)
+        /// </summary>
+        /// <param name="a">Helligkeit (0 bis 1)</param>
+        public void SetSunAmbientFactor(float a)
+        {
+            SunAmbientFactor = a;
+        }
+
+        /// <summary>
+        /// Helligkeit des Umgebungslichts (dort wo die Sonne nicht scheint), Wertebereich: 0 bis 1
         /// </summary>
         public float SunAmbientFactor
         {
@@ -504,17 +509,19 @@ namespace KWEngine2
         /// <summary>
         /// Setzt die Farbe des Sonnenlichts
         /// </summary>
-        /// <param name="red">Rotanteil</param>
-        /// <param name="green">Grünanteil</param>
-        /// <param name="blue">Blauanteil</param>
-        /// <param name="intensity">Helligkeitsanteil</param>
+        /// <param name="red">Rotanteil (0 bis 1)</param>
+        /// <param name="green">Grünanteil (0 bis 1)</param>
+        /// <param name="blue">Blauanteil (0 bis 1)</param>
+        /// <param name="intensity">Helligkeitsanteil (0 bis 1024)</param>
         public void SetSunColor(float red, float green, float blue, float intensity)
         {
             _sunColor.X = HelperGL.Clamp(red, 0, 1);
             _sunColor.Y = HelperGL.Clamp(green, 0, 1);
             _sunColor.Z = HelperGL.Clamp(blue, 0, 1);
-            _sunColor.W = HelperGL.Clamp(intensity, 0, 1);
+            _sunColor.W = HelperGL.Clamp(intensity, 0, 1024);
         }
+
+
 
         /// <summary>
         /// Erfragt die Farbe der Sonne

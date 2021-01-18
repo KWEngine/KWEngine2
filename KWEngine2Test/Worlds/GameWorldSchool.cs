@@ -93,7 +93,7 @@ namespace KWEngine2Test.Worlds
 
             SetTextureSkybox(@".\textures\skybox1.jpg");
             //SetTextureSkyboxRotation(90);
-            DebugShowPerformanceInTitle = KWEngine.PerformanceUnit.FramesPerSecond;
+            DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
 
         }
     }

@@ -84,8 +84,11 @@ namespace KWEngine2.Model
                             | PostProcessSteps.ValidateDataStructure
                             | PostProcessSteps.GenerateUVCoords
                             | PostProcessSteps.CalculateTangentSpace;
+                            
                         if (filename != "kwcube.obj" && filename != "kwcube6.obj")
                             steps |= PostProcessSteps.JoinIdenticalVertices;
+                        if(filename == "kwsphere.obj")
+                            steps |= PostProcessSteps.GenerateSmoothNormals;
                         if (type == FileType.DirectX)
                             steps |= PostProcessSteps.FlipWindingOrder;
                         if (flipTextureCoordinates)
@@ -129,6 +132,8 @@ namespace KWEngine2.Model
         private static GeoModel ProcessScene(Scene scene, string filename, AssemblyMode am)
         {
             GeoModel returnModel = new GeoModel();
+            if (filename.Contains("kwcube6.obj"))
+                returnModel.IsKWCube6 = true;
             returnModel.Filename = filename;
             returnModel.Name = StripPathFromFile(filename);
             if (am == AssemblyMode.Internal)
@@ -422,21 +427,24 @@ namespace KWEngine2.Model
                     material = scene.Materials[mesh.MaterialIndex];
                     geoMaterial.Name = model.Filename == "kwcube.obj" ? "KWCube" : material.Name;
                     geoMaterial.BlendMode = material.BlendMode == BlendMode.Default ? OpenTK.Graphics.OpenGL4.BlendingFactor.OneMinusSrcAlpha : OpenTK.Graphics.OpenGL4.BlendingFactor.One; // TODO: Check if this is correct!
-                    geoMaterial.ColorDiffuse = new Vector4(1, 1, 1, 1);
+                    geoMaterial.ColorAlbedo = new Vector4(1, 1, 1, 1);
                     geoMaterial.ColorEmissive = new Vector4(0, 0, 0, 1);
+
                 }
                 else
                 {
                     geoMaterial.Name = "kw-undefined.";
                     geoMaterial.BlendMode = OpenTK.Graphics.OpenGL4.BlendingFactor.OneMinusSrcAlpha;
-                    geoMaterial.ColorDiffuse = new Vector4(1, 1, 1, 1);
+                    geoMaterial.ColorAlbedo = new Vector4(1, 1, 1, 1);
                     geoMaterial.ColorEmissive = new Vector4(0, 0, 0, 1);
                 }
-                geoMaterial.SpecularArea = 1024;
-                geoMaterial.SpecularPower = 0;
+                geoMaterial.Roughness = 1;
+                geoMaterial.Metalness = 0;
             }
             else
             {
+                
+
                 if (mesh.MaterialIndex >= 0)
                 {
                     material = scene.Materials[mesh.MaterialIndex];
@@ -445,11 +453,11 @@ namespace KWEngine2.Model
                     if (material.Name == "DefaultMaterial")
                     {
                         geoMaterial.BlendMode = OpenTK.Graphics.OpenGL4.BlendingFactor.OneMinusSrcAlpha;
-                        geoMaterial.ColorDiffuse = new Vector4(1, 1, 1, 1);
+                        geoMaterial.ColorAlbedo = new Vector4(1, 1, 1, 1);
                         geoMaterial.ColorEmissive = new Vector4(0, 0, 0, 1);
-                        geoMaterial.SpecularPower = 0;
-                        geoMaterial.SpecularArea = 1024;
-                        geoMaterial.TextureSpecularIsRoughness = false;
+                        geoMaterial.Roughness = 1;
+                        geoMaterial.Metalness = 0;
+                        geoMaterial.TextureRoughnessIsSpecular = false;
                         if (mesh.Name != null && mesh.Name.ToLower().Contains("_invisible"))
                         {
                             geoMaterial.Opacity = 0;
@@ -457,31 +465,31 @@ namespace KWEngine2.Model
                     }
                     else
                     {
+                        geoMaterial.Roughness = material.HasShininess ? (100f - material.Shininess) / 100f : 1;
+                        geoMaterial.Metalness = material.HasReflectivity ? material.Reflectivity : 0;
                         geoMaterial.BlendMode = material.BlendMode == BlendMode.Default ? OpenTK.Graphics.OpenGL4.BlendingFactor.OneMinusSrcAlpha : OpenTK.Graphics.OpenGL4.BlendingFactor.One; // TODO: Check if this is correct!
                         if (model.AssemblyMode == AssemblyMode.Internal && material.Name == "System")
                         {
-                            geoMaterial.ColorDiffuse = new Vector4(1, 1, 1, 1);
+                            geoMaterial.ColorAlbedo = new Vector4(1, 1, 1, 1);
                         }
                         else if (model.AssemblyMode == AssemblyMode.Internal && material.Name == "X")
                         {
-                            geoMaterial.ColorDiffuse = new Vector4(1, 0, 0, 1);
+                            geoMaterial.ColorAlbedo = new Vector4(1, 0, 0, 1);
                         }
                         else if (model.AssemblyMode == AssemblyMode.Internal && material.Name == "Y")
                         {
-                            geoMaterial.ColorDiffuse = new Vector4(0, 1, 0, 1);
+                            geoMaterial.ColorAlbedo = new Vector4(0, 1, 0, 1);
                         }
                         else if (model.AssemblyMode == AssemblyMode.Internal && material.Name == "Z")
                         {
-                            geoMaterial.ColorDiffuse = new Vector4(0, 0, 1, 1);
+                            geoMaterial.ColorAlbedo = new Vector4(0, 0, 1, 1);
                         }
                         else
                         {
-                            geoMaterial.ColorDiffuse = material.HasColorDiffuse ? new Vector4(material.ColorDiffuse.R, material.ColorDiffuse.G, material.ColorDiffuse.B, material.ColorDiffuse.A) : new Vector4(1, 1, 1, 1);
+                            geoMaterial.ColorAlbedo = material.HasColorDiffuse ? new Vector4(material.ColorDiffuse.R, material.ColorDiffuse.G, material.ColorDiffuse.B, material.ColorDiffuse.A) : new Vector4(1, 1, 1, 1);
                         }
                         geoMaterial.ColorEmissive = material.HasColorEmissive ? new Vector4(material.ColorEmissive.R, material.ColorEmissive.G, material.ColorEmissive.B, material.ColorEmissive.A) : new Vector4(0, 0, 0, 1);
-                        geoMaterial.SpecularPower = material.ShininessStrength;
-                        geoMaterial.SpecularArea = material.Shininess;
-                        geoMaterial.TextureSpecularIsRoughness = false;
+                        geoMaterial.TextureRoughnessIsSpecular = false;
                         geoMaterial.Opacity = material.HasOpacity ? material.Opacity : 1;
                         if(mesh.Name != null && mesh.Name.ToLower().Contains("_invisible"))
                         {
@@ -494,12 +502,12 @@ namespace KWEngine2.Model
                 else
                 {
                     geoMaterial.Name = "kw-undefined.";
+                    geoMaterial.Metalness = 0;
+                    geoMaterial.Roughness = 1;
                     geoMaterial.BlendMode = OpenTK.Graphics.OpenGL4.BlendingFactor.OneMinusSrcAlpha;
-                    geoMaterial.ColorDiffuse = new Vector4(1, 1, 1, 1);
+                    geoMaterial.ColorAlbedo = new Vector4(1, 1, 1, 1);
                     geoMaterial.ColorEmissive = new Vector4(0, 0, 0, 1);
-                    geoMaterial.SpecularArea = 1024;
-                    geoMaterial.SpecularPower = 0;
-                    geoMaterial.TextureSpecularIsRoughness = false;
+                    geoMaterial.TextureRoughnessIsSpecular = false;
                     if (mesh.Name != null && mesh.Name.ToLower().Contains("_invisible"))
                     {
                         geoMaterial.Opacity = 0;
@@ -510,11 +518,22 @@ namespace KWEngine2.Model
             // Process Textures:
             if (material != null)
             {
-                bool roughnessUsed = false;
+
+                // TODO: Metalness texture missing with assimp
+
+                bool specularUsed = false;
+                int roughnessTextureIndex = -1;
                 TextureSlot[] texturesOfMaterial = material.GetAllMaterialTextures();
-                foreach (TextureSlot slot in texturesOfMaterial)
+                for(int i = 0; i < texturesOfMaterial.Length; i++)
                 {
-                    if(slot.TextureType == TextureType.Shininess) // this is PBR Roughness
+                    TextureSlot slot = texturesOfMaterial[i];
+                    if (roughnessTextureIndex < 0 && slot.TextureType == Assimp.TextureType.Shininess)
+                    {
+                        roughnessTextureIndex = i;
+                    }
+
+
+                    if(slot.TextureType == Assimp.TextureType.Specular)
                     {
                         GeoTexture tex = new GeoTexture();
                         tex.UVTransform = new OpenTK.Vector2(1, 1);
@@ -529,7 +548,7 @@ namespace KWEngine2.Model
                             if (model.AssemblyMode == AssemblyMode.File)
                             {
                                 tex.OpenGLID = HelperTexture.LoadTextureForModelExternal(
-                                        FindTextureInSubs(StripPathFromFile(tex.Filename), model.PathAbsolute), true
+                                        FindTextureInSubs(StripPathFromFile(tex.Filename), model.PathAbsolute)
                                     );
                             }
                             else
@@ -539,22 +558,20 @@ namespace KWEngine2.Model
                             }
                             if (tex.OpenGLID > 0)
                             {
-                                tex.Type = GeoTexture.TexType.Specular;
+                                tex.Type = TextureType.Roughness;
                                 model.Textures.Add(tex.Filename, tex);
-                                geoMaterial.TextureSpecular = tex;
-                                geoMaterial.TextureSpecularIsRoughness = true;
-                                roughnessUsed = true;
+                                geoMaterial.TextureRoughness = tex;
+                                geoMaterial.TextureRoughnessIsSpecular = true;
+                                specularUsed = true;
                             }
                             else
                             {
-                                geoMaterial.TextureSpecular = tex;
-                                geoMaterial.TextureSpecularIsRoughness = false;
+                                geoMaterial.TextureRoughness = tex;
+                                geoMaterial.TextureRoughnessIsSpecular = false;
                                 tex.OpenGLID = KWEngine.TextureBlack;
                             }
                         }
-                        break;
                     }
-
                 }
 
                 
@@ -565,15 +582,15 @@ namespace KWEngine2.Model
                     tex.UVTransform = new OpenTK.Vector2(1, 1);
                     tex.Filename = material.TextureDiffuse.FilePath;
                     tex.UVMapIndex = material.TextureDiffuse.UVIndex;
-                    tex.Type = GeoTexture.TexType.Diffuse;
+                    tex.Type = TextureType.Albedo;
                     if (model.Textures.ContainsKey(tex.Filename))
                     {
                         tex.OpenGLID = model.Textures[tex.Filename].OpenGLID;
-                        geoMaterial.TextureDiffuse = tex;
+                        geoMaterial.TextureAlbedo = tex;
                     }
                     else if (CheckIfOtherModelsShareTexture(tex.Filename, model.Path, out GeoTexture sharedTexture))
                     {
-                        geoMaterial.TextureDiffuse = sharedTexture;
+                        geoMaterial.TextureAlbedo = sharedTexture;
                     }
                     else
                     {
@@ -590,16 +607,16 @@ namespace KWEngine2.Model
                         }
                         if (tex.OpenGLID > 0)
                         {
-                            geoMaterial.TextureDiffuse = tex;
+                            geoMaterial.TextureAlbedo = tex;
                             model.Textures.Add(tex.Filename, tex);
                         }
                         else
                         {
                             tex.OpenGLID = KWEngine.TextureDefault;
-                            geoMaterial.TextureDiffuse = tex;
+                            tex.UVTransform = new Vector2(100, 100);
+                            geoMaterial.TextureAlbedo = tex;
                         }
                     }
-                    
                 }
 
                 // Normal map texture
@@ -609,7 +626,7 @@ namespace KWEngine2.Model
                     tex.UVTransform = new OpenTK.Vector2(1, 1);
                     tex.Filename = material.TextureNormal.FilePath;
                     tex.UVMapIndex = material.TextureNormal.UVIndex;
-                    tex.Type = GeoTexture.TexType.Normal;
+                    tex.Type = TextureType.Normal;
                     if (model.Textures.ContainsKey(tex.Filename))
                     {
                         tex.OpenGLID = model.Textures[tex.Filename].OpenGLID;
@@ -637,31 +654,25 @@ namespace KWEngine2.Model
                             model.Textures.Add(tex.Filename, tex);
                             geoMaterial.TextureNormal = tex;
                         }
-                        else
-                        {
-                            tex.OpenGLID = KWEngine.TextureBlack;
-                            //geoMaterial.TextureNormal = tex;
-                        }
                     }
-                    
                 }
 
-                // Specular map texture
-                if (material.HasTextureSpecular && roughnessUsed == false)
+                // Roughness map texture
+                if (roughnessTextureIndex >= 0 && specularUsed == false)
                 {
                     GeoTexture tex = new GeoTexture();
                     tex.UVTransform = new OpenTK.Vector2(1, 1);
-                    tex.Filename = material.TextureSpecular.FilePath;
-                    tex.UVMapIndex = material.TextureSpecular.UVIndex;
-                    tex.Type = GeoTexture.TexType.Specular;
+                    tex.Filename = texturesOfMaterial[roughnessTextureIndex].FilePath;
+                    tex.UVMapIndex = texturesOfMaterial[roughnessTextureIndex].UVIndex;
+                    tex.Type = TextureType.Roughness;
                     if (model.Textures.ContainsKey(tex.Filename))
                     {
                         tex.OpenGLID = model.Textures[tex.Filename].OpenGLID;
-                        geoMaterial.TextureSpecular = tex;
+                        geoMaterial.TextureRoughness = tex;
                     }
                     else if (CheckIfOtherModelsShareTexture(tex.Filename, model.Path, out GeoTexture sharedTexture))
                     {
-                        geoMaterial.TextureSpecular = sharedTexture;
+                        geoMaterial.TextureRoughness = sharedTexture;
                     }
                     else
                     {
@@ -678,22 +689,16 @@ namespace KWEngine2.Model
                         }
                         if (tex.OpenGLID > 0)
                         {
-                            geoMaterial.TextureSpecular = tex;
-
+                            geoMaterial.TextureRoughness = tex;
                             model.Textures.Add(tex.Filename, tex);
-                        }
-                        else
-                        {
-                            tex.OpenGLID = KWEngine.TextureBlack;
-                            geoMaterial.TextureSpecular = tex;
                         }
                     }
                 }
                 else
                 {
-                    if(material.HasTextureSpecular && roughnessUsed)
+                    if(specularUsed)
                     {
-                        Debug.WriteLine("Skipping specular texture for " + model.Filename + " because roughness texture was found.");
+                        Debug.WriteLine("Skipping roughness texture for " + model.Filename + " because old style specular texture was found.");
                     }
                 }
 
@@ -704,7 +709,7 @@ namespace KWEngine2.Model
                     tex.UVTransform = new OpenTK.Vector2(1, 1);
                     tex.Filename = material.TextureEmissive.FilePath;
                     tex.UVMapIndex = material.TextureEmissive.UVIndex;
-                    tex.Type = GeoTexture.TexType.Emissive;
+                    tex.Type = TextureType.Emissive;
                     if (model.Textures.ContainsKey(tex.Filename))
                     {
                         tex.OpenGLID = model.Textures[tex.Filename].OpenGLID;
@@ -750,7 +755,7 @@ namespace KWEngine2.Model
                     tex.UVTransform = new OpenTK.Vector2(1, 1);
                     tex.Filename = material.TextureLightMap.FilePath;
                     tex.UVMapIndex = material.TextureLightMap.UVIndex;
-                    tex.Type = GeoTexture.TexType.Light;
+                    tex.Type = TextureType.Light;
                     if (model.Textures.ContainsKey(tex.Filename))
                     {
                         tex.OpenGLID = model.Textures[tex.Filename].OpenGLID;
@@ -777,11 +782,6 @@ namespace KWEngine2.Model
                         {
                             model.Textures.Add(tex.Filename, tex);
                             geoMaterial.TextureLight = tex;
-                        }
-                        else
-                        {
-                            tex.OpenGLID = KWEngine.TextureBlack;
-                            //geoMaterial.TextureLight = tex;
                         }
                     }                    
                 }

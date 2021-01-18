@@ -7,8 +7,10 @@ using static KWEngine2.KWEngine;
 
 namespace KWEngine2.Model
 {
+    /*
     internal class GeoModelCube
     {
+
         public float SpecularPower = 0;
         public float SpecularArea = 512;
 
@@ -72,7 +74,7 @@ namespace KWEngine2.Model
             }
         }
 
-        internal void SetTextureInternal(string texture, CubeSide side, TextureType type, bool isFile)
+        internal void SetTextureInternal(string texture, CubeSide side, TextureType type)
         {
             if (Owner == null || GLWindow.CurrentWindow.CurrentWorld == null)
             {
@@ -80,16 +82,17 @@ namespace KWEngine2.Model
             }
             if (this is GeoModelCube1)
             {
-                SetTextureAll(texture, type, isFile);
+                SetTextureAll(texture, type);
             }
             else if (side == CubeSide.All)
             {
-                SetTextureFront(texture, type, isFile);
-                SetTextureBack(texture, type, isFile);
-                SetTextureLeft(texture, type, isFile);
-                SetTextureRight(texture, type, isFile);
-                SetTextureTop(texture, type, isFile);
-                SetTextureBottom(texture, type, isFile);
+
+                SetTextureFront(texture, type);
+                SetTextureBack(texture, type);
+                SetTextureLeft(texture, type);
+                SetTextureRight(texture, type);
+                SetTextureTop(texture, type);
+                SetTextureBottom(texture, type);
             }
             else if (side == CubeSide.Front)
             {
@@ -117,12 +120,12 @@ namespace KWEngine2.Model
             }
         }
 
-        public void SetTexture(string texture, CubeSide side, TextureType type, bool isFile)
+        public void SetTexture(string texture, CubeSide side, TextureType type)
         {
-            SetTextureInternal(texture, side, type, isFile);
+            SetTextureInternal(texture, side, type);
         }
 
-        private void SetTextureAll(string texture, TextureType type, bool isFile)
+        private void SetTextureAll(string texture, TextureType type)
         {
             int texAll;
            
@@ -133,11 +136,11 @@ namespace KWEngine2.Model
             else
             {
                 Assembly a = Assembly.GetEntryAssembly();
-                texAll = isFile ? HelperTexture.LoadTextureForModelExternal(texture) : HelperTexture.LoadTextureForModelInternal(texture);
+                texAll = HelperTexture.LoadTextureForModelExternal(texture);
                 KWEngine.CustomTextures[GLWindow.CurrentWindow.CurrentWorld].Add(texture, texAll);
             }
 
-            if (type == TextureType.Diffuse)
+            if (type == TextureType.Albedo)
             {   
                 EditTextureObject(ref GeoTextureFront, texAll, type, texture);
                 EditTextureObject(ref GeoTextureBack, texAll, type, texture);
@@ -180,7 +183,7 @@ namespace KWEngine2.Model
                 KWEngine.CustomTextures[GLWindow.CurrentWindow.CurrentWorld].Add(texture, texId);
             }
 
-            if(type == TextureType.Diffuse)
+            if(type == TextureType.Albedo)
                 EditTextureObject(ref GeoTextureFront, texId, type, texture);
             else if(type == TextureType.Normal)
                 EditTextureObject(ref GeoTextureFrontNormal, texId, type, texture);
@@ -207,7 +210,7 @@ namespace KWEngine2.Model
                 KWEngine.CustomTextures[GLWindow.CurrentWindow.CurrentWorld].Add(texture, texId);
             }
 
-            if (type == TextureType.Diffuse)
+            if (type == TextureType.Albedo)
                 EditTextureObject(ref GeoTextureBack, texId, type, texture);
             else if (type == TextureType.Normal)
                 EditTextureObject(ref GeoTextureBackNormal, texId, type, texture);
@@ -231,7 +234,7 @@ namespace KWEngine2.Model
                 KWEngine.CustomTextures[GLWindow.CurrentWindow.CurrentWorld].Add(texture, texId);
             }
 
-            if (type == TextureType.Diffuse)
+            if (type == TextureType.Albedo)
                 EditTextureObject(ref GeoTextureLeft, texId, type, texture);
             else if (type == TextureType.Normal)
                 EditTextureObject(ref GeoTextureLeftNormal, texId, type, texture);
@@ -255,7 +258,7 @@ namespace KWEngine2.Model
                 KWEngine.CustomTextures[GLWindow.CurrentWindow.CurrentWorld].Add(texture, texId);
             }
 
-            if (type == TextureType.Diffuse)
+            if (type == TextureType.Albedo)
                 EditTextureObject(ref GeoTextureRight, texId, type, texture);
             else if (type == TextureType.Normal)
                 EditTextureObject(ref GeoTextureRightNormal, texId, type, texture);
@@ -276,7 +279,7 @@ namespace KWEngine2.Model
                 KWEngine.CustomTextures[GLWindow.CurrentWindow.CurrentWorld].Add(texture, texId);
             }
 
-            if (type == TextureType.Diffuse)
+            if (type == TextureType.Albedo)
                 EditTextureObject(ref GeoTextureTop, texId, type, texture);
             else if (type == TextureType.Normal)
                 EditTextureObject(ref GeoTextureTopNormal, texId, type, texture);
@@ -296,7 +299,7 @@ namespace KWEngine2.Model
                 texId = isFile ? HelperTexture.LoadTextureForModelExternal(texture) : HelperTexture.LoadTextureForModelInternal(texture);
             }
 
-            if (type == TextureType.Diffuse)
+            if (type == TextureType.Albedo)
                 EditTextureObject(ref GeoTextureBottom, texId, type, texture);
             else if (type == TextureType.Normal)
                 EditTextureObject(ref GeoTextureBottomNormal, texId, type, texture);
@@ -306,7 +309,7 @@ namespace KWEngine2.Model
 
         private void EditTextureObject(ref GeoTexture tex, int texId, TextureType type, string name)
         {
-            if (type == TextureType.Diffuse)
+            if (type == TextureType.Albedo)
             {
                 
                 tex.Filename = name;
@@ -334,4 +337,5 @@ namespace KWEngine2.Model
         }
 
     }
+    */
 }

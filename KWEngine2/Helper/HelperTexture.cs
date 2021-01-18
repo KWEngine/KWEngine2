@@ -11,6 +11,112 @@ namespace KWEngine2.Helper
 {
     internal static class HelperTexture
     {
+        public static int CreateEmptyCubemapTexture()
+        {
+            int texID = GL.GenTexture();
+            GL.BindTexture(TextureTarget.TextureCubeMap, texID);
+            byte[] pxColor = new byte[] { 0, 0, 0 };
+
+            GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX, 0, PixelInternalFormat.Rgb, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgr, PixelType.UnsignedByte, pxColor);
+            GL.TexImage2D(TextureTarget.TextureCubeMapNegativeX, 0, PixelInternalFormat.Rgb, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgr, PixelType.UnsignedByte, pxColor);
+            GL.TexImage2D(TextureTarget.TextureCubeMapPositiveY, 0, PixelInternalFormat.Rgb, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgr, PixelType.UnsignedByte, pxColor);
+            GL.TexImage2D(TextureTarget.TextureCubeMapNegativeY, 0, PixelInternalFormat.Rgb, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgr, PixelType.UnsignedByte, pxColor);
+            GL.TexImage2D(TextureTarget.TextureCubeMapPositiveZ, 0, PixelInternalFormat.Rgb, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgr, PixelType.UnsignedByte, pxColor);
+            GL.TexImage2D(TextureTarget.TextureCubeMapNegativeZ, 0, PixelInternalFormat.Rgb, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgr, PixelType.UnsignedByte, pxColor);
+
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+
+            GL.BindTexture(TextureTarget.TextureCubeMap, 0);
+
+            return texID;
+        }
+
+        public static int CreateEmptyDepthTexture()
+        {
+            int texID = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, texID);
+
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.DepthComponent, PixelType.Float, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            HelperGL.CheckGLErrors();
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+
+            return texID;
+        }
+
+        public static int LoadTextureCompressedNoMipMap(Stream s)
+        {
+            int texID = -1;
+            bool error = false;
+            using (HelperDDS dds = new HelperDDS(s))
+            {
+                if (dds.DDSPixelFormat == HelperDDS.PixelFormat.DXT1 || dds.DDSPixelFormat == HelperDDS.PixelFormat.DXT3 || dds.DDSPixelFormat == HelperDDS.PixelFormat.DXT5)
+                {
+
+                    texID = GL.GenTexture();
+
+                    GL.BindTexture(TextureTarget.Texture2D, texID);
+                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
+                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, 0);
+                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+                    GL.CompressedTexImage2D(TextureTarget.Texture2D, 0, dds.DDSPixelFormat == HelperDDS.PixelFormat.DXT1 ?  InternalFormat.CompressedRgbaS3tcDxt1Ext : dds.DDSPixelFormat == HelperDDS.PixelFormat.DXT3 ? InternalFormat.CompressedRgbaS3tcDxt3Ext : InternalFormat.CompressedRgbaS3tcDxt5Ext, dds.BitmapImage.Width, dds.BitmapImage.Height, 0, dds.Data.Length, dds.Data);
+
+                    GL.BindTexture(TextureTarget.Texture2D, 0);
+                }
+                else
+                {
+                    error = true;
+                }
+            }
+            if (error)
+                throw new Exception("Unsupported compressed texture format: only DXT1, DXT3 and DXT5 are supported.");
+            return texID;
+        }
+        public static int LoadTextureCompressedNoMipMap(string fileName)
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            string resourceName = "KWEngine2.Assets.Textures." + fileName;
+
+            int texID = -1;
+            bool error = false;
+            using (Stream s = assembly.GetManifestResourceStream(resourceName))
+            {
+                using(HelperDDS dds = new HelperDDS(s))
+                {
+                    if (dds.DDSPixelFormat == HelperDDS.PixelFormat.DXT1 || dds.DDSPixelFormat == HelperDDS.PixelFormat.DXT3 || dds.DDSPixelFormat == HelperDDS.PixelFormat.DXT5)
+                    {
+                        texID = GL.GenTexture();
+                        GL.BindTexture(TextureTarget.Texture2D, texID);
+                        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
+                        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, 0);
+                        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+                        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+                        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+                        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+                        GL.CompressedTexImage2D(TextureTarget.Texture2D, 0, dds.DDSPixelFormat == HelperDDS.PixelFormat.DXT1 ? InternalFormat.CompressedRgbaS3tcDxt1Ext : dds.DDSPixelFormat == HelperDDS.PixelFormat.DXT3 ? InternalFormat.CompressedRgbaS3tcDxt3Ext : InternalFormat.CompressedRgbaS3tcDxt5Ext, dds.BitmapImage.Width, dds.BitmapImage.Height, 0, dds.Data.Length, dds.Data);
+
+                        GL.BindTexture(TextureTarget.Texture2D, 0);
+                    }
+                    else
+                    {
+                        error = true;
+                    }
+                }
+                if (error)
+                    throw new Exception("Unsupported compressed texture format: only DXT1, DXT3 and DXT5 are supported.");
+            }
+            return texID;
+        }
 
         public static int RoundToPowerOf2(int value)
         {
@@ -79,7 +185,7 @@ namespace KWEngine2.Helper
             return LoadTextureFromAssembly(resourceName, assembly);
         }
 
-        public static int LoadTextureForModelExternal(string filename, bool convertRoughnessToSpecular = false)
+        public static int LoadTextureForModelExternal(string filename)
         {
             if (!File.Exists(filename))
             {
@@ -129,7 +235,7 @@ namespace KWEngine2.Helper
             return texID;
         }
 
-        public static int LoadTextureForModelGLB(byte[] rawTextureData, bool convertRoughnessToSpecular = false)
+        public static int LoadTextureForModelGLB(byte[] rawTextureData)
         {
             int texID;
             try

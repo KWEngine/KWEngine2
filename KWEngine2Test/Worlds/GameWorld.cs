@@ -59,11 +59,11 @@ namespace KWEngine2Test.Worlds
             KWEngine.LoadModelFromFile("Panel", @".\models\spacepanel\scifipanel.obj");
             KWEngine.LoadModelFromFile("Spaceship", @".\models\spaceship\spaceship4.obj");
 
-            KWEngine.BuildTerrainModel("Terrain", @".\textures\heightmap.png", @".\textures\sand_diffuse.png", 100, 2, 100, 5, 5);
+            KWEngine.BuildTerrainModel("Terrain", @".\textures\heightmap.png", @".\textures\sand_diffuse.jpg", 100, 2, 100, 5, 5);
             KWEngine.ShadowMapCoefficient = 0.0005f;
             FOVShadow = 40f;
             SetSunPosition(250, 250, -250);
-            SetSunColor(0.25f, 0.5f, 1, 0.75f);
+            SetSunColor(0.25f, 0.5f, 1, 0.7f);
 
             SunAmbientFactor = 0.2f;
             SetCameraPosition(100, 100, 100);
@@ -83,7 +83,7 @@ namespace KWEngine2Test.Worlds
             floor.SetModel("Terrain");
             floor.IsCollisionObject = true;
             floor.IsShadowCaster = true;
-            floor.SetTexture(@".\textures\sand_normal.png", KWEngine.TextureType.Normal);
+            floor.SetTexture(@".\textures\sand_normal.jpg", TextureType.Normal);
             AddGameObject(floor);
             
             Immovable wallLeft1 = new Immovable();
@@ -133,14 +133,14 @@ namespace KWEngine2Test.Worlds
             p.IsCollisionObject = true;
             p.IsPickable = true;
             p.TurnTowardsXZ(new Vector3(0, 0, 0));
-            p.SetSpecularOverride(true, 8, 32);
+            //p.SetSpecularOverride(true, 8, 32);
             AddGameObject(p);
             //SetFirstPersonObject(p);
 
             p._flashlight = new Flashlight();
             p._flashlight.Type = LightType.DirectionalShadow;
             p._flashlight.SetDistanceMultiplier(2);
-            p._flashlight.SetColor(1, 0.75f, 0, 1);
+            p._flashlight.SetColor(1, 0.75f, 0, 5f);
             p._flashlight.SetFOVShadow(180);
             AddLightObject(p._flashlight);
 
@@ -149,7 +149,7 @@ namespace KWEngine2Test.Worlds
             lab.SetModel("Lab");
             lab.IsCollisionObject = true;
             lab.IsShadowCaster = true;
-            lab.SetSpecularOverride(true, 0, 2048);
+            //lab.SetSpecularOverride(true, 0, 2048);
             AddGameObject(lab);
 
             Panel panel = new Panel();
@@ -157,8 +157,8 @@ namespace KWEngine2Test.Worlds
             panel.SetModel("Panel");
             panel.SetPosition(10, 0.25f, -5);
             panel.SetScale(3);
-            panel.SetSpecularOverride(true, 2, 1024);
-            panel.SetTextureForMesh(0, @".\models\spacepanel\scifipanel2.png");
+            //panel.SetSpecularOverride(true, 2, 1024);
+            //panel.SetTextureForMesh(0, @".\models\spacepanel\scifipanel2.png");
             panel.IsShadowCaster = true;
             panel.IsPickable = true;
             panel.IsCollisionObject = true;
@@ -166,7 +166,7 @@ namespace KWEngine2Test.Worlds
             
             PanelLight pLight = new PanelLight();
             pLight.Type = LightType.Directional;
-            pLight.SetColor(1, 1, 1, 1);
+            pLight.SetColor(1, 1, 1, 1f);
             pLight.SetPosition(10, 5, -5);
             pLight.SetTarget(10, 0, -5);
             pLight.SetDistanceMultiplier(2f);

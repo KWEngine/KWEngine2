@@ -11,10 +11,9 @@ namespace KWEngine2.Model
     /// </summary>
     public class GeoModel
     {
-        /// <summary>
-        /// Aktuell immer false.
-        /// </summary>
-        public bool PBRWorkflow { get; internal set; } = false;
+
+        internal bool IsKWCube6 { get; set; } = false;
+
 
         /// <summary>
         /// Wurzelknoten
@@ -84,8 +83,6 @@ namespace KWEngine2.Model
             }
         }
 
-        //internal GeoTerrain _terrain { get; set; } = null;
-
         internal List<string> BoneNames { get; set; } = new List<string>();
         internal List<GeoNode> NodesWithoutHierarchy = new List<GeoNode>();
         internal Dictionary<string, GeoTexture> Textures { get; set; }
@@ -133,5 +130,7 @@ namespace KWEngine2.Model
         }
 
         internal int GLBOffset { get; set; } = -1;
+
+        internal bool IsGLTF { get; set; } = false;
     }
 }

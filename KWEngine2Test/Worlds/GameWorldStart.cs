@@ -118,7 +118,7 @@ namespace KWEngine2Test.Worlds
             _button4.SetColor(0, 1f, 1f, 1);
             AddHUDObject(_button4);
 
-            DebugShowPerformanceInTitle = KWEngine.PerformanceUnit.FramesPerSecond;
+            DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
         }
 
     }

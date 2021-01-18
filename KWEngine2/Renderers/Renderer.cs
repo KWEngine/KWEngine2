@@ -52,12 +52,16 @@ namespace KWEngine2.Renderers
         protected int mUniform_BloomTextureScene = -1;
         protected int mUniform_Resolution = -1;
         protected int mUniform_TextureNormalMap = -1;
-        protected int mUniform_TextureSpecularMap = -1;
-        protected int mUniform_TextureSpecularIsRoughness = -1;
+        protected int mUniform_TextureRoughnessMap = -1;
+        protected int mUniform_TextureMetalnessMap = -1;
+        protected int mUniform_TextureRoughnessIsSpecular = -1;
+        protected int mUniform_Roughness = -1;
+        protected int mUniform_Metalness = -1;
         protected int mUniform_TextureEmissiveMap = -1;
         protected int mUniform_TextureUse = -1;
         protected int mUniform_TextureUseNormalMap = -1;
-        protected int mUniform_TextureUseSpecularMap = -1;
+        protected int mUniform_TextureUseRoughnessMap = -1;
+        protected int mUniform_TextureUseMetalnessMap = -1;
         protected int mUniform_TextureUseEmissiveMap = -1;
         protected int mUniform_TextureIsSkybox = -1;
         protected int mUniform_TextureShadowMap = -1;
@@ -87,6 +91,8 @@ namespace KWEngine2.Renderers
 
         protected int mUniform_TextureLightMap = -1;
         protected int mUniform_TextureUseLightMap = -1;
+        protected int mUniform_TextureHUDOffset = -1;
+        protected int mUniform_TextureHUDIsText = -1;
 
         public Renderer()
         {
@@ -304,12 +310,12 @@ namespace KWEngine2.Renderers
 
         public int GetUniformHandleUseSpecularMap()
         {
-            return mUniform_TextureUseSpecularMap;
+            return mUniform_TextureUseRoughnessMap;
         }
 
         public int GetUniformHandleSpecularMap()
         {
-            return mUniform_TextureSpecularMap;
+            return mUniform_TextureRoughnessMap;
         }
 
         public int GetUniformHandleUseNormalMap()

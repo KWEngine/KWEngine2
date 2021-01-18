@@ -15,7 +15,7 @@ namespace KWEngine2Test.Worlds
      
         public override void Prepare()
         {
-            KWEngine.DebugShowPerformanceInTitle = KWEngine.PerformanceUnit.FrameTimeInMilliseconds;
+            KWEngine.DebugShowPerformanceInTitle = PerformanceUnit.FrameTimeInMilliseconds;
 
             FOV = 90;
             Player p = new Player();

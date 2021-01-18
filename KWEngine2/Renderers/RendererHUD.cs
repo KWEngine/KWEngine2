@@ -58,6 +58,8 @@ namespace KWEngine2.Renderers
             mUniform_Texture = GL.GetUniformLocation(mProgramId, "uTextureDiffuse");
             mUniform_TintColor = GL.GetUniformLocation(mProgramId, "uTintColor");
             mUniform_Glow = GL.GetUniformLocation(mProgramId, "uGlow");
+            mUniform_TextureHUDOffset = GL.GetUniformLocation(mProgramId, "uOffset");
+            mUniform_TextureHUDIsText = GL.GetUniformLocation(mProgramId, "uIsText");
 
         }
 
@@ -68,7 +70,7 @@ namespace KWEngine2.Renderers
 
         internal override void Draw(GameObject g, ref Matrix4 viewProjection)
         {
-            
+            throw new NotImplementedException();
         }
 
         internal override void Draw(ParticleObject po, ref Matrix4 viewProjection)
@@ -95,20 +97,23 @@ namespace KWEngine2.Renderers
 
                 lock (ho._modelMatrices)
                 {
+                    GL.ActiveTexture(TextureUnit.Texture0);
+                    if(ho._type == HUDObjectType.Text)
+                        GL.BindTexture(TextureTarget.Texture2D, KWEngine.FontTextureArray[KWEngine.Font]);
+                    else
+                        GL.BindTexture(TextureTarget.Texture2D, ho._textureId);
+                    GL.Uniform1(mUniform_Texture, 0);
+
                     for (int i = 0; i < ho._positions.Count; i++)
                     {
-
                         Matrix4 mvp = ho._modelMatrices[i] * viewProjection;
                         GL.UniformMatrix4(mUniform_MVP, false, ref mvp);
-
-                        GL.ActiveTexture(TextureUnit.Texture0);
-                        GL.BindTexture(TextureTarget.Texture2D, ho._textureIds[i]);
-                        GL.Uniform1(mUniform_Texture, 0);
-
+                        GL.Uniform1(mUniform_TextureHUDOffset, ho._offsets[i]);
+                        GL.Uniform1(mUniform_TextureHUDIsText, ho._type == HUDObjectType.Text ? 1 : 0);
                         GL.DrawElements(mesh.Primitive, mesh.IndexCount, DrawElementsType.UnsignedInt, 0);
-
-                        GL.BindTexture(TextureTarget.Texture2D, 0);
+                        
                     }
+                    GL.BindTexture(TextureTarget.Texture2D, 0);
                 }
             }
 
