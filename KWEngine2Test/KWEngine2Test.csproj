@@ -70,9 +70,9 @@
     <Compile Include="Objects\SweepAndPruneTest\SweepCube.cs" />
     <Compile Include="Worlds\GameWorldPBRTest.cs" />
     <Compile Include="Worlds\GameWorldSchool.cs" />
-    <Compile Include="Worlds\GameWorldJumpAndRun.cs" />
-    <Compile Include="Worlds\GameWorldSpaceInvaders.cs" />
-    <Compile Include="Worlds\GameWorldArena.cs" />
+    <Compile Include="Worlds\GameWorld04.cs" />
+    <Compile Include="Worlds\GameWorld03.cs" />
+    <Compile Include="Worlds\GameWorld02.cs" />
     <Compile Include="Worlds\GameWorldSweepAndPruneTest.cs" />
     <Compile Include="Worlds\GameWorldStart.cs" />
     <Compile Include="Objects\Cube.cs" />
@@ -82,7 +82,7 @@
     <Compile Include="Objects\Main\PanelLight.cs" />
     <Compile Include="Objects\Main\Player.cs" />
     <Compile Include="GameWindow.cs" />
-    <Compile Include="Worlds\GameWorld.cs" />
+    <Compile Include="Worlds\GameWorld01.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -128,27 +128,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Models\Forum\forum_upper.fbx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Models\gltftest1.glb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Models\gltftest2.glb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Models\gltftest3.glb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Models\gltftest3.gltf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Models\gltftest3b.bin">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Models\gltftest3b.gltf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Models\gltftest3c.glb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Models\gltftest_alltext\gltftest_alltext.gltf">
@@ -524,9 +503,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Models\SpacePanel\scifipanel.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Models\SpacePanel\scifipanel2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Models\SpacePedestal\pedestal.png">

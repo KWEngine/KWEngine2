@@ -7,8 +7,9 @@ namespace KWEngine2Test
     class GameWindow : GLWindow
     {
         public GameWindow()
-            : base(1280, 720, OpenTK.GameWindowFlags.Default, 1, true, false, 1)
+            : base(1280, 720, OpenTK.GameWindowFlags.Default, 1, true, false, 4)
         {
+            KWEngine.PostProcessQuality = PostProcessingQuality.Standard;
             SetWorld(new GameWorldStart());
         }
     }

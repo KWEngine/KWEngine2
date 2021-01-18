@@ -8,7 +8,7 @@ using KWEngine2Test.Objects.Main;
 
 namespace KWEngine2Test.Worlds
 {
-    class GameWorld : World
+    class GameWorld01 : World
     {
         private long _timeStamp = 0;
         private long _timeStampExp = 0;
@@ -65,7 +65,7 @@ namespace KWEngine2Test.Worlds
             SetSunPosition(250, 250, -250);
             SetSunColor(0.25f, 0.5f, 1, 0.7f);
 
-            SunAmbientFactor = 0.3f;
+            SunAmbientFactor = 0.1f;
             SetCameraPosition(100, 100, 100);
             WorldDistance = 1000;
 
@@ -139,7 +139,7 @@ namespace KWEngine2Test.Worlds
 
             p._flashlight = new Flashlight();
             p._flashlight.Type = LightType.DirectionalShadow;
-            p._flashlight.SetDistanceMultiplier(2);
+            p._flashlight.SetDistanceMultiplier(5);
             p._flashlight.SetColor(1, 0.75f, 0, 5f);
             p._flashlight.SetFOVShadow(180);
             AddLightObject(p._flashlight);
@@ -169,7 +169,7 @@ namespace KWEngine2Test.Worlds
             pLight.SetColor(1, 1, 1, 1);
             pLight.SetPosition(10, 5, -5);
             pLight.SetTarget(10, 0, -5);
-            pLight.SetDistanceMultiplier(2f);
+            pLight.SetDistanceMultiplier(5f);
             AddLightObject(pLight);
             
 

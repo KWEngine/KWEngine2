@@ -291,7 +291,7 @@ void main()
 	color.w = uOpacity;
 
 	vec3 addedBloom = vec3(max(rgbFragment.x - 1.0, 0.0), max(rgbFragment.y - 1.0, 0.0), max(rgbFragment.z - 1.0, 0.0));
-	addedBloom /= 16.0;
+	addedBloom /= 10.0;
 	bloom.x = addedBloom.x + uGlow.x * uGlow.w + uOutline.x * dotOutline * 0.15 + emissive.x * 0.125;
 	bloom.y = addedBloom.y + uGlow.y * uGlow.w + uOutline.y * dotOutline * 0.15 + emissive.y * 0.125;
 	bloom.z = addedBloom.z + uGlow.z * uGlow.w + uOutline.z * dotOutline * 0.15 + emissive.z * 0.125;

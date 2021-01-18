@@ -9,7 +9,7 @@ using KWEngine2Test.Objects.SpaceInvaders;
 
 namespace KWEngine2Test.Worlds
 {
-    class GameWorldSpaceInvaders : World
+    class GameWorld03 : World
     {
         private long _timestampLast = 0;
         private Player _p;

@@ -176,7 +176,7 @@ namespace KWEngine2.Renderers
 
                 // Set global roughness/metalness:
                 GL.Uniform1(mUniform_Roughness, g._roughnessOverride[0] ? g._roughness[0] : 1);
-                GL.Uniform1(mUniform_Metalness, g._metalnessOverride[0] ? g._metalness[0] : 1);
+                GL.Uniform1(mUniform_Metalness, g._metalnessOverride[0] ? g._metalness[0] : 0);
 
                 // Camera
                 if (!CurrentWorld.IsFirstPersonMode)

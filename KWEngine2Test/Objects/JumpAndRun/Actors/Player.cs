@@ -91,7 +91,7 @@ namespace KWEngine2Test.Objects.JumpAndRun.Actors
 
             if (Position.Y < -5)
             {
-                (CurrentWorld as GameWorldJumpAndRun).Reset();
+                (CurrentWorld as GameWorld04).Reset();
                 _momentum = 0;
             }
         }

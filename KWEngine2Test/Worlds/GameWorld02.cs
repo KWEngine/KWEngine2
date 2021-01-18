@@ -11,7 +11,7 @@ using KWEngine2.Helper;
 
 namespace KWEngine2Test.Worlds
 {
-    class GameWorldArena : World
+    class GameWorld02 : World
     {
         private Player _player = new Player();
 
@@ -29,7 +29,7 @@ namespace KWEngine2Test.Worlds
             FOV = 90;
             SetSunPosition(200, 200, 50);
             SetSunColor(1, 0.75f, 0.5f, 0.7f);
-            SetSunAmbientFactor(0.25f);
+            SetSunAmbientFactor(0.2f);
             KWEngine.ShadowMapCoefficient = 0.00075f;
            
             
@@ -55,8 +55,13 @@ namespace KWEngine2Test.Worlds
             floor.SetTexture(@".\textures\sand_normal.jpg", TextureType.Normal);
             AddGameObject(floor);
 
-            
-            
+            Immovable arenaOuter = new Immovable();
+            arenaOuter.SetModel("ArenaOuter");
+            arenaOuter.IsCollisionObject = true;
+            arenaOuter.IsShadowCaster = true;
+            AddGameObject(arenaOuter);
+
+
             Immovable arenaPlatforms = new Immovable();
             arenaPlatforms.SetModel("ArenaPlatforms");
             arenaPlatforms.IsCollisionObject = true;
@@ -69,7 +74,6 @@ namespace KWEngine2Test.Worlds
             testPlatform.SetPosition(15, 1.5f, 0);
             testPlatform.IsCollisionObject = true;
             testPlatform.IsShadowCaster = true;
-            //testPlatform.SetGlow(1, 0, 0, 1);
             AddGameObject(testPlatform);
             
 

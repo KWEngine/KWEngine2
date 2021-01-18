@@ -14,6 +14,9 @@ namespace KWEngine2Test.Worlds
 
         public override void Act(KeyboardState kb, MouseState ms, float deltaTimeFactor)
         {
+            if (kb[Key.Escape] && GetCurrentTimeInMilliseconds() > 500)
+                CurrentWindow.Close();
+
             if (_button == null)
                 return;
 
@@ -23,7 +26,7 @@ namespace KWEngine2Test.Worlds
 
                 if (ms.LeftButton == ButtonState.Pressed)
                 {
-                    CurrentWindow.SetWorld(new GameWorld());
+                    CurrentWindow.SetWorld(new GameWorld01());
                     return;
                 }
             }
@@ -39,7 +42,7 @@ namespace KWEngine2Test.Worlds
 
                 if (ms.LeftButton == ButtonState.Pressed)
                 {
-                    CurrentWindow.SetWorld(new GameWorldArena());
+                    CurrentWindow.SetWorld(new GameWorld02());
                     return;
                 }
             }
@@ -54,7 +57,7 @@ namespace KWEngine2Test.Worlds
 
                 if (ms.LeftButton == ButtonState.Pressed)
                 {
-                    CurrentWindow.SetWorld(new GameWorldSpaceInvaders());
+                    CurrentWindow.SetWorld(new GameWorld03());
                     return;
                 }
             }
@@ -69,7 +72,7 @@ namespace KWEngine2Test.Worlds
 
                 if (ms.LeftButton == ButtonState.Pressed)
                 {
-                    CurrentWindow.SetWorld(new GameWorldJumpAndRun());
+                    CurrentWindow.SetWorld(new GameWorld04());
                     return;
                 }
             }
@@ -81,9 +84,6 @@ namespace KWEngine2Test.Worlds
      
         public override void Prepare()
         {
-            //KWEngine.PostProcessQuality = KWEngine.PostProcessingQuality.Standard;
-            //KWEngine.MouseSensitivity = -0.001f;
-
             int imageWidth = 190;
             int imageHeight = 190;
             int width = CurrentWindow.Width;

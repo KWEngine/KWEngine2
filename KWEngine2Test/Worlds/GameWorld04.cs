@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace KWEngine2Test.Worlds
 {
-    class GameWorldJumpAndRun : World
+    class GameWorld04 : World
     {
         private Player _player;
 

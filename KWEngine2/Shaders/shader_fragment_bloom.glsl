@@ -10,6 +10,8 @@ uniform float uBloomRadius;
 out		vec4 color;
 
 float weight[5] = float[] (0.15, 0.4, 0.27, 0.18, 0.09);
+//float weight[11] = float[] (0.4, 0.36, 0.32, 0.27, 0.24, 0.20, 0.16, 0.11, 0.06, 0.02, 0.008);
+//float weight[4] = float[] (0.4, 0.3, 0.2, 0.1);
 
 
 void main()
