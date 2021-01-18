@@ -65,7 +65,7 @@ namespace KWEngine2Test.Worlds
             SetSunPosition(250, 250, -250);
             SetSunColor(0.25f, 0.5f, 1, 0.7f);
 
-            SunAmbientFactor = 0.2f;
+            SunAmbientFactor = 0.3f;
             SetCameraPosition(100, 100, 100);
             WorldDistance = 1000;
 
@@ -166,7 +166,7 @@ namespace KWEngine2Test.Worlds
             
             PanelLight pLight = new PanelLight();
             pLight.Type = LightType.Directional;
-            pLight.SetColor(1, 1, 1, 1f);
+            pLight.SetColor(1, 1, 1, 1);
             pLight.SetPosition(10, 5, -5);
             pLight.SetTarget(10, 0, -5);
             pLight.SetDistanceMultiplier(2f);

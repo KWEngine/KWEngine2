@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Input;
 using KWEngine2Test.Objects.Arena;
+using KWEngine2.Helper;
 
 namespace KWEngine2Test.Worlds
 {
@@ -21,40 +22,14 @@ namespace KWEngine2Test.Worlds
                 CurrentWindow.SetWorld(new GameWorldStart());
                 return;
             }
-
-            if (kb[Key.P])
-            {
-                KWEngine.GlowRadius += 0.01f;
-                Console.WriteLine(KWEngine.GlowRadius);
-            }
-            if (kb[Key.O])
-            {
-                KWEngine.GlowRadius -= 0.01f;
-                Console.WriteLine(KWEngine.GlowRadius);
-            }
-
-            if (kb[Key.J])
-            {
-                KWEngine.PostProcessQuality = KWEngine.PostProcessingQuality.Low;
-                Console.WriteLine("Low");
-            }
-            if (kb[Key.K])
-            {
-                KWEngine.PostProcessQuality = KWEngine.PostProcessingQuality.Standard;
-                Console.WriteLine("Medium");
-            }
-            if (kb[Key.L])
-            {
-                KWEngine.PostProcessQuality = KWEngine.PostProcessingQuality.High;
-                Console.WriteLine("High");
-            }
         }
 
         public override void Prepare()
         {
             FOV = 90;
             SetSunPosition(200, 200, 50);
-            SetSunColor(1, 0.75f, 0.5f, 1);
+            SetSunColor(1, 0.75f, 0.5f, 0.7f);
+            SetSunAmbientFactor(0.25f);
             KWEngine.ShadowMapCoefficient = 0.00075f;
            
             
@@ -62,12 +37,13 @@ namespace KWEngine2Test.Worlds
             KWEngine.LoadModelFromFile("ArenaPlatform", @".\Models\ArenaOuter\ArenaPlatform.obj");
             KWEngine.LoadModelFromFile("ArenaPlatforms", @".\Models\ArenaOuter\ArenaPlatforms.fbx");
 
-            KWEngine.BuildTerrainModel("Arena", @".\textures\heightmapArena.png", @".\textures\sand_diffuse.png", 150, 10, 150, 7.5f, 7.5f);
+            KWEngine.BuildTerrainModel("Arena", @".\textures\heightmapArena.png", @".\textures\sand_diffuse.jpg", 150, 10, 150, 7.5f, 7.5f);
             Immovable terra = new Immovable();
             terra.SetModel("Arena");
             terra.SetPosition(0, -0.5f, 0);
-            terra.SetTexture(@".\textures\sand_normal.png", KWEngine.TextureType.Normal);
+            terra.SetTexture(@".\textures\sand_normal.jpg", TextureType.Normal);
             AddGameObject(terra);
+
 
             Immovable floor = new Immovable();
             floor.SetModel("KWCube");
@@ -75,16 +51,12 @@ namespace KWEngine2Test.Worlds
             floor.SetPosition(0, -2.5f, 0);
             floor.SetTextureRepeat(5, 5);
             floor.IsCollisionObject = true;
-            floor.SetTexture(@".\textures\sand_diffuse.png");
-            floor.SetTexture(@".\textures\sand_normal.png", KWEngine.TextureType.Normal);
+            floor.SetTexture(@".\textures\sand_diffuse.jpg");
+            floor.SetTexture(@".\textures\sand_normal.jpg", TextureType.Normal);
             AddGameObject(floor);
 
-            Immovable arenaOuter = new Immovable();
-            arenaOuter.SetModel("ArenaOuter");
-            arenaOuter.IsCollisionObject = true;
-            arenaOuter.IsShadowCaster = true;
-            AddGameObject(arenaOuter);
-
+            
+            
             Immovable arenaPlatforms = new Immovable();
             arenaPlatforms.SetModel("ArenaPlatforms");
             arenaPlatforms.IsCollisionObject = true;
@@ -112,8 +84,8 @@ namespace KWEngine2Test.Worlds
             AddGameObject(_player);
             SetFirstPersonObject(_player, 230);
 
-            SetTextureSkybox(@".\textures\skybox1.jpg", 1, 0.8f, 0.6f);
-            DebugShowPerformanceInTitle = KWEngine.PerformanceUnit.FramesPerSecond;
+            SetTextureSkybox(@".\textures\skybox1.jpg");
+            DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
 
         }
     }
