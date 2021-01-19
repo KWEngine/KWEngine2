@@ -93,7 +93,7 @@ namespace KWEngine2Test.Worlds
             s.SetTexture(@".\textures\Metal022_1K_Normal.jpg", TextureType.Normal);
             s.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
             s.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
-            s.SetGlow(1, 1, 0, 1);
+            //s.SetGlow(1, 1, 0, 1);
             AddGameObject(s);
 
             Sphere s2 = new Sphere();
@@ -104,7 +104,7 @@ namespace KWEngine2Test.Worlds
             s2.SetTexture(@".\textures\Metal022_1K_Normal.jpg", TextureType.Normal);
             s2.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
             s2.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
-            s2.SetGlow(0, 0, 1, 1);
+            //s2.SetGlow(0, 0, 1, 1);
             AddGameObject(s2);
 
             Sphere s3 = new Sphere();
@@ -115,7 +115,7 @@ namespace KWEngine2Test.Worlds
             s3.SetTexture(@".\textures\Metal022_1K_Normal.jpg", TextureType.Normal);
             s3.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
             s3.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
-            s3.SetGlow(0, 0, 1, 1);
+            //s3.SetGlow(0, 0, 1, 1);
             AddGameObject(s3);
 
             Sphere s4 = new Sphere();
@@ -126,7 +126,7 @@ namespace KWEngine2Test.Worlds
             s4.SetTexture(@".\textures\Metal022_1K_Normal.jpg", TextureType.Normal);
             s4.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
             s4.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
-            s4.SetGlow(0, 0, 1, 1);
+            //s4.SetGlow(0, 0, 1, 1);
             AddGameObject(s4);
 
             Immovable mattest = new Immovable();
