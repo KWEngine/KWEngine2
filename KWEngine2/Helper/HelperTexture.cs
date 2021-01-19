@@ -118,7 +118,7 @@ namespace KWEngine2.Helper
             return texID;
         }
 
-        public static int RoundToPowerOf2(int value)
+        public static int RoundUpToPowerOf2(int value)
         {
             if (value < 0)
             {
@@ -134,6 +134,25 @@ namespace KWEngine2.Helper
             v |= v >> 8;
             v |= v >> 16;
             v++;
+
+            return (int)v;
+        }
+
+        public static int RoundDownToPowerOf2(int value)
+        {
+            if (value == 0)
+            {
+                return 0;
+            }
+
+            uint v = (uint)value;
+           
+            v |= (v >> 1);
+            v |= (v >> 2);
+            v |= (v >> 4);
+            v |= (v >> 8);
+            v |= (v >> 16);
+            v = v - (v >> 1);
 
             return (int)v;
         }

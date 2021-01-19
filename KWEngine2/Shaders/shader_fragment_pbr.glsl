@@ -184,7 +184,8 @@ void main()
 	vec3 metalness = vec3(uMetalness);
 	if(uUseTextureMetalness > 0)
 	{
-		metalness = texture(uTextureMetalness, vTexture).xyz;
+		vec3 metaltmp = texture(uTextureMetalness, vTexture).xyz;
+		metalness = vec3((metaltmp.x + metaltmp.y + metaltmp.z) / 3.0);
 	}
 	reflection *= metalness;
 	reflection = min(refl, reflection);
@@ -217,17 +218,18 @@ void main()
 			vec3 lightPos = uLightsPositions[i].xyz;
 			vec3 fragmentToCurrentLightNotNormalized = lightPos - vPosition;
 			vec3 fragmentToCurrentLightNormalized = normalize(fragmentToCurrentLightNotNormalized);
-			
+			float currentLightDistanceSq = dot(fragmentToCurrentLightNotNormalized, fragmentToCurrentLightNotNormalized);
+			float distanceFactor = (uLightsPositions[i].w / currentLightDistanceSq);
+
 			// Shadow mapping #2:
 			float darkeningCurrentLight = 1.0;
 			if(i == uShadowLightPosition)
 			{
 				float dotLightSurfaceVNormal = max(dot(vNormal, fragmentToCurrentLightNormalized), 0.0);
 				darkeningCurrentLight = max(calculateDarkening(dotLightSurfaceVNormal, vShadowCoord2, uBiasCoefficient2, uTextureShadowMap2), 0.0);
+				darkeningCurrentLight *= distanceFactor;
 			}
 
-			float currentLightDistanceSq = dot(fragmentToCurrentLightNotNormalized, fragmentToCurrentLightNotNormalized);
-			float distanceFactor = (uLightsPositions[i].w / currentLightDistanceSq);
 
 			// optional: spot light cone
 			float differenceLightDirectionAndFragmentDirection = 1.0;

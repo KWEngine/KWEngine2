@@ -574,7 +574,7 @@ namespace KWEngine2
             {
                 if(value >= 512 && value <= 8192)
                 {
-                    _shadowMapSize = HelperTexture.RoundToPowerOf2(value);
+                    _shadowMapSize = HelperTexture.RoundUpToPowerOf2(value);
                 }
                 else
                 {

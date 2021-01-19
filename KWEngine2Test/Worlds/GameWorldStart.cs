@@ -22,7 +22,7 @@ namespace KWEngine2Test.Worlds
 
             if (_button.IsMouseCursorOnMe(ms))
             {
-                _button.SetGlow(0.25f, 0.5f, 1f, 0.4f);
+                _button.SetGlow(0.25f, 0.5f, 0f, 0.4f);
 
                 if (ms.LeftButton == ButtonState.Pressed)
                 {

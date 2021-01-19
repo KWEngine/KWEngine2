@@ -51,6 +51,10 @@ namespace KWEngine2.GameObjects
                 }
             }
         }
+
+        /// <summary>
+        /// Erfragt die aktuelle Lichtfärbung
+        /// </summary>
         public Vector4 Color { get; internal set; }
         internal World World { get; set; }
         internal float FOVShadow2 { get; set; } = 60f;

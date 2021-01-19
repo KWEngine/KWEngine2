@@ -6,7 +6,7 @@ using System.IO;
 namespace KWEngine2.Helper
 {
     #region HelperDDS Class
-    public class HelperDDS : IDisposable
+    internal class HelperDDS : IDisposable
     {
         #region Variables
         private bool m_isValid = false;

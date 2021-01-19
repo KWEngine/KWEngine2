@@ -94,6 +94,9 @@ namespace KWEngine2
 
         }
 
+        internal int _bloomwidth = 1024;
+        internal int _bloomheight = 512;
+
         /// <summary>
         /// Konstruktormethode
         /// </summary>
@@ -111,8 +114,14 @@ namespace KWEngine2
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             Width = width;
             Height = height;
-            if (textureAnisotropy >= 1 && textureAnisotropy <= 16)
-                _anisotropy = textureAnisotropy;
+
+            _bloomwidth = HelperTexture.RoundDownToPowerOf2(width);
+            if (_bloomwidth > 1024)
+                _bloomwidth = 1024;
+            _bloomheight = _bloomwidth / 2;
+
+            if (textureAnisotropy >= 2 && textureAnisotropy <= 16)
+                _anisotropy = HelperTexture.RoundDownToPowerOf2(textureAnisotropy);
             else
                 _anisotropy = 1;
 
@@ -120,8 +129,7 @@ namespace KWEngine2
 
             if (antialiasing >= 0 && antialiasing <= 8)
             {
-                if (antialiasing == 1 || antialiasing == 3 || antialiasing == 5 || antialiasing == 6 || antialiasing == 7)
-                    antialiasing = 0;
+                antialiasing = HelperTexture.RoundDownToPowerOf2(antialiasing);
             }
             else
             {
@@ -750,11 +758,10 @@ namespace KWEngine2
         {
             if (KWEngine.PostProcessQuality != PostProcessingQuality.Disabled)
             {
-
                 RendererBloom r = (RendererBloom)KWEngine.Renderers["Bloom"];
                 RendererMerge m = (RendererMerge)KWEngine.Renderers["Merge"];
                 GL.UseProgram(r.GetProgramId());
-                GL.Viewport(0, 0, Width, Height);
+                GL.Viewport(0, 0, _bloomwidth, _bloomheight);
                 int loopCount =
                     KWEngine.PostProcessQuality == PostProcessingQuality.High ? 6 :
                     KWEngine.PostProcessQuality == PostProcessingQuality.Standard ? 4 : 2;
@@ -857,7 +864,7 @@ namespace KWEngine2
 
                 GL.ReadBuffer(ReadBufferMode.ColorAttachment1);
                 GL.DrawBuffer(DrawBufferMode.ColorAttachment1);
-                GL.BlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Linear);
+                GL.BlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
             }
             else
             {
@@ -1098,7 +1105,7 @@ namespace KWEngine2
             renderedTextureTemp = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, renderedTextureTemp);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
-                Width, Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
+                _bloomwidth, _bloomheight, 0, PixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (float)TextureParameterName.ClampToEdge);
@@ -1128,7 +1135,7 @@ namespace KWEngine2
             int renderedTextureTemp2 = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, renderedTextureTemp2);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
-                Width, Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+                _bloomwidth, _bloomheight, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (float)TextureParameterName.ClampToEdge);

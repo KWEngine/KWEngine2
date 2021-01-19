@@ -16,8 +16,8 @@ namespace KWEngine2Test.Worlds
     class GameWorldPBRTest : World
     {
         private long timestamp = 0;
-        private HUDObject ho;
-        private HUDObject ho2;
+        //private HUDObject ho;
+        //private HUDObject ho2;
 
         public override void Act(KeyboardState kb, MouseState ms, float deltaTimeFactor)
         {
@@ -68,24 +68,12 @@ namespace KWEngine2Test.Worlds
                 AddParticleObject(p);
                 timestamp = now;
             }
-            
-
-            if(ho != null)
-            {
-                
-                if(ho.IsMouseCursorOnMe(ms))
-                {
-                    ho.SetGlow(1, 1, 1, 1);
-                }
-                else
-                {
-                    ho.SetGlow(0, 0, 0, 0);
-                }
-            }
         }
 
         public override void Prepare()
         {
+            KWEngine.LoadModelFromFile("MatTest", @".\models\materialtest.glb");
+
             FOV = 45;
             FOVShadow = 30f;
             SetSunPosition(25, 25, 0);
@@ -93,34 +81,59 @@ namespace KWEngine2Test.Worlds
             SetSunAmbientFactor(0.5f);
             SetSunColor(1, 1, 1, 0.0f);
 
-            SetCameraPosition(0, 3f, 3.5f);
+            SetCameraPosition(0, 10f, 15f);
 
             SetTextureSkybox(@".\textures\skybox1.jpg");
 
             Sphere s = new Sphere();
             s.SetModel("KWSphere");
-            s.SetPosition(0, 1, 0);
+            s.SetPosition(0, 1, -5);
             s.IsShadowCaster = true;
             s.SetTexture(@".\textures\Metal022_1K_Color.jpg");
-            //s.SetTexture(@".\textures\bg_greenmountains.png");
             s.SetTexture(@".\textures\Metal022_1K_Normal.jpg", TextureType.Normal);
             s.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
             s.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
-            //s.SetRoughness(0);
-           // AddGameObject(s);
+            s.SetGlow(1, 1, 0, 1);
+            AddGameObject(s);
 
-            KWEngine.LoadModelFromFile("MatTest", @".\Models\ArenaOuter\materialtest.glb");
-            //KWEngine.LoadModelFromFile("ArenaPlatform", @".\Models\ArenaOuter\ArenaPlatform.obj");
-            //KWEngine.LoadModelFromFile("ArenaPlatforms", @".\Models\ArenaOuter\ArenaPlatforms.fbx");
+            Sphere s2 = new Sphere();
+            s2.SetModel("KWSphere");
+            s2.SetPosition(6, 1, 0);
+            s2.IsShadowCaster = true;
+            s2.SetTexture(@".\textures\Metal022_1K_Color.jpg");
+            s2.SetTexture(@".\textures\Metal022_1K_Normal.jpg", TextureType.Normal);
+            s2.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
+            s2.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
+            s2.SetGlow(0, 0, 1, 1);
+            AddGameObject(s2);
 
-            Immovable arenaOuter = new Immovable();
-            arenaOuter.SetModel("MatTest");
-            arenaOuter.IsCollisionObject = true;
-            arenaOuter.IsShadowCaster = true;
-            arenaOuter.AddRotationY(45);
-            arenaOuter.SetScale(0.25f);
-            AddGameObject(arenaOuter);
+            Sphere s3 = new Sphere();
+            s3.SetModel("KWSphere");
+            s3.SetPosition(-5.5f, 1, 0);
+            s3.IsShadowCaster = true;
+            s3.SetTexture(@".\textures\Metal022_1K_Color.jpg");
+            s3.SetTexture(@".\textures\Metal022_1K_Normal.jpg", TextureType.Normal);
+            s3.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
+            s3.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
+            s3.SetGlow(0, 0, 1, 1);
+            AddGameObject(s3);
 
+            Sphere s4 = new Sphere();
+            s4.SetModel("KWSphere");
+            s4.SetPosition(0, 1, 5);
+            s4.IsShadowCaster = true;
+            s4.SetTexture(@".\textures\Metal022_1K_Color.jpg");
+            s4.SetTexture(@".\textures\Metal022_1K_Normal.jpg", TextureType.Normal);
+            s4.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
+            s4.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
+            s4.SetGlow(0, 0, 1, 1);
+            AddGameObject(s4);
+
+            Immovable mattest = new Immovable();
+            mattest.SetModel("MatTest");
+            mattest.IsShadowCaster = true;
+            mattest.SetScale(0.5f);
+            //AddGameObject(mattest);
 
             Cube floor = new Cube();
             floor.SetModel("KWCube");
@@ -156,26 +169,9 @@ namespace KWEngine2Test.Worlds
             p2.SetTarget(0, 1, 0);
             p2.SetColor(0, 1, 0, 1f);
             p2.SetDistanceMultiplier(10);
-            //AddLightObject(p2);
+            AddLightObject(p2);
 
-
-            /*
-            ho = new HUDObject(HUDObjectType.Text, 64, 64);
-            ho.SetText("Hello World ÖÄÜäüöß");
-            //ho.SetScale(64, 64);
-            //ho.CharacterSpreadFactor = 48;
-            //AddHUDObject(ho);
-
-            ho2 = new HUDObject(HUDObjectType.Image, 1024, 256);
-            ho2.SetTexture(@".\textures\bg_greenmountains.png");
-            ho2.SetScale(320, 240);
-            //AddHUDObject(ho2);
-
-
-            KWEngine.SetFont(0);
-            */
-
-            //DebugShadowCaster = true;
+            DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
         }
     }
 }
