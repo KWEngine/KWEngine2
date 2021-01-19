@@ -289,8 +289,7 @@ namespace KWEngine2.Renderers
                         GL.Uniform2(mUniform_TextureTransform, mesh.Material.TextureAlbedo.UVTransform.X, mesh.Material.TextureAlbedo.UVTransform.Y);
 
                         // albedo map:
-                        int texId = -1;
-                        texId = mesh.Material.TextureAlbedo.OpenGLID;
+                        int texId = g._albedoTextureOverride != null && g._albedoTextureOverride[i] > 0 ? g._albedoTextureOverride[i] : mesh.Material.TextureAlbedo.OpenGLID;
                         GL.ActiveTexture(TextureUnit.Texture0);
                         if (texId > 0)
                         {

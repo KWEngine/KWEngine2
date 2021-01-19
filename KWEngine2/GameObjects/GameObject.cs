@@ -54,10 +54,6 @@ namespace KWEngine2.GameObjects
         internal Vector2 BackFrontMost { get; set; } = new Vector2(0, 0);
         internal Vector2 BottomTopMost { get; set; } = new Vector2(0, 0);
 
-        internal enum Override { SpecularEnable, SpecularPower, SpecularArea, TextureDiffuse, TextureNormal, TextureSpecular, TextureTransform, TextureMetallic, TextureRoughness }
-
-        //internal Dictionary<string, Dictionary<Override, object>> _overrides = new Dictionary<string, Dictionary<Override, object>>();        
-
         /// <summary>
         /// Aktuelles Fenster
         /// </summary>
@@ -592,6 +588,7 @@ namespace KWEngine2.GameObjects
                 _roughnessOverride = new bool[_meshNameList.Count];
                 _roughness = new float[_meshNameList.Count];
                 _metalness = new float[_meshNameList.Count];
+                _albedoTextureOverride = new int[_meshNameList.Count];
 
             }
             for (int i = 0; i < ModelMatrixForRenderPass.Length; i++)
@@ -1592,6 +1589,28 @@ namespace KWEngine2.GameObjects
             }
         }
 
+        internal void SetTextureInternal(string texture, int meshIndex)
+        {
+            CheckModelAndWorld();
+
+            int texId = -1;
+            if (KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(texture))
+            {
+                texId = KWEngine.CustomTextures[KWEngine.CurrentWorld][texture];
+            }
+            else
+            {
+                texId = HelperTexture.LoadTextureForModelExternal(texture);
+                if(texId > 0 && !KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(texture))
+                {
+                    KWEngine.CustomTextures[KWEngine.CurrentWorld].Add(texture, texId);
+                }
+            }
+
+            _albedoTextureOverride[meshIndex] = texId;
+
+        }
+
         internal void SetTextureInternal(string texture, TextureType type, CubeSide side)
         {
             CheckModelAndWorld();
@@ -1645,6 +1664,10 @@ namespace KWEngine2.GameObjects
                 else
                 {
                     texId = HelperTexture.LoadTextureForModelExternal(texture);
+                    if (texId > 0 && !KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(texture))
+                    {
+                        KWEngine.CustomTextures[KWEngine.CurrentWorld].Add(texture, texId);
+                    }
                 }
 
                 mTextureSet.SetTexture(texId, (int)side, type);
@@ -1655,6 +1678,7 @@ namespace KWEngine2.GameObjects
         internal float[] _metalness;
         internal bool[] _roughnessOverride;
         internal bool[] _metalnessOverride;
+        internal int[] _albedoTextureOverride;
 
         /// <summary>
         /// Setzt die Rauheit der Objektoberfläche
@@ -1746,20 +1770,50 @@ namespace KWEngine2.GameObjects
         }
 
         /// <summary>
-        /// Setzt die Textur für das Objekt (KWCube und KWCube6)
+        /// Setzt die Textur für das Objekt (KWCube, KWSphere und Terrain)
         /// </summary>
         /// <param name="texture">Texturdatei</param>
         /// <param name="type">Art der Textur (Standard: Diffuse)</param>
         /// <param name="side">Seite des Würfels (für KWCube-Modelle)</param>
         public void SetTexture(string texture, TextureType type = TextureType.Albedo, CubeSide side = CubeSide.All)
         {
-            if (CurrentWindow._multithreaded)
+            if ((Model != null && Model.IsTerrain) || IsCubeOrSphere())
             {
-                Action a = () => SetTextureInternal(texture, type, side);
-                HelperGLLoader.AddCall(this, a);
+                if (CurrentWindow._multithreaded)
+                {
+                    Action a = () => SetTextureInternal(texture, type, side);
+                    HelperGLLoader.AddCall(this, a);
+                }
+                else
+                    SetTextureInternal(texture, type, side);
             }
             else
-                SetTextureInternal(texture, type, side);
+            {
+                SetTexture(texture, 0);
+            }
+        }
+
+        /// <summary>
+        /// Ändert die Albedo-Textur für das Objekt
+        /// </summary>
+        /// <param name="texture">Texturdatei</param>
+        /// <param name="meshIndex">ID des Meshs im Model</param>
+        public void SetTexture(string texture, int meshIndex)
+        {
+            if (IsCubeOrSphere() || Model.IsTerrain)
+            {
+                SetTexture(texture);
+            }
+            else
+            {
+                if (CurrentWindow._multithreaded)
+                {
+                    Action a = () => SetTextureInternal(texture, meshIndex);
+                    HelperGLLoader.AddCall(this, a);
+                }
+                else
+                    SetTextureInternal(texture, meshIndex);
+            }
         }
 
         /// <summary>
