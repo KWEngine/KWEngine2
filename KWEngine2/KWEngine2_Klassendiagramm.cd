@@ -44,6 +44,7 @@
       <Method Name="InitializeParticles" Hidden="true" />
       <Method Name="InitializeShaders" Hidden="true" />
       <Field Name="KWDollar" Hidden="true" />
+      <Field Name="KWGrid" Hidden="true" />
       <Field Name="KWHeart" Hidden="true" />
       <Field Name="KWRect" Hidden="true" />
       <Field Name="KWSkull" Hidden="true" />
@@ -65,7 +66,7 @@
       <Compartment Name="Nested Types" Collapsed="false" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>ARMIZBjFAIGAYKAQoCDAARCAUCAEABASKcjYSlUCmAA=</HashCode>
+      <HashCode>ARMIZBjFAKGAYKAQoCDAARCAUCAEABASKcjYSlUCmAA=</HashCode>
       <FileName>KWEngine.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -73,7 +74,9 @@
     <Position X="5.5" Y="3" Width="2.75" />
     <Members>
       <Field Name="_anisotropy" Hidden="true" />
+      <Field Name="_bloomheight" Hidden="true" />
       <Field Name="_bloomQuad" Hidden="true" />
+      <Field Name="_bloomwidth" Hidden="true" />
       <Field Name="_dummy" Hidden="true" />
       <Field Name="_fsaa" Hidden="true" />
       <Field Name="_modelViewProjectionMatrixBackground" Hidden="true" />
@@ -130,7 +133,7 @@
       <Method Name="UpdateWindowRect" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>EAaBQQSBgiAgkYQAQAiCERAiiAxKYWDACUBpERABlwo=</HashCode>
+      <HashCode>ECaBQQSBgiAgkYQASAiCERAiiAxKYWDACUBpERABlwo=</HashCode>
       <FileName>GLWindow.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -186,13 +189,14 @@
       <Method Name="UpdateCameraLookAtVector" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>BIDgWFqCIDiBSgBIAWWQAAhDaA4VqzI0KRLPElDubMY=</HashCode>
+      <HashCode>BIDgWFqCIDiBSgJIAWWQAAhDaA4VqzI0KRLPElDubMY=</HashCode>
       <FileName>World.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="KWEngine2.GameObjects.GameObject">
     <Position X="11.5" Y="3" Width="3.25" />
     <Members>
+      <Field Name="_albedoTextureOverride" Hidden="true" />
       <Field Name="_animationId" Hidden="true" />
       <Field Name="_animationPercentage" Hidden="true" />
       <Field Name="_collisionCandidates" Hidden="true" />
@@ -251,15 +255,8 @@
       <Method Name="UpdateLookAtVector" Hidden="true" />
       <Method Name="UpdateModelMatrixAndHitboxes" Hidden="true" />
     </Members>
-    <NestedTypes>
-      <Enum Name="KWEngine2.GameObjects.GameObject.Override" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>GameObjects\GameObject.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Enum>
-    </NestedTypes>
     <TypeIdentifier>
-      <HashCode>QmHKuhpD2KEgWLX0JhLM3QRAkLomj8zZHZoIxgDoSfQ=</HashCode>
+      <HashCode>QmHKuhpD2KEgWLX0JhLM3RRAkLomj8zZHZoIxgDoSfQ=</HashCode>
       <FileName>GameObjects\GameObject.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
