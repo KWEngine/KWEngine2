@@ -168,7 +168,7 @@ namespace KWEngine2.Renderers
                         continue;
                     }
 
-                    GL.Uniform3(mUniform_BaseColor, mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z);
+                    GL.Uniform4(mUniform_BaseColor, mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z, 1.0f);
 
                     HelperGL.CheckGLErrors();
                     GL.BindVertexArray(mesh.VAO);
