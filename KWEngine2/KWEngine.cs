@@ -353,7 +353,7 @@ namespace KWEngine2
             {
                 GeoMesh mesh = CoordinateSystem.Meshes[meshName];
 
-                GL.Uniform3(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z);
+                GL.Uniform4(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z, 1.0f);
 
                 GL.BindVertexArray(mesh.VAO);
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
@@ -374,7 +374,7 @@ namespace KWEngine2
             {
                 GeoMesh mesh = CoordinateSystemX.Meshes[meshName];
 
-                GL.Uniform3(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z);
+                GL.Uniform4(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z, 1.0f);
 
                 GL.BindVertexArray(mesh.VAO);
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
@@ -395,7 +395,7 @@ namespace KWEngine2
             {
                 GeoMesh mesh = CoordinateSystemY.Meshes[meshName];
 
-                GL.Uniform3(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z);
+                GL.Uniform4(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z, 1.0f);
 
                 GL.BindVertexArray(mesh.VAO);
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
@@ -416,7 +416,7 @@ namespace KWEngine2
             {
                 GeoMesh mesh = CoordinateSystemZ.Meshes[meshName];
 
-                GL.Uniform3(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z);
+                GL.Uniform4(RendererSimple.GetUniformBaseColor(), mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z, 1.0f);
 
                 GL.BindVertexArray(mesh.VAO);
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
