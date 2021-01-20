@@ -74,6 +74,32 @@ namespace KWEngine2.Renderers
             throw new NotImplementedException();
         }
 
+        internal Matrix4 rotMat = Matrix4.CreateRotationX((float)(Math.PI / 2.0));
+
+        internal void DrawGrid(GridType type, ref Matrix4 viewProjection)
+        {
+            GL.UseProgram(mProgramId);
+
+            Matrix4 mvp = viewProjection;
+            if (type == GridType.GridXY)
+            {
+                mvp = rotMat * viewProjection;
+            }
+            GL.UniformMatrix4(mUniform_MVP, false, ref mvp);
+            
+            GL.Uniform4(mUniform_BaseColor, 1.0f, 1.0f, 1.0f, 1.0f);
+
+            GeoMesh mesh = KWEngine.KWGrid.Meshes.Values.ElementAt(0);
+            GL.BindVertexArray(mesh.VAO);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
+            GL.DrawElements(mesh.Primitive, mesh.IndexCount, DrawElementsType.UnsignedInt, 0);
+            HelperGL.CheckGLErrors();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
+            GL.BindVertexArray(0);
+
+            GL.UseProgram(0);
+        }
+
         internal void DrawHitbox(GameObject g, ref Matrix4 viewProjection)
         {
             if (!g.IsInsideScreenSpace || g.Opacity <= 0 || !g.IsCollisionObject)
@@ -90,7 +116,7 @@ namespace KWEngine2.Renderers
 
                     float[] v = g.Hitboxes[i].GetVertices();
                     GL.UniformMatrix4(mUniform_MVP, false, ref viewProjection);
-                    GL.Uniform3(mUniform_BaseColor, 1.0f, 1.0f, 1.0f);
+                    GL.Uniform4(mUniform_BaseColor, 1.0f, 1.0f, 1.0f, 1.0f);
 
                     int tmpVAO = GL.GenVertexArray();
                     GL.BindVertexArray(tmpVAO);

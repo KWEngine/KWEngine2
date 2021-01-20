@@ -195,6 +195,7 @@
     <EmbeddedResource Include="Assets\Models\skull.obj" />
     <EmbeddedResource Include="Assets\Models\dollar.mtl" />
     <EmbeddedResource Include="Assets\Models\dollar.obj" />
+    <EmbeddedResource Include="Assets\Models\kwgrid.obj" />
     <None Include="KWEngine2_Klassendiagramm.cd" />
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config">

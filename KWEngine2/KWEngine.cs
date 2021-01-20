@@ -15,6 +15,25 @@ using System.Runtime.CompilerServices;
 namespace KWEngine2
 {
     /// <summary>
+    /// Einheit zur Anzeige eines 10 Einheiten großen Gitternetzes
+    /// </summary>
+    public enum GridType
+    {
+        /// <summary>
+        /// Kein Gitternetz
+        /// </summary>
+        None,
+        /// <summary>
+        /// Ein Gitternetz auf der durch die XZ-Achsen aufgespannten Ebene
+        /// </summary>
+        GridXZ,
+        /// <summary>
+        /// Ein Gitternetz auf der durch die XY-Achsen aufgespannten Ebene
+        /// </summary>
+        GridXY
+    }
+
+    /// <summary>
     /// Einheit zur Anzeige der Frame-Performance
     /// </summary>
     public enum PerformanceUnit
@@ -300,6 +319,7 @@ namespace KWEngine2
         internal static GeoModel CoordinateSystemZ;
         internal static GeoModel GHitbox;
         internal static GeoModel KWRect;
+        internal static GeoModel KWGrid;
         internal static GeoModel KWStar;
         internal static GeoModel KWHeart;
         internal static GeoModel KWSkull;
@@ -414,6 +434,7 @@ namespace KWEngine2
             Models.Add("KWCube", SceneImporter.LoadModel("kwcube.obj", true, SceneImporter.AssemblyMode.Internal));
             Models.Add("KWCube6", SceneImporter.LoadModel("kwcube6.obj", false, SceneImporter.AssemblyMode.Internal));
             KWRect = SceneImporter.LoadModel("kwrect.obj", false, SceneImporter.AssemblyMode.Internal);
+            KWGrid = SceneImporter.LoadModel("kwgrid.obj", false, SceneImporter.AssemblyMode.Internal);
             Models.Add("KWSphere", SceneImporter.LoadModel("kwsphere.obj", true, SceneImporter.AssemblyMode.Internal));
             KWStar = SceneImporter.LoadModel("star.obj", false, SceneImporter.AssemblyMode.Internal);
             Models.Add("KWStar", KWStar);

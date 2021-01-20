@@ -361,6 +361,11 @@ namespace KWEngine2
                     KWEngine.Renderers["Skybox"].Draw(_dummy, ref _projectionMatrix);
                 }
 
+                if(CurrentWorld.DebugShowCoordinateSystemGrid != GridType.None)
+                {
+                    KWEngine.RendererSimple.DrawGrid(CurrentWorld.DebugShowCoordinateSystemGrid, ref viewProjection);
+                }
+
                 Matrix4 viewProjectionShadowBiased = viewProjectionShadow * HelperMatrix.BiasedMatrixForShadowMapping;
                 Matrix4 viewProjectionShadowBiased2 = sLight == null ? Matrix4.Identity : sLight._viewProjectionMatrixShadow2 * HelperMatrix.BiasedMatrixForShadowMapping;
 

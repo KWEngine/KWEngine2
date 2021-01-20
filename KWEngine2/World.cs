@@ -32,6 +32,11 @@ namespace KWEngine2
         public bool DebugShowCoordinateSystem { get; set; } = false;
 
         /// <summary>
+        /// Zeige 10 Einheiten großes Hilfsgitter auf der angegebenen Ebene
+        /// </summary>
+        public GridType DebugShowCoordinateSystemGrid { get; set; } = GridType.None;
+
+        /// <summary>
         /// Zeigt die Performance im Titelbereich des Fensters an
         /// </summary>
         public PerformanceUnit DebugShowPerformanceInTitle

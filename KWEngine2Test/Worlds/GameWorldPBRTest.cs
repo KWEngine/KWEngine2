@@ -144,7 +144,7 @@ namespace KWEngine2Test.Worlds
             floor.SetTexture(@".\textures\sand_normal.jpg", TextureType.Normal);
             floor.SetTextureRepeat(2, 2);
             floor.IsShadowCaster = true;
-            AddGameObject(floor);
+            //AddGameObject(floor);
 
             KWEngine.BuildTerrainModel("Terrain", @".\textures\heightmap.png", @".\textures\sand_diffuse.jpg", 25, 0.1f, 25, 2, 2);
             Immovable floor2 = new Immovable();
@@ -172,6 +172,7 @@ namespace KWEngine2Test.Worlds
             AddLightObject(p2);
 
             DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
+            DebugShowCoordinateSystemGrid = GridType.GridXY;
         }
     }
 }
