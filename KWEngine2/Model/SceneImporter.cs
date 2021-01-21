@@ -440,11 +440,10 @@ namespace KWEngine2.Model
                 }
                 geoMaterial.Roughness = 1;
                 geoMaterial.Metalness = 0;
+                geoMaterial.Opacity = 1;
             }
             else
             {
-                
-
                 if (mesh.MaterialIndex >= 0)
                 {
                     material = scene.Materials[mesh.MaterialIndex];
@@ -458,6 +457,7 @@ namespace KWEngine2.Model
                         geoMaterial.Roughness = 1;
                         geoMaterial.Metalness = 0;
                         geoMaterial.TextureRoughnessIsSpecular = false;
+                        geoMaterial.Opacity = 1;
                         if (mesh.Name != null && mesh.Name.ToLower().Contains("_invisible"))
                         {
                             geoMaterial.Opacity = 0;
@@ -504,6 +504,7 @@ namespace KWEngine2.Model
                     geoMaterial.Name = "kw-undefined.";
                     geoMaterial.Metalness = 0;
                     geoMaterial.Roughness = 1;
+                    geoMaterial.Opacity = 1;
                     geoMaterial.BlendMode = OpenTK.Graphics.OpenGL4.BlendingFactor.OneMinusSrcAlpha;
                     geoMaterial.ColorAlbedo = new Vector4(1, 1, 1, 1);
                     geoMaterial.ColorEmissive = new Vector4(0, 0, 0, 1);
@@ -811,7 +812,6 @@ namespace KWEngine2.Model
                 }
                 
             }
-
             return false;
         }
 

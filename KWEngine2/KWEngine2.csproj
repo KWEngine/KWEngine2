@@ -126,7 +126,6 @@
     <Compile Include="Helper\LoadPackage.cs" />
     <Compile Include="Helper\ParticleInfo.cs" />
     <Compile Include="Helper\Sector.cs" />
-    <Compile Include="Helper\TextureSet.cs" />
     <Compile Include="KWEngine.cs" />
     <Compile Include="GameObjects\GameObject.cs" />
     <Compile Include="GLWindow.cs" />

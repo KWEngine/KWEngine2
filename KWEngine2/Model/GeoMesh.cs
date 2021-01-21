@@ -43,7 +43,6 @@ namespace KWEngine2.Model
             internal set;
         }
 
-        //public uint[] Indices { get; internal set; }
         public GeoMaterial Material { get; internal set; }
 
         internal void VAOGenerateAndBind()

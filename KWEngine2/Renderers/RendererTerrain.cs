@@ -174,10 +174,6 @@ namespace KWEngine2.Renderers
                 GL.Uniform1(mUniform_SunAffection, g.IsAffectedBySun ? 1 : 0);
                 GL.Uniform1(mUniform_LightAffection, g.IsAffectedByLight ? 1 : 0);
 
-                // Set global roughness/metalness:
-                GL.Uniform1(mUniform_Roughness, g._roughnessOverride[0] ? g._roughness[0] : 1);
-                GL.Uniform1(mUniform_Metalness, g._metalnessOverride[0] ? g._metalness[0] : 0);
-
                 // Camera
                 if (!CurrentWorld.IsFirstPersonMode)
                 {
@@ -233,9 +229,12 @@ namespace KWEngine2.Renderers
                     GL.Uniform4(mUniform_EmissiveColor, Vector4.Zero);
                 }
 
-                foreach (string meshName in g.Model.Meshes.Keys)
+                for (int i = 0; i < g.Model.Meshes.Keys.Count; i++)
                 {
+                    string meshName = g.Model.Meshes.Keys.ElementAt(i);
                     GeoMesh mesh = g.Model.Meshes[meshName];
+                    GeoMaterial meshMaterial = mesh.Material;
+
 
                     // Shadow mapping
                     Matrix4 modelViewProjectionMatrixBiased = g.ModelMatrixForRenderPass[0] * viewProjectionShadowBiased;
@@ -266,11 +265,11 @@ namespace KWEngine2.Renderers
                         GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureWhite);
                         GL.Uniform1(mUniform_Texture, 0);
                         GL.Uniform1(mUniform_TextureUse, 0);
-                        GL.Uniform3(mUniform_BaseColor, mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z);
+                        GL.Uniform3(mUniform_BaseColor, meshMaterial.ColorAlbedo.X, meshMaterial.ColorAlbedo.Y, meshMaterial.ColorAlbedo.Z);
                     }
 
                     // normal map:
-                    texId = mesh.Material.TextureNormal.OpenGLID;
+                    texId = meshMaterial.TextureNormal.OpenGLID;
                     GL.ActiveTexture(TextureUnit.Texture1);
                     if (texId > 0)
                     {
@@ -287,9 +286,9 @@ namespace KWEngine2.Renderers
 
                     // roughness map:
                     GL.ActiveTexture(TextureUnit.Texture2);
-                    if (mesh.Material.TextureRoughness.OpenGLID > 0)
+                    if (meshMaterial.TextureRoughness.OpenGLID > 0)
                     {
-                        GL.BindTexture(TextureTarget.Texture2D, mesh.Material.TextureRoughness.OpenGLID);
+                        GL.BindTexture(TextureTarget.Texture2D, meshMaterial.TextureRoughness.OpenGLID);
                         GL.Uniform1(mUniform_TextureRoughnessMap, 2);
                         GL.Uniform1(mUniform_TextureUseRoughnessMap, 1);
                         GL.Uniform1(mUniform_TextureRoughnessIsSpecular, 0);
@@ -304,9 +303,9 @@ namespace KWEngine2.Renderers
 
                     // metalness map:
                     GL.ActiveTexture(TextureUnit.Texture3);
-                    if (mesh.Material.TextureMetalness.OpenGLID > 0)
+                    if (meshMaterial.TextureMetalness.OpenGLID > 0)
                     {
-                        GL.BindTexture(TextureTarget.Texture2D, mesh.Material.TextureMetalness.OpenGLID);
+                        GL.BindTexture(TextureTarget.Texture2D, meshMaterial.TextureMetalness.OpenGLID);
                         GL.Uniform1(mUniform_TextureMetalnessMap, 3);
                         GL.Uniform1(mUniform_TextureUseMetalnessMap, 1);
                     }
@@ -319,9 +318,9 @@ namespace KWEngine2.Renderers
 
                     // emissive map:
                     GL.ActiveTexture(TextureUnit.Texture4);
-                    if (mesh.Material.TextureEmissive.OpenGLID > 0)
+                    if (meshMaterial.TextureEmissive.OpenGLID > 0)
                     {
-                        GL.BindTexture(TextureTarget.Texture2D, mesh.Material.TextureEmissive.OpenGLID);
+                        GL.BindTexture(TextureTarget.Texture2D, meshMaterial.TextureEmissive.OpenGLID);
                         GL.Uniform1(mUniform_TextureEmissiveMap, 4);
                         GL.Uniform1(mUniform_TextureUseEmissiveMap, 1);
                     }

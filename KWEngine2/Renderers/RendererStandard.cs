@@ -208,7 +208,6 @@ namespace KWEngine2.Renderers
                 }
 
                 int index = 0;
-
                 for (int i = 0; i < g.Model.Meshes.Keys.Count; i++)// (string meshName in g.Model.Meshes.Keys)
                 {
                     string meshName = g.Model.Meshes.Keys.ElementAt(i);
@@ -248,18 +247,19 @@ namespace KWEngine2.Renderers
                     GL.Disable(EnableCap.Blend);
                     GeoMesh mesh = g.Model.Meshes.Values.ElementAt(i);
 
+                    GeoMaterial meshMaterial = g._materials[i];
 
-                    if (mesh.Material.Opacity <= 0)
+                    if (meshMaterial.Opacity <= 0)
                     {
                         continue;
                     }
 
-                    if (mesh.Material.Opacity < 1 || g.Opacity < 1)
+                    if (meshMaterial.Opacity < 1 || g.Opacity < 1)
                     {
                         GL.Enable(EnableCap.Blend);
                     }
 
-                    GL.Uniform1(mUniform_Opacity, mesh.Material.Opacity * g.Opacity);
+                    GL.Uniform1(mUniform_Opacity, meshMaterial.Opacity * g.Opacity);
 
                     if (mesh.BoneNames.Count > 0 && g.AnimationID >= 0 && g.Model.Animations != null && g.Model.Animations.Count > 0)
                     {
@@ -277,127 +277,120 @@ namespace KWEngine2.Renderers
 
                     
 
-                    if (g.IsCubeOrSphere())
+                    GL.Uniform1(mUniform_Roughness, meshMaterial.Roughness);
+                    GL.Uniform1(mUniform_Metalness, meshMaterial.Metalness);
+                    GL.Uniform2(mUniform_TextureTransform, meshMaterial.TextureAlbedo.UVTransform.X, meshMaterial.TextureAlbedo.UVTransform.Y);
+
+                    // albedo map:
+                    int texId = meshMaterial.TextureAlbedo.OpenGLID;
+                    GL.ActiveTexture(TextureUnit.Texture0);
+                    if (texId > 0)
                     {
-                        UploadMaterialForKWSimpleMesh(ref g.mTextureSet, mesh, g, i);
-                        GL.Uniform1(mUniform_TextureUseLightMap, 0);
+                        GL.BindTexture(TextureTarget.Texture2D, texId);
+                        GL.Uniform1(mUniform_Texture, 0);
+                        GL.Uniform1(mUniform_TextureUse, 1);
+                        GL.Uniform3(mUniform_BaseColor, 1f, 1f, 1f);
                     }
                     else
                     {
-                        GL.Uniform1(mUniform_Roughness, g._roughnessOverride[i] ? g._roughness[i] : mesh.Material.Roughness);
-                        GL.Uniform1(mUniform_Metalness, g._metalnessOverride[i] ? g._metalness[i] : mesh.Material.Metalness);
-                        GL.Uniform2(mUniform_TextureTransform, mesh.Material.TextureAlbedo.UVTransform.X, mesh.Material.TextureAlbedo.UVTransform.Y);
+                        GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureWhite);
+                        GL.Uniform1(mUniform_Texture, 0);
+                        GL.Uniform1(mUniform_TextureUse, 0);
+                        GL.Uniform3(mUniform_BaseColor, meshMaterial.ColorAlbedo.X, meshMaterial.ColorAlbedo.Y, meshMaterial.ColorAlbedo.Z);
+                    }
 
-                        // albedo map:
-                        int texId = g._albedoTextureOverride != null && g._albedoTextureOverride[i] > 0 ? g._albedoTextureOverride[i] : mesh.Material.TextureAlbedo.OpenGLID;
-                        GL.ActiveTexture(TextureUnit.Texture0);
-                        if (texId > 0)
-                        {
-                            GL.BindTexture(TextureTarget.Texture2D, texId);
-                            GL.Uniform1(mUniform_Texture, 0);
-                            GL.Uniform1(mUniform_TextureUse, 1);
-                            GL.Uniform3(mUniform_BaseColor, 1f, 1f, 1f);
-                        }
-                        else
-                        {
-                            GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureWhite);
-                            GL.Uniform1(mUniform_Texture, 0);
-                            GL.Uniform1(mUniform_TextureUse, 0);
-                            GL.Uniform3(mUniform_BaseColor, mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z);
-                        }
+                    // normal map:
+                    texId = meshMaterial.TextureNormal.OpenGLID;
+                    GL.ActiveTexture(TextureUnit.Texture1);
+                    if (texId > 0)
+                    {
 
-                        // normal map:
-                        texId = mesh.Material.TextureNormal.OpenGLID;
-                        GL.ActiveTexture(TextureUnit.Texture1);
-                        if (texId > 0)
-                        {
-                            
-                            GL.BindTexture(TextureTarget.Texture2D, texId);
-                            GL.Uniform1(mUniform_TextureNormalMap, 1);
-                            GL.Uniform1(mUniform_TextureUseNormalMap, 1);
-                        }
-                        else
-                        {
-                            GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureWhite);
-                            GL.Uniform1(mUniform_TextureNormalMap, 1);
-                            GL.Uniform1(mUniform_TextureUseNormalMap, 0);
-                        }
+                        GL.BindTexture(TextureTarget.Texture2D, texId);
+                        GL.Uniform1(mUniform_TextureNormalMap, 1);
+                        GL.Uniform1(mUniform_TextureUseNormalMap, 1);
+                    }
+                    else
+                    {
+                        GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureWhite);
+                        GL.Uniform1(mUniform_TextureNormalMap, 1);
+                        GL.Uniform1(mUniform_TextureUseNormalMap, 0);
+                    }
 
-                        // roughness map:
-                        GL.ActiveTexture(TextureUnit.Texture2);
-                        if (mesh.Material.TextureRoughness.OpenGLID > 0)
+                    // roughness map:
+                    GL.ActiveTexture(TextureUnit.Texture2);
+                    if (meshMaterial.TextureRoughness.OpenGLID > 0)
+                    {
+
+                        GL.BindTexture(TextureTarget.Texture2D, meshMaterial.TextureRoughness.OpenGLID);
+                        GL.Uniform1(mUniform_TextureRoughnessMap, 2);
+                        GL.Uniform1(mUniform_TextureUseRoughnessMap, 1);
+                        GL.Uniform1(mUniform_TextureRoughnessIsSpecular, meshMaterial.TextureRoughnessIsSpecular ? 1 : 0);
+                    }
+                    else
+                    {
+                        if (meshMaterial.TextureRoughnessInMetalness && meshMaterial.TextureMetalness.OpenGLID > 0)
                         {
-                            
-                            GL.BindTexture(TextureTarget.Texture2D, mesh.Material.TextureRoughness.OpenGLID);
+                            GL.BindTexture(TextureTarget.Texture2D, meshMaterial.TextureMetalness.OpenGLID);
                             GL.Uniform1(mUniform_TextureRoughnessMap, 2);
                             GL.Uniform1(mUniform_TextureUseRoughnessMap, 1);
-                            GL.Uniform1(mUniform_TextureRoughnessIsSpecular, mesh.Material.TextureRoughnessIsSpecular ? 1 : 0);
-                        }
-                        else
-                        {
-                            if(mesh.Material.TextureRoughnessInMetalness && mesh.Material.TextureMetalness.OpenGLID > 0)
-                            {
-                                GL.BindTexture(TextureTarget.Texture2D, mesh.Material.TextureMetalness.OpenGLID);
-                                GL.Uniform1(mUniform_TextureRoughnessMap, 2);
-                                GL.Uniform1(mUniform_TextureUseRoughnessMap, 1);
-                                GL.Uniform1(mUniform_TextureRoughnessIsSpecular, 1);
-                            }
-                            else
-                            {
-                                GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureWhite);
-                                GL.Uniform1(mUniform_TextureRoughnessMap, 2);
-                                GL.Uniform1(mUniform_TextureUseRoughnessMap, 0);
-                                GL.Uniform1(mUniform_TextureRoughnessIsSpecular, 0);
-                            }
-                            
-                        }
-
-                        // metalness map:
-                        GL.ActiveTexture(TextureUnit.Texture3);
-                        if (mesh.Material.TextureMetalness.OpenGLID > 0)
-                        {
-                            GL.BindTexture(TextureTarget.Texture2D, mesh.Material.TextureMetalness.OpenGLID);
-                            GL.Uniform1(mUniform_TextureMetalnessMap, 3);
-                            GL.Uniform1(mUniform_TextureUseMetalnessMap, 1);
-                        }
-                        else
-                        {
-                            GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureBlack);
-                            GL.Uniform1(mUniform_TextureMetalnessMap, 3);
-                            GL.Uniform1(mUniform_TextureUseMetalnessMap, 0);
-                        }
-
-                        // emissive map:
-                        GL.ActiveTexture(TextureUnit.Texture4);
-                        if (mesh.Material.TextureEmissive.OpenGLID > 0)
-                        {
-                            GL.BindTexture(TextureTarget.Texture2D, mesh.Material.TextureEmissive.OpenGLID);
-                            GL.Uniform1(mUniform_TextureEmissiveMap, 4);
-                            GL.Uniform1(mUniform_TextureUseEmissiveMap, 1);
-                        }
-                        else
-                        {
-                            GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureBlack);
-                            GL.Uniform1(mUniform_TextureEmissiveMap, 4);
-                            GL.Uniform1(mUniform_TextureUseEmissiveMap, 0);
-                        }
-
-
-
-                        GL.ActiveTexture(TextureUnit.Texture8);
-                        if (mesh.Material.TextureLight.OpenGLID > 0)
-                        {
-                            GL.BindTexture(TextureTarget.Texture2D, mesh.Material.TextureLight.OpenGLID);
-                            GL.Uniform1(mUniform_TextureLightMap, 8);
-                            GL.Uniform1(mUniform_TextureUseLightMap, 1);
+                            GL.Uniform1(mUniform_TextureRoughnessIsSpecular, 1);
                         }
                         else
                         {
                             GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureWhite);
-                            GL.Uniform1(mUniform_TextureLightMap, 8);
-                            GL.Uniform1(mUniform_TextureUseLightMap, 0);
+                            GL.Uniform1(mUniform_TextureRoughnessMap, 2);
+                            GL.Uniform1(mUniform_TextureUseRoughnessMap, 0);
+                            GL.Uniform1(mUniform_TextureRoughnessIsSpecular, 0);
                         }
+
                     }
+
+                    // metalness map:
+                    GL.ActiveTexture(TextureUnit.Texture3);
+                    if (meshMaterial.TextureMetalness.OpenGLID > 0)
+                    {
+                        GL.BindTexture(TextureTarget.Texture2D, meshMaterial.TextureMetalness.OpenGLID);
+                        GL.Uniform1(mUniform_TextureMetalnessMap, 3);
+                        GL.Uniform1(mUniform_TextureUseMetalnessMap, 1);
+                    }
+                    else
+                    {
+                        GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureBlack);
+                        GL.Uniform1(mUniform_TextureMetalnessMap, 3);
+                        GL.Uniform1(mUniform_TextureUseMetalnessMap, 0);
+                    }
+
+                    // emissive map:
+                    GL.ActiveTexture(TextureUnit.Texture4);
+                    if (meshMaterial.TextureEmissive.OpenGLID > 0)
+                    {
+                        GL.BindTexture(TextureTarget.Texture2D, meshMaterial.TextureEmissive.OpenGLID);
+                        GL.Uniform1(mUniform_TextureEmissiveMap, 4);
+                        GL.Uniform1(mUniform_TextureUseEmissiveMap, 1);
+                    }
+                    else
+                    {
+                        GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureBlack);
+                        GL.Uniform1(mUniform_TextureEmissiveMap, 4);
+                        GL.Uniform1(mUniform_TextureUseEmissiveMap, 0);
+                    }
+
+
+
+                    GL.ActiveTexture(TextureUnit.Texture8);
+                    if (meshMaterial.TextureLight.OpenGLID > 0)
+                    {
+                        GL.BindTexture(TextureTarget.Texture2D, meshMaterial.TextureLight.OpenGLID);
+                        GL.Uniform1(mUniform_TextureLightMap, 8);
+                        GL.Uniform1(mUniform_TextureUseLightMap, 1);
+                    }
+                    else
+                    {
+                        GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureWhite);
+                        GL.Uniform1(mUniform_TextureLightMap, 8);
+                        GL.Uniform1(mUniform_TextureUseLightMap, 0);
+                    }
+
 
                     GL.BindVertexArray(mesh.VAO);
                     GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
@@ -435,137 +428,6 @@ namespace KWEngine2.Renderers
         internal override void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum, bool isSun)
         {
             throw new NotImplementedException();
-        }
-
-        private void UploadMaterialForKWSimpleMesh(ref TextureSet textureSet, GeoMesh mesh, GameObject g, int i)
-        {
-            //            GL.Uniform1(mUniform_Opacity, g.Opacity);
-            //            if (g.Opacity < 1)
-            //            {
-            //                GL.Enable(EnableCap.Blend);
-            //            }
-
-            // Set global roughness/metalness:
-            GL.Uniform1(mUniform_Roughness, g._roughness[i]);
-            GL.Uniform1(mUniform_Metalness, g._metalness[i]);
-
-            if (g.Model.Filename == "kwsphere.obj")
-            {
-                UploadMaterialForSide(CubeSide.Front, ref g.mTextureSet, mesh);
-            }
-            else if (mesh.Material.Name == "KWCube")
-            {
-                UploadMaterialForSide(CubeSide.Front, ref g.mTextureSet, mesh);
-            }
-            else
-            {
-                if (mesh.Material.Name == "Front")
-                {
-                    UploadMaterialForSide(CubeSide.Front, ref g.mTextureSet, mesh);
-                }
-                else if (mesh.Material.Name == "Back")
-                {
-                    UploadMaterialForSide(CubeSide.Back, ref g.mTextureSet, mesh);
-                }
-                else if (mesh.Material.Name == "Left")
-                {
-                    UploadMaterialForSide(CubeSide.Left, ref g.mTextureSet, mesh);
-                }
-                else if (mesh.Material.Name == "Right")
-                {
-                    UploadMaterialForSide(CubeSide.Right, ref g.mTextureSet, mesh);
-                }
-                else if (mesh.Material.Name == "Top")
-                {
-                    UploadMaterialForSide(CubeSide.Top, ref g.mTextureSet, mesh);
-                }
-                else if (mesh.Material.Name == "Bottom")
-                {
-                    UploadMaterialForSide(CubeSide.Bottom, ref g.mTextureSet, mesh);
-                }
-            }
-
-
-        }
-
-        private void UploadMaterialForSide(CubeSide side, ref TextureSet textureSet, GeoMesh mesh)
-        {
-            if(side == CubeSide.All)
-            {
-                throw new Exception("The enum 'CubeSide.All' is invalid in this call.");
-            }
-            else
-            {
-                // uv transform:
-                GL.Uniform2(mUniform_TextureTransform, textureSet.uvTransform[(int)side, 0], textureSet.uvTransform[(int)side, 1]);
-
-                // albedo:
-                if(textureSet.albedo[(int)side] > 0)
-                {
-                    GL.ActiveTexture(TextureUnit.Texture0);
-                    GL.BindTexture(TextureTarget.Texture2D, textureSet.albedo[(int)side]);
-                    GL.Uniform1(mUniform_Texture, 0);
-                    GL.Uniform1(mUniform_TextureUse, 1);
-                    GL.Uniform3(mUniform_BaseColor, 1f, 1f, 1f);
-                }
-                else
-                {
-                    GL.Uniform1(mUniform_TextureUse, 0);
-                    GL.Uniform3(mUniform_BaseColor, mesh.Material.ColorAlbedo.X, mesh.Material.ColorAlbedo.Y, mesh.Material.ColorAlbedo.Z);
-                }
-
-                // normal map:
-                if (textureSet.normal[(int)side] > 0)
-                {
-                    GL.ActiveTexture(TextureUnit.Texture1);
-                    GL.BindTexture(TextureTarget.Texture2D, textureSet.normal[(int)side]);
-                    GL.Uniform1(mUniform_TextureNormalMap, 1);
-                    GL.Uniform1(mUniform_TextureUseNormalMap, 1);
-                }
-                else
-                {
-                    GL.Uniform1(mUniform_TextureUseNormalMap, 0);
-                }
-
-                // roughness map:
-                if (textureSet.roughness[(int)side] > 0)
-                {
-                    GL.ActiveTexture(TextureUnit.Texture2);
-                    GL.BindTexture(TextureTarget.Texture2D, textureSet.roughness[(int)side]);
-                    GL.Uniform1(mUniform_TextureRoughnessMap, 2);
-                    GL.Uniform1(mUniform_TextureUseRoughnessMap, 1);
-                }
-                else
-                {
-                    GL.Uniform1(mUniform_TextureUseRoughnessMap, 0);
-                }
-
-                // metalness map:
-                if (textureSet.metalness[(int)side] > 0)
-                {
-                    GL.ActiveTexture(TextureUnit.Texture3);
-                    GL.BindTexture(TextureTarget.Texture2D, textureSet.metalness[(int)side]);
-                    GL.Uniform1(mUniform_TextureMetalnessMap, 3);
-                    GL.Uniform1(mUniform_TextureUseMetalnessMap, 1);
-                }
-                else
-                {
-                    GL.Uniform1(mUniform_TextureUseMetalnessMap, 0);
-                }
-
-                // emissive map:
-                if (textureSet.emissive[(int)side] > 0)
-                {
-                    GL.ActiveTexture(TextureUnit.Texture4);
-                    GL.BindTexture(TextureTarget.Texture2D, textureSet.emissive[(int)side]);
-                    GL.Uniform1(mUniform_TextureEmissiveMap, 4);
-                    GL.Uniform1(mUniform_TextureUseEmissiveMap, 1);
-                }
-                else
-                {
-                    GL.Uniform1(mUniform_TextureUseEmissiveMap, 0);
-                }
-            }
         }
     }
 }

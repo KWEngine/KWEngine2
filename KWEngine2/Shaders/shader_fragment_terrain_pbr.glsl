@@ -177,10 +177,10 @@ void main()
 
 
 	// Metalness / Reflections:
-	vec3 reflectedCameraSurfaceNormal = reflect(-fragmentToCamera, theNormal);
 	vec3 refl = vec3(0.22 * uSunIntensity.xyz * uSunAmbient);
 	if(uUseTextureSkybox > 0)
 	{
+		vec3 reflectedCameraSurfaceNormal = reflect(-fragmentToCamera, theNormal);
 		refl = texture(uTextureSkybox, reflectedCameraSurfaceNormal).xyz * uSunIntensity.xyz * max(uSunAmbient, uSunIntensity.w);
 	}
 	vec3 reflection = refl;
@@ -199,7 +199,8 @@ void main()
 	float roughness = uRoughness;
 	if(uUseTextureRoughness > 0)
 	{
-		roughness = texture(uTextureRoughness, vTexture).r;
+		vec3 roughnessRGB = texture(uTextureRoughness, vTexture).xyz;
+		roughness = (roughnessRGB.x + roughnessRGB.y + roughnessRGB.z) / 3.0;
 		if(uUseTextureRoughnessIsSpecular > 0)
 		{
 			roughness = 1.0 - roughness;
@@ -212,7 +213,6 @@ void main()
 
 	// Loop for lights:
 	vec3 colorComponentSpecularTotalFromLights = vec3(0.0);
-	//vec3 colorComponentDiffuseTotalFromLights = vec3(0.0);
 	vec3 colorComponentIntensityTotalFromLights = vec3(0.0);
 	if(uLightAffection > 0)
 	{

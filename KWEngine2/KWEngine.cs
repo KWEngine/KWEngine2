@@ -663,14 +663,14 @@ namespace KWEngine2
             GeoMesh terrainMesh = t.BuildTerrain(new Vector3(0, 0, 0), heightmap, width, height, depth, texRepeatX, texRepeatZ, isFile);
             terrainMesh.Terrain = t;
             GeoMaterial mat = new GeoMaterial();
-            mat.BlendMode = OpenTK.Graphics.OpenGL4.BlendingFactor.OneMinusSrcAlpha;
+            mat.BlendMode = BlendingFactor.OneMinusSrcAlpha;
             mat.ColorAlbedo = new Vector4(1, 1, 1, 1);
             mat.ColorEmissive = new Vector4(0, 0, 0, 0);
-            mat.Name = name + "-Material";
-            //mat.SpecularArea = 512;
-            //mat.SpecularPower = 0;
+            mat.Opacity = 1;
+            mat.Metalness = 0;
+            mat.Roughness = 1;
 
-            GeoTexture texDiffuse = new GeoTexture(name + "-TextureDiffuse");
+            GeoTexture texDiffuse = new GeoTexture();
             texDiffuse.Filename = texture;
             texDiffuse.Type = TextureType.Albedo;
             texDiffuse.UVMapIndex = 0;

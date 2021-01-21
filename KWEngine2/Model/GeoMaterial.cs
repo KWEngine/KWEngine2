@@ -3,34 +3,77 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace KWEngine2.Model
 {
-    internal class GeoMaterial
+    internal struct GeoMaterial
     {
-        //public bool IsPBRMaterial { get; internal set; } = false;
+        public string Name;
+        public BlendingFactor BlendMode;
+        public Vector4 ColorEmissive;
+        public Vector4 ColorAlbedo;
 
-        public string Name { get; internal set; }
-        public BlendingFactor BlendMode { get; internal set; } = BlendingFactor.OneMinusSrcAlpha;
-        public Vector4 ColorEmissive { get; internal set; } = new Vector4(0, 0, 0, 0);
-        public Vector4 ColorAlbedo { get; internal set; } = new Vector4(1, 1, 1, 1);
+        public float Opacity;
 
-        public float Opacity { get; internal set; } = 1;
-        //public float SpecularPower { get; internal set; } = 0;
-        //public float SpecularArea { get; internal set; } = 256;
+        public GeoTexture TextureAlbedo;
+        public GeoTexture TextureNormal;
+        public GeoTexture TextureEmissive;
+        public GeoTexture TextureLight;
+        public GeoTexture TextureMetalness;
+        public GeoTexture TextureRoughness;
 
-        public GeoTexture TextureAlbedo { get; internal set; } = new GeoTexture(null);
-        public GeoTexture TextureNormal { get; internal set; } = new GeoTexture(null);
-        //public GeoTexture TextureSpecular { get; internal set; } = new GeoTexture(null);
+        public float Metalness;
+        public float Roughness;
 
-        public GeoTexture TextureMetalness { get; internal set; } = new GeoTexture(null);
-        public GeoTexture TextureRoughness { get; internal set; } = new GeoTexture(null);
+        public bool TextureRoughnessIsSpecular;
+        public bool TextureRoughnessInMetalness;
 
-        public float Metalness { get; internal set; } = 0;
-        public float Roughness { get; internal set; } = 1;
-
-        public GeoTexture TextureEmissive { get; internal set; } = new GeoTexture(null);
-        public GeoTexture TextureLight { get; internal set; } = new GeoTexture(null);
-
-        public bool TextureRoughnessIsSpecular { get; internal set; } = false;
-        public bool TextureRoughnessInMetalness { get; internal set; } = false;
-
+        /*
+        public GeoMaterial(string name)
+        {
+            BlendMode = BlendingFactor.OneMinusSrcAlpha;
+            ColorEmissive = new Vector4(0, 0, 0, 0);
+            ColorAlbedo = new Vector4(1, 1, 1, 1);
+            Opacity = 1;
+            TextureAlbedo = new GeoTexture();
+            TextureNormal = new GeoTexture();
+            TextureMetalness = new GeoTexture();
+            TextureRoughness = new GeoTexture();
+            Metalness = 0;
+            Roughness = 1;
+            TextureEmissive = new GeoTexture();
+            TextureLight = new GeoTexture();
+            TextureRoughnessInMetalness = false;
+            TextureRoughnessIsSpecular = false;
+            Name = name;
+        }
+        */
+     
+        public void SetTexture(string texture, TextureType type, int id)
+        {
+            if (type == TextureType.Albedo)
+            {
+                TextureAlbedo = new GeoTexture() { Filename = texture, OpenGLID = id, Type = type, UVMapIndex = 0, UVTransform = new Vector2(TextureAlbedo.UVTransform.X, TextureAlbedo.UVTransform.Y) };
+            }
+            else if (type == TextureType.Emissive)
+            {
+                TextureEmissive = new GeoTexture() { Filename = texture, OpenGLID = id, Type = type, UVMapIndex = 0, UVTransform = new Vector2(1, 1) };
+            }
+            else if (type == TextureType.Light)
+            {
+                TextureLight = new GeoTexture() { Filename = texture, OpenGLID = id, Type = type, UVMapIndex = 1, UVTransform = new Vector2(1, 1) };
+            }
+            else if (type == TextureType.Metalness)
+            {
+                TextureMetalness = new GeoTexture() { Filename = texture, OpenGLID = id, Type = type, UVMapIndex = 0, UVTransform = new Vector2(1, 1) };
+            }
+            else if (type == TextureType.Roughness)
+            {
+                TextureRoughness = new GeoTexture() { Filename = texture, OpenGLID = id, Type = type, UVMapIndex = 0, UVTransform = new Vector2(1, 1) };
+            }
+            else if (type == TextureType.Normal)
+            {
+                TextureNormal = new GeoTexture() { Filename = texture, OpenGLID = id, Type = type, UVMapIndex = 0, UVTransform = new Vector2(1, 1) };
+            }
+            else
+                throw new System.Exception("Unknown texture type for current material " + Name);
+        }
     }
 }

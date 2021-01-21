@@ -24,6 +24,8 @@ namespace KWEngine2.GameObjects
         /// </summary>
         public bool UpdateLast { get; set; } = false;
 
+        internal GeoMaterial[] _materials;
+
         internal uint DistanceToCamera { get; set; } = 100;
         /// <summary>
         /// Gibt an, ob das Objekt Schatten wirft und empfängt
@@ -552,28 +554,30 @@ namespace KWEngine2.GameObjects
             SetModel(KWEngine.GetModel(m));
         }
 
+        private void CopyMaterialsFromMeshes()
+        {
+            _materials = new GeoMaterial[_model.Meshes.Values.Count];
+            for (int i = 0; i < _materials.Length; i++)
+            {
+                _materials[i] = _model.Meshes.Values.ElementAt(i).Material;
+            }
+        }
+
         internal void SetModel(GeoModel m)
         {
             // is m null? throw exception then!
             _model = m ?? throw new Exception("Your model is null.");
 
+            CopyMaterialsFromMeshes();
+
             if (m.Name == "kwcube.obj")
             {
                 ModelMatrixForRenderPass = new Matrix4[1];
-                this.mTextureSet = new TextureSet(1);
-                _metalnessOverride = new bool[1];
-                _roughnessOverride = new bool[1];
-                _roughness = new float[1];
-                _metalness = new float[1];
+                
             }
             else if (m.Name == "kwcube6.obj")
             {
                 ModelMatrixForRenderPass = new Matrix4[1];
-                this.mTextureSet = new TextureSet(6);
-                _metalnessOverride = new bool[6];
-                _roughnessOverride = new bool[6];
-                _roughness = new float[6];
-                _metalness = new float[6];
             }
             else
             {
@@ -583,14 +587,8 @@ namespace KWEngine2.GameObjects
                     l.Add(mesh.Name);
                 _meshNameList = l.AsReadOnly();
                 ModelMatrixForRenderPass = new Matrix4[_meshNameList.Count];
-                this.mTextureSet = new TextureSet(_meshNameList.Count);
-                _metalnessOverride = new bool[_meshNameList.Count];
-                _roughnessOverride = new bool[_meshNameList.Count];
-                _roughness = new float[_meshNameList.Count];
-                _metalness = new float[_meshNameList.Count];
-                _albedoTextureOverride = new int[_meshNameList.Count];
-
             }
+
             for (int i = 0; i < ModelMatrixForRenderPass.Length; i++)
             {
                 ModelMatrixForRenderPass[i] = Matrix4.Identity;
@@ -1589,7 +1587,7 @@ namespace KWEngine2.GameObjects
             }
         }
 
-        internal void SetTextureInternal(string texture, int meshIndex)
+        internal void SetTextureInternal(string texture, int meshIndex, TextureType type)
         {
             CheckModelAndWorld();
 
@@ -1607,8 +1605,8 @@ namespace KWEngine2.GameObjects
                 }
             }
 
-            _albedoTextureOverride[meshIndex] = texId;
-
+            if (texId >= 0)
+                _materials[meshIndex].SetTexture(texture, type, texId);
         }
 
         internal void SetTextureInternal(string texture, TextureType type, CubeSide side)
@@ -1622,7 +1620,7 @@ namespace KWEngine2.GameObjects
             if (Model.IsTerrain)
             {
                 GeoMesh terrainMesh = Model.Meshes.Values.ElementAt(0);
-                GeoTexture newTex = new GeoTexture(texture)
+                GeoTexture newTex = new GeoTexture()
                 {
                     Filename = texture,
                     Type = type
@@ -1636,23 +1634,14 @@ namespace KWEngine2.GameObjects
                 {
                     SetTextureTerrainInternal(ref newTex, texture);
                 }
-
-                if (type == TextureType.Albedo)
+                if(newTex.OpenGLID >= 0)
                 {
-                    terrainMesh.Material.TextureAlbedo = newTex;
+                    GeoMaterial mat = terrainMesh.Material;
+                    mat.SetTexture(newTex.Filename, newTex.Type, newTex.OpenGLID);
+                    terrainMesh.Material = mat;
                 }
-                else if (type == TextureType.Normal)
-                {
-                    terrainMesh.Material.TextureNormal = newTex;
-                }
-                else if (type == TextureType.Roughness)
-                {
-                    terrainMesh.Material.TextureRoughness = newTex;
-                }
-                else if (type == TextureType.Metalness)
-                {
-                    terrainMesh.Material.TextureMetalness = newTex;
-                }
+                else
+                    Console.WriteLine("Texture " + texture + " not found.");
             }
             else
             {
@@ -1670,15 +1659,22 @@ namespace KWEngine2.GameObjects
                     }
                 }
 
-                mTextureSet.SetTexture(texId, (int)side, type);
+                if (texId >= 0)
+                {
+                    if (side == CubeSide.All)
+                    {
+                        for(int i = 0; i < _materials.Length; i++)
+                        {
+                            _materials[i].SetTexture(texture, type, texId);
+                        }
+                    }
+                    else
+                    {
+                        _materials[(int)side].SetTexture(texture, type, texId);
+                    }
+                }
             }
         }
-
-        internal float[] _roughness;
-        internal float[] _metalness;
-        internal bool[] _roughnessOverride;
-        internal bool[] _metalnessOverride;
-        internal int[] _albedoTextureOverride;
 
         /// <summary>
         /// Setzt die Rauheit der Objektoberfläche
@@ -1689,38 +1685,18 @@ namespace KWEngine2.GameObjects
             if (Model == null)
                 throw new Exception("Cannot set roughness - model is not set.");
 
-            /*
-            if (!(Model.Name == "kwsphere.obj" || Model.Name == "kwcube.obj" || Model.Name == "kwcube6.obj"))
+            for (int i = 0; i < _materials.Length; i++)
             {
-                throw new Exception("Cannot set roughness on models other than KWCube and KWSphere");
-            }
-            */
-            if (IsCubeOrSphere())
-            {
-                for (int i = 0; i < mTextureSet.roughness.Length; i++)
+                if(_materials[i].TextureRoughness.OpenGLID > 0)
                 {
-                    if (mTextureSet.roughness[i] > 0)
-                    {
-                        throw new Exception("Cannot set roughness - your model's roughness texture has priority!");
-                    }
+                    throw new Exception("Cannot set roughness - your model's roughness texture has priority!");
                 }
             }
-            else
-            {
-                foreach(GeoMesh mesh in Model.Meshes.Values)
-                {
-                    if(mesh.Material.TextureRoughness.OpenGLID > 0)
-                    {
-                        throw new Exception("Cannot set roughness - your model's roughness texture has priority!");
-                    }
-                }
-            }
-
+            
             r = HelperGL.Clamp(r, 0, 1);
-            for (int i = 0; i < _roughness.Length; i++)
+            for (int i = 0; i < _materials.Length; i++)
             {
-                _roughness[i] = r;
-                _roughnessOverride[i] = true;
+                _materials[i].Roughness = r;
             }
         }
 
@@ -1731,41 +1707,20 @@ namespace KWEngine2.GameObjects
         public void SetMetalness(float m)
         {
             if (Model == null)
-                throw new Exception("Cannot set roughness - model is not set.");
+                throw new Exception("Cannot set metalness - model is not set.");
 
-            /*
-            if (!(Model.Name == "kwsphere.obj" || Model.Name == "kwcube.obj" || Model.Name == "kwcube6.obj"))
+            for (int i = 0; i < _materials.Length; i++)
             {
-                throw new Exception("Cannot set metalness on models other than KWCube and KWSphere");
-            }
-            */
-
-            if (IsCubeOrSphere())
-            {
-                for (int i = 0; i < mTextureSet.metalness.Length; i++)
+                if (_materials[i].TextureMetalness.OpenGLID > 0)
                 {
-                    if (mTextureSet.metalness[i] > 0)
-                    {
-                        throw new Exception("Cannot set metalness - your model's metalness texture has priority!");
-                    }
-                }
-            }
-            else
-            {
-                foreach (GeoMesh mesh in Model.Meshes.Values)
-                {
-                    if (mesh.Material.TextureMetalness.OpenGLID > 0)
-                    {
-                        throw new Exception("Cannot set metalness - your model's metalness texture has priority!");
-                    }
+                    throw new Exception("Cannot set metalness - your model's metalness texture has priority!");
                 }
             }
 
             m = HelperGL.Clamp(m, 0, 1);
-            for (int i = 0; i < _metalness.Length; i++)
+            for (int i = 0; i < _materials.Length; i++)
             {
-                _metalness[i] = m;
-                _metalnessOverride[i] = true;
+                _materials[i].Metalness = m;
             }
         }
 
@@ -1798,7 +1753,8 @@ namespace KWEngine2.GameObjects
         /// </summary>
         /// <param name="texture">Texturdatei</param>
         /// <param name="meshIndex">ID des Meshs im Model</param>
-        public void SetTexture(string texture, int meshIndex)
+        /// <param name="type">Art der Textur</param>
+        public void SetTexture(string texture, int meshIndex, TextureType type = TextureType.Albedo)
         {
             if (IsCubeOrSphere() || Model.IsTerrain)
             {
@@ -1808,11 +1764,11 @@ namespace KWEngine2.GameObjects
             {
                 if (CurrentWindow._multithreaded)
                 {
-                    Action a = () => SetTextureInternal(texture, meshIndex);
+                    Action a = () => SetTextureInternal(texture, meshIndex, type);
                     HelperGLLoader.AddCall(this, a);
                 }
                 else
-                    SetTextureInternal(texture, meshIndex);
+                    SetTextureInternal(texture, meshIndex, type);
             }
         }
 
@@ -1821,7 +1777,7 @@ namespace KWEngine2.GameObjects
         /// </summary>
         /// <param name="x">Breitenwiederholungen</param>
         /// <param name="y">Höhenwiederholungen</param>
-        /// <param name="side">Seite des Würfels (für KWCube)</param>
+        /// <param name="side">Seite des Würfels (für KWCube6)</param>
         public void SetTextureRepeat(float x, float y, CubeSide side = CubeSide.All)
         {
             CheckModelAndWorld();
@@ -1831,8 +1787,28 @@ namespace KWEngine2.GameObjects
                 throw new Exception("Cannot set texture repeat values on models other than KWCube or KWSphere.");
             }
 
-            mTextureSet.SetUVTransform((int)side, x, y);
-
+            
+            if(side == CubeSide.All)
+            {
+                for(int i = 0; i < _materials.Length; i++)
+                {
+                    _materials[i].TextureAlbedo.UVTransform = new Vector2(x, y);
+                }
+            }
+            else
+            {
+                if (Model.Name == "kwcube6.obj")
+                {
+                    _materials[(int)side].TextureAlbedo.UVTransform = new Vector2(x, y);
+                }
+                else
+                {
+                    for (int i = 0; i < _materials.Length; i++)
+                    {
+                        _materials[i].TextureAlbedo.UVTransform = new Vector2(x, y);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -2403,13 +2379,6 @@ namespace KWEngine2.GameObjects
         internal bool IsCubeOrSphere()
         {
             return this.Model != null && (this.Model.Filename == "kwcube.obj" || this.Model.Filename == "kwsphere.obj" || this.Model.Filename == "kwcube6.obj");
-        }
-
-        internal TextureSet mTextureSet = new TextureSet(0);
-
-        internal TextureSet GetTextureSet()
-        {
-            return this.mTextureSet;
         }
     }
 }

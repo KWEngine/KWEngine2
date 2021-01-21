@@ -411,6 +411,7 @@ namespace KWEngine2.Model
                 geoMaterial.TextureRoughnessIsSpecular = false;
                 geoMaterial.Roughness = 1;
                 geoMaterial.Metalness = 0;
+                geoMaterial.Opacity = 1;
                 if (mesh.Name != null && mesh.Name.ToLower().Contains("_invisible"))
                 {
                     geoMaterial.Opacity = 0;
@@ -425,7 +426,6 @@ namespace KWEngine2.Model
                 geoMaterial.ColorEmissive = new Vector4(material.EmissiveFactor[0], material.EmissiveFactor[1], material.EmissiveFactor[2], 1f);
                 geoMaterial.Metalness = material.PbrMetallicRoughness.MetallicFactor;
                 geoMaterial.Roughness = material.PbrMetallicRoughness.RoughnessFactor;
-
                 if (mesh.Name != null && mesh.Name.ToLower().Contains("_invisible"))
                 {
                     geoMaterial.Opacity = 0;
@@ -453,7 +453,7 @@ namespace KWEngine2.Model
                         {
                             byte[] rawTextureData = GetTextureDataFromAccessor(scene, i, ref model, out string filename);
                             int glTextureId = HelperTexture.LoadTextureForModelGLB(rawTextureData);
-                            tex.UVTransform = new OpenTK.Vector2(1, 1);
+                            tex.UVTransform = new OpenTK.Vector2(1, 1); // TODO: find a way to lookup uv transform in glTF
                             tex.Filename = filename;
                             tex.UVMapIndex = material.PbrMetallicRoughness.BaseColorTexture.TexCoord;
                             tex.Type = TextureType.Albedo;
