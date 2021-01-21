@@ -272,7 +272,7 @@ void main()
 	vec3 rgbFragment = albedo * (1.0 - metalness) + emissive;
 
 	vec3 rgbSpecular = vec3(0.0);
-	if(dotSunSurface > 0 && darkeningSun > 0)
+	if(dotSunSurface > 0 && darkeningSun > 0 && uSunAffection > 0)
 	{
 		rgbSpecular = uSunIntensity.xyz * uSunIntensity.w;
 		rgbSpecular *= roughnessCalculated;
@@ -288,7 +288,7 @@ void main()
 	rgbFragment += colorComponentSpecularTotalFromLights;
 
 	// check sun light intensity:
-	float sunlightIntensity = uSunIntensity.w * dotSunSurface * darkeningSun;
+	float sunlightIntensity = uSunIntensity.w * dotSunSurface * darkeningSun * float(uSunAffection);
 	rgbFragment *= (uSunIntensity.xyz * (sunlightIntensity + uSunAmbient)) + colorComponentIntensityTotalFromLights;
 	
 	// Add reflection from skybox:
