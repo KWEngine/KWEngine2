@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KWEngine2Test.Objects
+namespace KWEngine2Test.Objects.TestAll
 {
     class PointLight : LightObject
     {

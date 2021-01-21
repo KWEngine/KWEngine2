@@ -7,7 +7,14 @@ namespace KWEngine2Test
     class GameWindow : GLWindow
     {
         public GameWindow()
-            : base(1280, 720, OpenTK.GameWindowFlags.Default, 1, true, false, 4)
+            : base(
+                  1280,                             // width
+                  720,                              // height
+                  OpenTK.GameWindowFlags.Default,   // window mode
+                  1,                                // anti-aliasing (1 to 8)
+                  true,                             // vsync?
+                  false,                            // multithreading (experimental)
+                  4)                                // anisotropic filtering (1 to 16)
         {
             KWEngine.PostProcessQuality = PostProcessingQuality.Standard;
             SetWorld(new GameWorldStart());

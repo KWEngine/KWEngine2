@@ -89,12 +89,6 @@ namespace KWEngine2Test.Worlds
             int width = CurrentWindow.Width;
             int height = CurrentWindow.Height;
 
-            Cube c = new Cube();
-            c.SetModel("KWCube");
-            c.SetGlow(1, 1, 1, 0.5f);
-            c.SetPosition(0, 4, 0);
-            //AddGameObject(c);
-
             _button = new HUDObject(HUDObjectType.Image, width / 2, height / 2 - 276);
             _button.SetTexture(@".\textures\button01.png");
             _button.SetScale(imageWidth, imageHeight);

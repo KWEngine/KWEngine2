@@ -46,7 +46,7 @@ uniform vec3 uTintColor;
 uniform float uSunAmbient;
 uniform vec3 uSunPosition;
 uniform vec4 uSunIntensity;
-
+uniform vec3 uSunDirection; // from pos to target
 uniform int uSunAffection;
 uniform int uLightAffection;
 
@@ -206,6 +206,8 @@ void main()
 			roughness = 1.0 - roughness;
 		}
 	}
+	float roughnessInverted = 1.0 - roughness;
+	float roughnessInvertedClamped = clamp(roughnessInverted, 0.0, 0.999);
 	float distributionMicroFacet = computeGGXDistribution(dotSunSurface, roughness);
 	float geometryMicroFacet = computeGGXPartialGeometryTerm(fragmentToCamera, theNormal, (0.5 * fragmentToCamera + 0.5 * fragmentToSun), roughness);
 	float roughnessCalculated = distributionMicroFacet * geometryMicroFacet;
@@ -233,6 +235,7 @@ void main()
 				darkeningCurrentLight *= distanceFactor;
 			}
 
+
 			// optional: spot light cone
 			float differenceLightDirectionAndFragmentDirection = 1.0;
 			if(uLightsTargets[i].w > 0.0)
@@ -256,6 +259,11 @@ void main()
 				rgbSpecularCurrentLight = uLightsColors[i].xyz * uLightsColors[i].w * clamp(distanceFactor * 10, 0.0, 1.0) * differenceLightDirectionAndFragmentDirection;
 				rgbSpecularCurrentLight *= microFacetContributionCurrentLight;
 				rgbSpecularCurrentLight = min(uLightsColors[i].xyz * uLightsColors[i].w, rgbSpecularCurrentLight) ; // conservation of energy
+
+				//calculate specular reflections from sun on surface:
+				vec3 reflectionVector = reflect(-fragmentToCurrentLightNormalized, theNormal);
+				float specular = max(roughnessInverted * distanceFactor * uLightsColors[i].w * pow(max(0.0, dot(fragmentToCamera, reflectionVector)), roughnessInverted * 2048.0), 0.0);
+				rgbSpecularCurrentLight += (uSunIntensity.xyz * specular);
 			}
 
 			colorComponentIntensityTotalFromLights += uLightsColors[i].xyz * uLightsColors[i].w * currentLightIntensity * darkeningCurrentLight;
@@ -274,6 +282,12 @@ void main()
 		rgbSpecular = uSunIntensity.xyz * uSunIntensity.w;
 		rgbSpecular *= roughnessCalculated;
 		rgbSpecular = min(uSunIntensity.xyz * uSunIntensity.w, rgbSpecular) ; // conservation of energy
+
+		//calculate specular reflections from sun on surface:
+		vec3 reflectionVector = reflect(-fragmentToSun, theNormal);
+		float specular = max(roughnessInverted * uSunIntensity.w * pow(max(0.0, dot(fragmentToCamera, reflectionVector)), roughnessInverted * 2048.0), 0.0);
+		rgbSpecular += (uSunIntensity.xyz * specular);
+
 		rgbFragment += rgbSpecular;
 	}
 	rgbFragment += colorComponentSpecularTotalFromLights;

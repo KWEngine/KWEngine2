@@ -170,6 +170,7 @@ namespace KWEngine2.Renderers
                 // Sun
                 GL.Uniform4(mUniform_SunIntensity, g.CurrentWorld.GetSunColor());
                 GL.Uniform3(mUniform_SunPosition, g.CurrentWorld.GetSunPosition().X, g.CurrentWorld.GetSunPosition().Y, g.CurrentWorld.GetSunPosition().Z);
+                GL.Uniform3(mUniform_SunDirection, ref g.CurrentWorld._sunDirectionInverted);
                 GL.Uniform1(mUniform_SunAmbient, g.CurrentWorld.SunAmbientFactor);
                 GL.Uniform1(mUniform_SunAffection, g.IsAffectedBySun ? 1 : 0);
                 GL.Uniform1(mUniform_LightAffection, g.IsAffectedByLight ? 1 : 0);
@@ -245,6 +246,9 @@ namespace KWEngine2.Renderers
                         Matrix4 modelViewProjectionMatrixBiased2 = g.ModelMatrixForRenderPass[0] * viewProjectionShadowBiased2;
                         GL.UniformMatrix4(mUniform_MVPShadowMap2, false, ref modelViewProjectionMatrixBiased2);
                     }
+
+                    GL.Uniform1(mUniform_Roughness, meshMaterial.Roughness);
+                    GL.Uniform1(mUniform_Metalness, meshMaterial.Metalness);
 
                     // TODO: Check if overrides exist
                     GL.Uniform2(mUniform_TextureTransform, mesh.Terrain.mTexX, mesh.Terrain.mTexY);

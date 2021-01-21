@@ -25,12 +25,12 @@ namespace KWEngine2.Helper
 
         internal static float CalculateRadiansFromDegrees(float degrees)
         {
-            return (float)Math.PI * degrees / 180f;
+            return (float)(Math.PI * degrees / 180.0);
         }
 
         internal static float CalculateDegreesFromRadians(float radiant)
         {
-            return (180f * radiant) / (float)Math.PI;
+            return (float)((180.0 * radiant) / Math.PI);
         }
 
         /// <summary>

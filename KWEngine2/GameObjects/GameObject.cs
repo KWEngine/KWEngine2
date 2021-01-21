@@ -1685,18 +1685,28 @@ namespace KWEngine2.GameObjects
             if (Model == null)
                 throw new Exception("Cannot set roughness - model is not set.");
 
-            for (int i = 0; i < _materials.Length; i++)
-            {
-                if(_materials[i].TextureRoughness.OpenGLID > 0)
-                {
-                    throw new Exception("Cannot set roughness - your model's roughness texture has priority!");
-                }
-            }
-            
             r = HelperGL.Clamp(r, 0, 1);
-            for (int i = 0; i < _materials.Length; i++)
+
+            if (Model.IsTerrain)
             {
-                _materials[i].Roughness = r;
+                GeoMaterial terrainMaterial = Model.Meshes.Values.ElementAt(0).Material;
+                terrainMaterial.Roughness = r;
+                Model.Meshes.Values.ElementAt(0).Material = terrainMaterial;
+            }
+            else
+            {
+                for (int i = 0; i < _materials.Length; i++)
+                {
+                    if(_materials[i].TextureRoughness.OpenGLID > 0)
+                    {
+                        throw new Exception("Cannot set roughness - your model's roughness texture has priority!");
+                    }
+                }
+
+                for (int i = 0; i < _materials.Length; i++)
+                {
+                    _materials[i].Roughness = r;
+                }
             }
         }
 
@@ -1709,18 +1719,27 @@ namespace KWEngine2.GameObjects
             if (Model == null)
                 throw new Exception("Cannot set metalness - model is not set.");
 
-            for (int i = 0; i < _materials.Length; i++)
-            {
-                if (_materials[i].TextureMetalness.OpenGLID > 0)
-                {
-                    throw new Exception("Cannot set metalness - your model's metalness texture has priority!");
-                }
-            }
-
             m = HelperGL.Clamp(m, 0, 1);
-            for (int i = 0; i < _materials.Length; i++)
+            if (Model.IsTerrain)
             {
-                _materials[i].Metalness = m;
+                GeoMaterial terrainMaterial = Model.Meshes.Values.ElementAt(0).Material;
+                terrainMaterial.Metalness = m;
+                Model.Meshes.Values.ElementAt(0).Material = terrainMaterial;
+            }
+            else
+            {
+                for (int i = 0; i < _materials.Length; i++)
+                {
+                    if (_materials[i].TextureMetalness.OpenGLID > 0)
+                    {
+                        throw new Exception("Cannot set metalness - your model's metalness texture has priority!");
+                    }
+                }
+
+                for (int i = 0; i < _materials.Length; i++)
+                {
+                    _materials[i].Metalness = m;
+                }
             }
         }
 

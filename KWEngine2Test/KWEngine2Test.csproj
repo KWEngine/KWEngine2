@@ -55,7 +55,10 @@
     <Compile Include="Objects\Arena\Player.cs" />
     <Compile Include="Objects\JumpAndRun\Platforms\Platform.cs" />
     <Compile Include="Objects\JumpAndRun\Actors\Player.cs" />
-    <Compile Include="Objects\PointLight.cs" />
+    <Compile Include="Objects\TestAll\CubeRoughnessTest.cs" />
+    <Compile Include="Objects\TestAll\DirectionalLight.cs" />
+    <Compile Include="Objects\TestAll\PlayerFloat.cs" />
+    <Compile Include="Objects\TestAll\PointLight.cs" />
     <Compile Include="Objects\School\Immovable.cs" />
     <Compile Include="Objects\School\Player.cs" />
     <Compile Include="Objects\SpaceInvaders\Box.cs" />
@@ -63,7 +66,7 @@
     <Compile Include="Objects\SpaceInvaders\EnemySimple.cs" />
     <Compile Include="Objects\SpaceInvaders\Player.cs" />
     <Compile Include="Objects\SpaceInvaders\Shot.cs" />
-    <Compile Include="Objects\Sphere.cs" />
+    <Compile Include="Objects\TestAll\Sphere.cs" />
     <Compile Include="Objects\SweepAndPruneTest\Enemy.cs" />
     <Compile Include="Objects\SweepAndPruneTest\Player.cs" />
     <Compile Include="Objects\SweepAndPruneTest\Shot.cs" />
@@ -75,7 +78,7 @@
     <Compile Include="Worlds\GameWorld02.cs" />
     <Compile Include="Worlds\GameWorldSweepAndPruneTest.cs" />
     <Compile Include="Worlds\GameWorldStart.cs" />
-    <Compile Include="Objects\Cube.cs" />
+    <Compile Include="Objects\TestAll\Cube.cs" />
     <Compile Include="Objects\Main\Flashlight.cs" />
     <Compile Include="Objects\Main\Immovable.cs" />
     <Compile Include="Objects\Main\Panel.cs" />
