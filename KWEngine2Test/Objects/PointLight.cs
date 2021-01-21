@@ -17,9 +17,9 @@ namespace KWEngine2Test.Objects
         float degrees = 0;
         public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
         {
-            Vector3 newPos = HelperRotation.CalculateRotationAroundPointOnAxis(new OpenTK.Vector3(0, 2, 0), 2, degrees);
-            degrees = (degrees + 0.5f) % 360;
-            SetPosition(newPos);
+            //Vector3 newPos = HelperRotation.CalculateRotationAroundPointOnAxis(new OpenTK.Vector3(0, 2, 0), 2, degrees);
+            //degrees = (degrees + 0.5f) % 360;
+            //SetPosition(newPos);
 
             if (up)
             {

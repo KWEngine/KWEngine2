@@ -50,7 +50,7 @@ namespace KWEngine2.Model
         {
             if (type == TextureType.Albedo)
             {
-                TextureAlbedo = new GeoTexture() { Filename = texture, OpenGLID = id, Type = type, UVMapIndex = 0, UVTransform = new Vector2(TextureAlbedo.UVTransform.X, TextureAlbedo.UVTransform.Y) };
+                TextureAlbedo = new GeoTexture() { Filename = texture, OpenGLID = id, Type = type, UVMapIndex = 0, UVTransform = new Vector2(TextureAlbedo.UVTransform.X == 0 ? 1 : TextureAlbedo.UVTransform.X, TextureAlbedo.UVTransform.Y == 0 ? 1 : TextureAlbedo.UVTransform.Y) };
             }
             else if (type == TextureType.Emissive)
             {

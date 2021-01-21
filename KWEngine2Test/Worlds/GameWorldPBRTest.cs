@@ -79,22 +79,23 @@ namespace KWEngine2Test.Worlds
             SetSunPosition(25, 25, 0);
             SetSunTarget(0, 0, 0);
             SetSunAmbientFactor(0.5f);
-            SetSunColor(1, 1, 1, 0.0f);
+            SetSunColor(1, 1, 1, 0.5f);
 
             SetCameraPosition(0, 10f, 15f);
 
             SetTextureSkybox(@".\textures\skybox1.jpg");
-
+            
             Sphere s = new Sphere();
             s.SetModel("KWSphere");
-            s.SetPosition(0, 1, -5);
+            s.SetPosition(0, 1, 0);
+            s.SetScale(2);
             s.IsShadowCaster = true;
             s.SetTexture(@".\textures\Metal022_1K_Color.jpg");
-            s.SetTexture(@".\textures\Metal022_1K_Normal.jpg", TextureType.Normal);
-            s.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
-            s.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
-            //AddGameObject(s);
-
+            //s.SetTexture(@".\textures\Metal022_1K_Normal.jpg", TextureType.Normal);
+            //s.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
+            //s.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
+            AddGameObject(s);
+            /*
             Sphere s2 = new Sphere();
             s2.SetModel("KWSphere");
             s2.SetPosition(6, 1, 0);
@@ -124,7 +125,7 @@ namespace KWEngine2Test.Worlds
             s4.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
             s4.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
             //AddGameObject(s4);
-
+            */
             Immovable mattest = new Immovable();
             mattest.SetModel("MatTest");
             mattest.IsShadowCaster = true;
@@ -133,11 +134,11 @@ namespace KWEngine2Test.Worlds
 
             Cube floor = new Cube();
             floor.SetModel("KWCube");
-            floor.SetPosition(-12.5f, -0.5f, 0);
+            floor.SetPosition(0f, -0.5f, 0);
             floor.SetScale(25, 1, 25);
             //floor.SetColor(0, 0, 0);
-            floor.SetTexture(@".\textures\sand_diffuse.jpg");
-            floor.SetTexture(@".\textures\sand_normal.jpg", TextureType.Normal);
+            floor.SetTexture(@".\textures\Metal022_1K_Color.jpg");
+            //floor.SetTexture(@".\textures\sand_normal.jpg", TextureType.Normal);
             floor.SetTextureRepeat(2, 2);
             floor.IsShadowCaster = true;
             AddGameObject(floor);
@@ -149,13 +150,13 @@ namespace KWEngine2Test.Worlds
             floor2.IsShadowCaster = true;
             floor2.SetPosition(12.5f, 0, 0);
             floor2.SetTexture(@".\textures\sand_normal.jpg", TextureType.Normal);
-            AddGameObject(floor2);
+            //AddGameObject(floor2);
 
             
             PointLight p = new PointLight();
             p.Type = LightType.Point;
             p.SetPosition(-2, 2, 4);
-            p.SetColor(1, 1, 1, 1f);
+            p.SetColor(1, 0, 0, 1f);
             p.SetDistanceMultiplier(3);
             AddLightObject(p);
 
@@ -169,6 +170,7 @@ namespace KWEngine2Test.Worlds
 
             DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
             //DebugShowCoordinateSystemGrid = GridType.GridXY;
+            //DebugShadowCaster = true;
         }
     }
 }
