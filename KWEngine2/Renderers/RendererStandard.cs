@@ -279,7 +279,7 @@ namespace KWEngine2.Renderers
 
                     GL.Uniform1(mUniform_Roughness, meshMaterial.Roughness);
                     GL.Uniform1(mUniform_Metalness, meshMaterial.Metalness);
-                    GL.Uniform2(mUniform_TextureTransform, meshMaterial.TextureAlbedo.UVTransform.X, meshMaterial.TextureAlbedo.UVTransform.Y);
+                    GL.Uniform2(mUniform_TextureTransform, meshMaterial.TextureAlbedo.UVTransform.X == 0 ? 1 : meshMaterial.TextureAlbedo.UVTransform.X, meshMaterial.TextureAlbedo.UVTransform.Y == 0 ? 1 : meshMaterial.TextureAlbedo.UVTransform.Y);
 
                     // albedo map:
                     int texId = meshMaterial.TextureAlbedo.OpenGLID;
