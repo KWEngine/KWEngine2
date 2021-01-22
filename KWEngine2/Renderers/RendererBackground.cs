@@ -15,6 +15,10 @@ namespace KWEngine2.Renderers
 {
     internal class RendererBackground : Renderer
     {
+        private int mUniformXYClip = -1;
+        private int mUniformXYOffset = -1;
+
+
         public override void Initialize()
         {
             Name = "Background";
@@ -58,6 +62,9 @@ namespace KWEngine2.Renderers
             mUniform_Texture = GL.GetUniformLocation(mProgramId, "uTextureDiffuse");
             mUniform_TintColor = GL.GetUniformLocation(mProgramId, "uTintColor");
             mUniform_TextureTransform = GL.GetUniformLocation(mProgramId, "uTextureTransform");
+
+            mUniformXYOffset = GL.GetUniformLocation(mProgramId, "uTextureOffset");
+            mUniformXYClip = GL.GetUniformLocation(mProgramId, "uTextureClip");
         }
 
         internal override void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum)
@@ -74,6 +81,9 @@ namespace KWEngine2.Renderers
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, KWEngine.CurrentWorld._textureBackground);
             GL.Uniform1(mUniform_Texture, 0);
+
+            GL.Uniform2(mUniformXYOffset, ref KWEngine.CurrentWorld._textureBackgroundOffset);
+            GL.Uniform2(mUniformXYClip, ref KWEngine.CurrentWorld._textureBackgroundClip);
 
             float ambient = KWEngine.CurrentWorld.GetSunColor().W > KWEngine.CurrentWorld.SunAmbientFactor ? KWEngine.CurrentWorld.GetSunColor().W : KWEngine.CurrentWorld.SunAmbientFactor;
             Vector4 skyColor = new Vector4(KWEngine.CurrentWorld.GetSunColor().X, KWEngine.CurrentWorld.GetSunColor().Y, KWEngine.CurrentWorld.GetSunColor().Z, ambient);

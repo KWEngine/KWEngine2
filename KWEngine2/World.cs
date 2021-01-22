@@ -56,6 +56,9 @@ namespace KWEngine2
         internal Matrix4 _skyboxRotation = Matrix4.Identity;
         internal Matrix4 _viewMatrixShadow = Matrix4.Identity;
 
+        internal Vector2 _textureBackgroundOffset = new Vector2(0, 0);
+        internal Vector2 _textureBackgroundClip = new Vector2(1, 1);
+
         /// <summary>
         /// Zentrum der Welt
         /// </summary>
@@ -172,16 +175,14 @@ namespace KWEngine2
         }
 
         internal int _textureBackground = -1;
-        internal Vector4 _textureBackgroundTint = new Vector4(1, 1, 1, 1);
         internal Vector2 _textureBackgroundTransform = new Vector2(1, 1);
         internal int _textureSkybox = -1;
 
-        internal void SetTextureBackgroundInternal(string filename, float repeatX = 1, float repeatY = 1, float red = 1, float green = 1, float blue = 1, float intensity = 1, bool isFile = true)
+        internal void SetTextureBackgroundInternal(string filename, float repeatX = 1, float repeatY = 1, float clipX = 1, float clipY = 1, bool isFile = true)
         {
             if (filename == null || filename.Length < 1)
             {
                 _textureBackground = -1;
-                _textureBackgroundTint = Vector4.Zero;
             }
             else
             {
@@ -195,12 +196,9 @@ namespace KWEngine2
                     _textureBackground = isFile ? HelperTexture.LoadTextureForBackgroundExternal(filename) : HelperTexture.LoadTextureForBackgroundInternal(filename);
                     KWEngine.CustomTextures[this].Add(filename, _textureBackground);
                 }
-                _textureBackgroundTint.X = HelperGL.Clamp(red, 0, 1);
-                _textureBackgroundTint.Y = HelperGL.Clamp(green, 0, 1);
-                _textureBackgroundTint.Z = HelperGL.Clamp(blue, 0, 1);
-                _textureBackgroundTint.W = HelperGL.Clamp(intensity, 0, 1);
-                _textureBackgroundTransform.X = HelperGL.Clamp(repeatX, 0.001f, 8192);
-                _textureBackgroundTransform.Y = HelperGL.Clamp(repeatY, 0.001f, 8192);
+                _textureBackgroundTransform = new Vector2(HelperGL.Clamp(repeatX, 0.001f, 8192), HelperGL.Clamp(repeatY, 0.001f, 8192));
+                _textureBackgroundClip = new Vector2(HelperGL.Clamp(clipX, 0, 1), HelperGL.Clamp(clipY, 0, 1));
+                _textureBackgroundOffset = new Vector2(0, 0);
                 _textureSkybox = -1;
             }
         }
@@ -211,17 +209,28 @@ namespace KWEngine2
         /// <param name="filename">Textur</param>
         /// <param name="repeatX">Wiederholung Breite</param>
         /// <param name="repeatY">Wiederholung Höhe</param>
+        /// <param name="clipX">Regelt, wie viel der Bildbreite genutzt wird (1 = 100%)</param>
+        /// <param name="clipY">Regelt, wie viel der Bildhöhe genutzt wird (1 = 100%)</param>
         /// <param name="isFile">false, falls der Pfad Teil der EXE-Datei ist</param>
-        public void SetTextureBackground(string filename, float repeatX = 1, float repeatY = 1, bool isFile = true)
+        public void SetTextureBackground(string filename, float repeatX = 1, float repeatY = 1, float clipX = 1, float clipY = 1, bool isFile = true)
         {
             if (GLWindow.CurrentWindow._multithreaded)
             {
-                Action a = () => SetTextureBackgroundInternal(filename, repeatX, repeatY, 1, 1, 1, 1, isFile);
+                Action a = () => SetTextureBackgroundInternal(filename, repeatX, repeatY, clipX, clipY, isFile);
                 HelperGLLoader.AddCall(this, a);
             }
             else
-                SetTextureBackgroundInternal(filename, repeatX, repeatY, 1, 1, 1, 1, isFile);
+                SetTextureBackgroundInternal(filename, repeatX, repeatY, clipX, clipY, isFile);
+        }
 
+        /// <summary>
+        /// Versetzt den sichtbaren Teil des Hintergrundbilds um die angegebene Menge
+        /// </summary>
+        /// <param name="x">Verschiebung nach links (negativer Wert) oder rechts (positiver Wert)</param>
+        /// <param name="y">Verschiebung nach oben (negativer Wert) oder unten (positiver Wert)</param>
+        public void SetTextureBackgroundOffset(float x, float y)
+        {
+            _textureBackgroundOffset = new Vector2(x, y);
         }
 
         /// <summary>
@@ -265,10 +274,6 @@ namespace KWEngine2
                 {
                     _textureSkybox = HelperTexture.LoadTextureSkybox(filename, !isFile);
                 }
-                _textureBackgroundTint.X = HelperGL.Clamp(red, 0, 1);
-                _textureBackgroundTint.Y = HelperGL.Clamp(green, 0, 1);
-                _textureBackgroundTint.Z = HelperGL.Clamp(blue, 0, 1);
-                _textureBackgroundTint.W = HelperGL.Clamp(intensity, 0, 1);
                 _textureBackground = -1;
             }
         }
