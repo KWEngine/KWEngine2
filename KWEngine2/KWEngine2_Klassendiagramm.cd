@@ -171,7 +171,9 @@
       <Field Name="_sunTarget" Hidden="true" />
       <Field Name="_sweepTestAxisIndex" Hidden="true" />
       <Field Name="_textureBackground" Hidden="true" />
-      <Field Name="_textureBackgroundTint" Hidden="true" />
+      <Field Name="_textureBackgroundClip" Hidden="true" />
+      <Field Name="_textureBackgroundMultiplier" Hidden="true" />
+      <Field Name="_textureBackgroundOffset" Hidden="true" />
       <Field Name="_textureBackgroundTransform" Hidden="true" />
       <Field Name="_textureSkybox" Hidden="true" />
       <Field Name="_viewMatrixShadow" Hidden="true" />
@@ -189,14 +191,13 @@
       <Method Name="UpdateCameraLookAtVector" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>BIDgWFqCIDiBSgJIAWWQAAhDaA4VqzI0KRLPElDubMY=</HashCode>
+      <HashCode>BIDgWFqCIDiBSgJIAWWSAAhDaA4XqzI0KRLPElDubsY=</HashCode>
       <FileName>World.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="KWEngine2.GameObjects.GameObject">
     <Position X="11.5" Y="3" Width="3.25" />
     <Members>
-      <Field Name="_albedoTextureOverride" Hidden="true" />
       <Field Name="_animationId" Hidden="true" />
       <Field Name="_animationPercentage" Hidden="true" />
       <Field Name="_collisionCandidates" Hidden="true" />
@@ -206,17 +207,14 @@
       <Field Name="_glow" Hidden="true" />
       <Field Name="_largestHitboxIndex" Hidden="true" />
       <Field Name="_lookAtVector" Hidden="true" />
+      <Field Name="_materials" Hidden="true" />
       <Field Name="_meshNameList" Hidden="true" />
-      <Field Name="_metalness" Hidden="true" />
-      <Field Name="_metalnessOverride" Hidden="true" />
       <Field Name="_model" Hidden="true" />
       <Field Name="_modelMatrix" Hidden="true" />
       <Field Name="_name" Hidden="true" />
       <Field Name="_opacity" Hidden="true" />
       <Field Name="_position" Hidden="true" />
       <Field Name="_rotation" Hidden="true" />
-      <Field Name="_roughness" Hidden="true" />
-      <Field Name="_roughnessOverride" Hidden="true" />
       <Field Name="_scale" Hidden="true" />
       <Field Name="_sceneCenter" Hidden="true" />
       <Field Name="_sceneDiameter" Hidden="true" />
@@ -232,13 +230,13 @@
       <Method Name="CheckIfNotTerrain" Hidden="true" />
       <Method Name="CheckModel" Hidden="true" />
       <Method Name="CheckModelAndWorld" Hidden="true" />
+      <Method Name="CopyMaterialsFromMeshes" Hidden="true" />
       <Method Name="CreateModelMatrix" Hidden="true" />
       <Property Name="DistanceToCamera" Hidden="true" />
       <Method Name="Get3DMouseCoords" Hidden="true" />
       <Method Name="GetExtentsForAxis" Hidden="true" />
       <Method Name="GetLargestHitbox" Hidden="true" />
       <Method Name="GetRotationNoFPSMode" Hidden="true" />
-      <Method Name="GetTextureSet" Hidden="true" />
       <Field Name="Hitboxes" Hidden="true" />
       <Method Name="IntersectRaySphere" Hidden="true" />
       <Method Name="IsCubeOrSphere" Hidden="true" />
@@ -246,7 +244,6 @@
       <Property Name="LeftRightMost" Hidden="true" />
       <Method Name="LinePlaneIntersection" Hidden="true" />
       <Field Name="ModelMatrixForRenderPass" Hidden="true" />
-      <Field Name="mTextureSet" Hidden="true" />
       <Method Name="ProcessCurrentAnimation" Hidden="true" />
       <Method Name="ReadNodeHierarchy" Hidden="true" />
       <Method Name="SetTextureInternal" Hidden="true" />
@@ -256,13 +253,13 @@
       <Method Name="UpdateModelMatrixAndHitboxes" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>QmHKuhpD2KEgWLX0JhLM3RRAkLomj8zZHZoIxgDoSfQ=</HashCode>
+      <HashCode>QmHKvhpC2KEgULX0JhLN1QRAkLomj8zZGZoIxgBoSfQ=</HashCode>
       <FileName>GameObjects\GameObject.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="KWEngine2.GameObjects.Explosion">
-    <Position X="8.5" Y="15.25" Width="2.75" />
+    <Position X="8.5" Y="15.75" Width="2.75" />
     <Members>
       <Field Name="_algorithm" Hidden="true" />
       <Field Name="_amount" Hidden="true" />
