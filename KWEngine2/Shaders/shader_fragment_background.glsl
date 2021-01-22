@@ -10,7 +10,7 @@ out     vec4 bloom;
  
 void main()
 {
-    color = texture(uTextureDiffuse, vTexture) * uTintColor * uTintColor.w;
+    color = texture(uTextureDiffuse, vTexture) * vec4(uTintColor.xyz * uTintColor.w, 1.0);
     color.w = 1.0;
     bloom = vec4(0);
 }

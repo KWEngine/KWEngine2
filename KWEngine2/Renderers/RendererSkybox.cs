@@ -89,8 +89,8 @@ namespace KWEngine2.Renderers
             GL.BindTexture(TextureTarget.TextureCubeMap, KWEngine.CurrentWorld._textureSkybox);
             GL.Uniform1(mUniform_Texture, 0);
 
-            float ambient = KWEngine.CurrentWorld.GetSunColor().W > KWEngine.CurrentWorld.SunAmbientFactor ? KWEngine.CurrentWorld.GetSunColor().W : KWEngine.CurrentWorld.SunAmbientFactor;
-            Vector4 skyColor = new Vector4(KWEngine.CurrentWorld.GetSunColor().X, KWEngine.CurrentWorld.GetSunColor().Y, KWEngine.CurrentWorld.GetSunColor().Z, ambient);
+            float ambient = KWEngine.CurrentWorld.GetSunColor().W + KWEngine.CurrentWorld.SunAmbientFactor;
+            Vector4 skyColor = new Vector4(KWEngine.CurrentWorld.GetSunColor().X, KWEngine.CurrentWorld.GetSunColor().Y, KWEngine.CurrentWorld.GetSunColor().Z, ambient * KWEngine.CurrentWorld._textureBackgroundMultiplier);
             GL.Uniform4(mUniform_TintColor, ref skyColor);
 
             GeoMesh mesh = KWEngine.Models["KWCube"].Meshes.Values.ElementAt(0);

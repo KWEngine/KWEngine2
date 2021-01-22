@@ -85,8 +85,8 @@ namespace KWEngine2.Renderers
             GL.Uniform2(mUniformXYOffset, ref KWEngine.CurrentWorld._textureBackgroundOffset);
             GL.Uniform2(mUniformXYClip, ref KWEngine.CurrentWorld._textureBackgroundClip);
 
-            float ambient = KWEngine.CurrentWorld.GetSunColor().W > KWEngine.CurrentWorld.SunAmbientFactor ? KWEngine.CurrentWorld.GetSunColor().W : KWEngine.CurrentWorld.SunAmbientFactor;
-            Vector4 skyColor = new Vector4(KWEngine.CurrentWorld.GetSunColor().X, KWEngine.CurrentWorld.GetSunColor().Y, KWEngine.CurrentWorld.GetSunColor().Z, ambient);
+            float ambient = KWEngine.CurrentWorld.GetSunColor().W + KWEngine.CurrentWorld.SunAmbientFactor;
+            Vector4 skyColor = new Vector4(KWEngine.CurrentWorld.GetSunColor().X, KWEngine.CurrentWorld.GetSunColor().Y, KWEngine.CurrentWorld.GetSunColor().Z, ambient * KWEngine.CurrentWorld._textureBackgroundMultiplier);
             GL.Uniform4(mUniform_TintColor, ref skyColor);
             GL.Uniform2(mUniform_TextureTransform, ref KWEngine.CurrentWorld._textureBackgroundTransform);
 

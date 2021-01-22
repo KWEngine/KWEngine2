@@ -233,6 +233,16 @@ namespace KWEngine2
             _textureBackgroundOffset = new Vector2(x, y);
         }
 
+        internal float _textureBackgroundMultiplier = 1;
+        /// <summary>
+        /// Verstärkt die Helligkeit des Hintergrundbilds (2D und 3D-Skybox)
+        /// </summary>
+        /// <param name="m">Verstärkung der Helligkeit (0.0 bis 2.0) - Standardwert: 1</param>
+        public void SetTextureBackgroundBrightnessMultiplier(float m)
+        {
+            _textureBackgroundMultiplier = HelperGL.Clamp(m, 0, 2);
+        }
+
         /// <summary>
         /// Setzt das 3D-Hintergrundbild
         /// </summary>
