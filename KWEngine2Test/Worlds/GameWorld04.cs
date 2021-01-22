@@ -37,6 +37,8 @@ namespace KWEngine2Test.Worlds
             KWEngine.LoadModelFromFile("Platform02", @".\Models\JumpAndRun\Platform02.obj");
 
             SetTextureBackground(@".\Textures\bg_greenmountains.png", 1, 1);
+            SetTextureBackgroundBrightnessMultiplier(0.75f);
+            SetSunColor(1, 1, 1, 1);
             WorldDistance = 1000;
 
             SetCameraPosition(0, 0, 50);

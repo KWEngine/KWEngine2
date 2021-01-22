@@ -294,7 +294,7 @@ namespace KWEngine2
         private Vector3 _cameraLookAt = new Vector3(0, 0, 1);
         private Vector3 _sunPosition = new Vector3(50, 50, 50);
         private Vector3 _sunTarget = new Vector3(0, 0, 0);
-        private Vector4 _sunColor = new Vector4(1, 1, 1, 1);
+        private Vector4 _sunColor = new Vector4(1, 1, 1, 0.75f);
         private float _sunAmbient = 0.25f;
 
         private float _fov = 45f;
