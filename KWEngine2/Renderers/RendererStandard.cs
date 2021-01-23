@@ -237,11 +237,9 @@ namespace KWEngine2.Renderers
                     Matrix4 modelViewProjectionMatrixBiased = g.ModelMatrixForRenderPass[index] * viewProjectionShadowBiased;
                     GL.UniformMatrix4(mUniform_MVPShadowMap, false, ref modelViewProjectionMatrixBiased);
 
-                    if (lightShadow >= 0)
-                    {
-                        Matrix4 modelViewProjectionMatrixBiased2 = g.ModelMatrixForRenderPass[index] * viewProjectionShadowBiased2;
-                        GL.UniformMatrix4(mUniform_MVPShadowMap2, false, ref modelViewProjectionMatrixBiased2);
-                    }
+                    Matrix4 modelViewProjectionMatrixBiased2 = lightShadow >= 0 ? g.ModelMatrixForRenderPass[index] * viewProjectionShadowBiased2 : Matrix4.Identity;
+                    GL.UniformMatrix4(mUniform_MVPShadowMap2, false, ref modelViewProjectionMatrixBiased2);
+
                     index++;
 
 
@@ -333,7 +331,7 @@ namespace KWEngine2.Renderers
                         {
                             GL.BindTexture(TextureTarget.Texture2D, meshMaterial.TextureMetalness.OpenGLID);
                             GL.Uniform1(mUniform_TextureRoughnessMap, 2);
-                            GL.Uniform1(mUniform_TextureUseRoughnessMap, 1);
+                            GL.Uniform1(mUniform_TextureUseRoughnessMap, 0);
                             GL.Uniform1(mUniform_TextureRoughnessIsSpecular, 1);
                         }
                         else

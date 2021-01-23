@@ -17,7 +17,7 @@ namespace KWEngine2Test
                   4)                                // anisotropic filtering (1 to 16)
         {
             KWEngine.PostProcessQuality = PostProcessingQuality.Standard;
-            SetWorld(new GameWorldStart());
+            SetWorld(new GameWorldPBRTest());
         }
     }
 }

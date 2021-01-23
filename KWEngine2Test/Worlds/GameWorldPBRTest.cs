@@ -197,6 +197,7 @@ namespace KWEngine2Test.Worlds
             floor2.IsCollisionObject = true;
             floor2.IsShadowCaster = true;
             floor2.SetPosition(5, 0, 5);
+            floor2.SetRoughness(0);
             floor2.SetTexture(@".\textures\sand_normal.jpg", TextureType.Normal);
             AddGameObject(floor2);
         }
