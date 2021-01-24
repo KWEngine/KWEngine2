@@ -329,7 +329,7 @@ namespace KWEngine2.Renderers
                     {
                         if (meshMaterial.TextureRoughnessInMetalness && meshMaterial.TextureMetalness.OpenGLID > 0)
                         {
-                            GL.BindTexture(TextureTarget.Texture2D, meshMaterial.TextureMetalness.OpenGLID);
+                            GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureWhite);
                             GL.Uniform1(mUniform_TextureRoughnessMap, 2);
                             GL.Uniform1(mUniform_TextureUseRoughnessMap, 0);
                             GL.Uniform1(mUniform_TextureRoughnessIsSpecular, 1);
@@ -350,7 +350,7 @@ namespace KWEngine2.Renderers
                     {
                         GL.BindTexture(TextureTarget.Texture2D, meshMaterial.TextureMetalness.OpenGLID);
                         GL.Uniform1(mUniform_TextureMetalnessMap, 3);
-                        GL.Uniform1(mUniform_TextureUseMetalnessMap, 1);
+                        GL.Uniform1(mUniform_TextureUseMetalnessMap, 0);
                     }
                     else
                     {

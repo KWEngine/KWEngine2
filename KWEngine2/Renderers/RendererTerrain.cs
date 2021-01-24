@@ -292,17 +292,29 @@ namespace KWEngine2.Renderers
                     GL.ActiveTexture(TextureUnit.Texture2);
                     if (meshMaterial.TextureRoughness.OpenGLID > 0)
                     {
+
                         GL.BindTexture(TextureTarget.Texture2D, meshMaterial.TextureRoughness.OpenGLID);
                         GL.Uniform1(mUniform_TextureRoughnessMap, 2);
                         GL.Uniform1(mUniform_TextureUseRoughnessMap, 1);
-                        GL.Uniform1(mUniform_TextureRoughnessIsSpecular, 0);
+                        GL.Uniform1(mUniform_TextureRoughnessIsSpecular, meshMaterial.TextureRoughnessIsSpecular ? 1 : 0);
                     }
                     else
                     {
-                        GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureWhite);
-                        GL.Uniform1(mUniform_TextureRoughnessMap, 2);
-                        GL.Uniform1(mUniform_TextureUseRoughnessMap, 0);
-                        GL.Uniform1(mUniform_TextureRoughnessIsSpecular, 0);
+                        if (meshMaterial.TextureRoughnessInMetalness && meshMaterial.TextureMetalness.OpenGLID > 0)
+                        {
+                            GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureWhite);
+                            GL.Uniform1(mUniform_TextureRoughnessMap, 2);
+                            GL.Uniform1(mUniform_TextureUseRoughnessMap, 0);
+                            GL.Uniform1(mUniform_TextureRoughnessIsSpecular, 1);
+                        }
+                        else
+                        {
+                            GL.BindTexture(TextureTarget.Texture2D, KWEngine.TextureWhite);
+                            GL.Uniform1(mUniform_TextureRoughnessMap, 2);
+                            GL.Uniform1(mUniform_TextureUseRoughnessMap, 0);
+                            GL.Uniform1(mUniform_TextureRoughnessIsSpecular, 0);
+                        }
+
                     }
 
                     // metalness map:

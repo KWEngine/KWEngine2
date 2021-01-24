@@ -178,6 +178,7 @@ void main()
 
 	// Metalness / Reflections:
 	vec3 refl = vec3(0.22 * uSunIntensity.xyz * uSunAmbient);
+	vec3 metalnessTextureLookup = vec3(0);
 	if(uUseTextureSkybox > 0)
 	{
 		vec3 reflectedCameraSurfaceNormal = reflect(-fragmentToCamera, theNormal);
@@ -187,8 +188,8 @@ void main()
 	vec3 metalness = vec3(uMetalness);
 	if(uUseTextureMetalness > 0)
 	{
-		vec3 metaltmp = texture(uTextureMetalness, vTexture).xyz;
-		metalness = vec3((metaltmp.x + metaltmp.y + metaltmp.z) / 3.0);
+		metalnessTextureLookup = texture(uTextureMetalness, vTexture).xyz;
+		metalness = metalnessTextureLookup;
 	}
 	reflection *= metalness;
 	reflection = min(refl, reflection);
@@ -199,11 +200,17 @@ void main()
 	float roughness = uRoughness;
 	if(uUseTextureRoughness > 0)
 	{
-		vec3 roughnessRGB = texture(uTextureRoughness, vTexture).xyz;
-		roughness = (roughnessRGB.x + roughnessRGB.y + roughnessRGB.z) / 3.0;
+		roughness = texture(uTextureRoughness, vTexture).x;
 		if(uUseTextureRoughnessIsSpecular > 0)
 		{
 			roughness = 1.0 - roughness;
+		}
+	}
+	else
+	{
+		if(uUseTextureRoughness == 0 && uUseTextureRoughnessIsSpecular > 0)
+		{
+			roughness = 1.0 - (metalnessTextureLookup.x + metalnessTextureLookup.y + metalnessTextureLookup.z) * 0.333333;
 		}
 	}
 	float roughnessInverted = 1.0 - roughness;
