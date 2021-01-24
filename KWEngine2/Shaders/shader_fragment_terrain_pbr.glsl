@@ -111,6 +111,15 @@ float calculateDarkening(float cosTheta, vec4 shadowCoord, float coefficient, sa
 	return darkening;
 }
 
+vec3 getSpecularComponent(vec3 theNormal, vec3 fragmentToLight, float roughnessInverted, float distanceFactor, int i, vec3 fragmentToCamera)
+{
+	return 
+		distanceFactor 
+		* roughnessInverted 
+		* (i >= 0 ? uLightsColors[i].xyz * uLightsColors[i].w : uSunIntensity.xyz * uSunIntensity.w)
+		* pow(max(0.0, dot(reflect(-fragmentToLight, theNormal), fragmentToCamera)), roughnessInverted * 4096.0);
+}
+
 void main()
 {
 	vec3 albedo = vec3(1.0);
@@ -177,7 +186,7 @@ void main()
 
 
 	// Metalness / Reflections:
-	vec3 refl = vec3(0.22 * uSunIntensity.xyz * uSunAmbient);
+	vec3 refl = vec3(0.22 * uSunIntensity.xyz * max(uSunAmbient, uSunIntensity.w));
 	vec3 metalnessTextureLookup = vec3(0);
 	if(uUseTextureSkybox > 0)
 	{
@@ -267,10 +276,7 @@ void main()
 				rgbSpecularCurrentLight *= microFacetContributionCurrentLight;
 				rgbSpecularCurrentLight = min(uLightsColors[i].xyz * uLightsColors[i].w, rgbSpecularCurrentLight) ; // conservation of energy
 
-				//calculate specular reflections from sun on surface:
-				vec3 reflectionVector = reflect(-fragmentToCurrentLightNormalized, theNormal);
-				float specular = max(roughnessInverted * distanceFactor * uLightsColors[i].w * pow(max(0.0, dot(fragmentToCamera, reflectionVector)), roughnessInverted * 2048.0), 0.0);
-				rgbSpecularCurrentLight += (uSunIntensity.xyz * specular);
+				rgbSpecularCurrentLight += getSpecularComponent(theNormal, fragmentToCurrentLightNormalized, roughnessInverted, distanceFactor, i, fragmentToCamera);
 			}
 
 			colorComponentIntensityTotalFromLights += uLightsColors[i].xyz * uLightsColors[i].w * currentLightIntensity * darkeningCurrentLight;
@@ -291,9 +297,7 @@ void main()
 		rgbSpecular = min(uSunIntensity.xyz * uSunIntensity.w, rgbSpecular) ; // conservation of energy
 
 		//calculate specular reflections from sun on surface:
-		vec3 reflectionVector = reflect(-fragmentToSun, theNormal);
-		float specular = max(roughnessInverted * uSunIntensity.w * pow(max(0.0, dot(fragmentToCamera, reflectionVector)), roughnessInverted * 2048.0), 0.0);
-		rgbSpecular += (uSunIntensity.xyz * specular);
+		rgbSpecular += getSpecularComponent(theNormal, fragmentToSun, roughnessInverted, 1.0, -1, fragmentToCamera);
 
 		rgbFragment += rgbSpecular;
 	}
@@ -313,7 +317,7 @@ void main()
 	color.w = uOpacity;
 
 	vec3 addedBloom = vec3(max(rgbFragment.x - 1.0, 0.0), max(rgbFragment.y - 1.0, 0.0), max(rgbFragment.z - 1.0, 0.0));
-	addedBloom /= 10.0;
+	addedBloom *= 0.1;
 	bloom.x = addedBloom.x + uGlow.x * uGlow.w + uOutline.x * dotOutline * 0.15 + emissive.x * 0.125;
 	bloom.y = addedBloom.y + uGlow.y * uGlow.w + uOutline.y * dotOutline * 0.15 + emissive.y * 0.125;
 	bloom.z = addedBloom.z + uGlow.z * uGlow.w + uOutline.z * dotOutline * 0.15 + emissive.z * 0.125;
