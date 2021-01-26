@@ -79,8 +79,6 @@ namespace KWEngine2.Renderers
         protected int mUniform_uCameraDirection = -1;
 
         protected int mUniform_EmissiveColor = -1;
-        protected int mUniform_SpecularPower = -1;
-        protected int mUniform_SpecularArea = -1;
 
         protected int mUniform_LightsColors = -1;
         protected int mUniform_LightsPositions = -1;
@@ -93,6 +91,8 @@ namespace KWEngine2.Renderers
         protected int mUniform_TextureUseLightMap = -1;
         protected int mUniform_TextureHUDOffset = -1;
         protected int mUniform_TextureHUDIsText = -1;
+
+        protected int mUniform_SpecularReflectionFactor = -1;
 
         public Renderer()
         {
@@ -257,17 +257,7 @@ namespace KWEngine2.Renderers
         {
             return mUniform_BaseColor;
         }
-
-        public int GetUniformSpecularPower()
-        {
-            return mUniform_SpecularPower;
-        }
-
-        public int GetUniformSpecularArea()
-        {
-            return mUniform_SpecularArea;
-        }
-
+     
         public int GetUniformEmissive()
         {
             return mUniform_EmissiveColor;

@@ -33,6 +33,8 @@ uniform sampler2D uTextureDiffuseB;
 uniform sampler2D uTextureDiffuseBlend;
 uniform int uTextureUseBlend;
 
+uniform int uSpecularReflectionFactor;
+
 uniform sampler2DShadow uTextureShadowMap;
 uniform sampler2DShadow uTextureShadowMap2;
 
@@ -113,12 +115,16 @@ float calculateDarkening(float cosTheta, vec4 shadowCoord, float coefficient, sa
 
 vec3 getSpecularComponent(vec3 theNormal, vec3 fragmentToLight, float roughnessInverted, float distanceFactor, int i, vec3 fragmentToCamera)
 {
+	vec3 reflectVector = reflect(-fragmentToLight, theNormal);
+	float dotReflectionCamera = pow(max(dot(reflectVector, fragmentToCamera), 0.0), 2.0);
 	return 
-		distanceFactor 
+		  distanceFactor 
+		* dotReflectionCamera
 		* roughnessInverted 
 		* (i >= 0 ? uLightsColors[i].xyz * uLightsColors[i].w : uSunIntensity.xyz * uSunIntensity.w)
-		* pow(max(0.0, dot(reflect(-fragmentToLight, theNormal), fragmentToCamera)), roughnessInverted * 4096.0);
+		* pow(max(dot(reflectVector, fragmentToCamera), 0.0), (roughnessInverted * roughnessInverted) * 8192.0);
 }
+
 
 void main()
 {
@@ -275,7 +281,9 @@ void main()
 				rgbSpecularCurrentLight = uLightsColors[i].xyz * uLightsColors[i].w * clamp(distanceFactor * 10, 0.0, 1.0) * differenceLightDirectionAndFragmentDirection;
 				rgbSpecularCurrentLight *= microFacetContributionCurrentLight;
 				rgbSpecularCurrentLight = min(uLightsColors[i].xyz * uLightsColors[i].w, rgbSpecularCurrentLight) ; // conservation of energy
-
+			}
+			if(uSpecularReflectionFactor > 0)
+			{	
 				rgbSpecularCurrentLight += getSpecularComponent(theNormal, fragmentToCurrentLightNormalized, roughnessInverted, distanceFactor, i, fragmentToCamera);
 			}
 
@@ -290,17 +298,23 @@ void main()
 	vec3 rgbFragment = albedo * (1.0 - metalness) + emissive;
 
 	vec3 rgbSpecular = vec3(0.0);
-	if(dotSunSurface > 0 && darkeningSun > 0 && uSunAffection > 0)
+	if(darkeningSun > 0 && uSunAffection > 0)
 	{
-		rgbSpecular = uSunIntensity.xyz * uSunIntensity.w;
-		rgbSpecular *= roughnessCalculated;
-		rgbSpecular = min(uSunIntensity.xyz * uSunIntensity.w, rgbSpecular) ; // conservation of energy
+		if(dotSunSurface > 0)
+		{
+			rgbSpecular = uSunIntensity.xyz * uSunIntensity.w;
+			rgbSpecular *= roughnessCalculated;
+			rgbSpecular = min(uSunIntensity.xyz * uSunIntensity.w, rgbSpecular) ; // conservation of energy
+		}
 
 		//calculate specular reflections from sun on surface:
-		rgbSpecular += getSpecularComponent(theNormal, fragmentToSun, roughnessInverted, 1.0, -1, fragmentToCamera);
-
-		rgbFragment += rgbSpecular;
+		if(uSpecularReflectionFactor > 0)
+		{
+			rgbSpecular += getSpecularComponent(theNormal, fragmentToSun, roughnessInverted, 1.0, -1, fragmentToCamera);
+		}
 	}
+
+	rgbFragment += rgbSpecular;
 	rgbFragment += colorComponentSpecularTotalFromLights;
 
 	// check sun light intensity:

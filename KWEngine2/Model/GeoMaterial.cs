@@ -21,31 +21,12 @@ namespace KWEngine2.Model
 
         public float Metalness;
         public float Roughness;
+        public bool SpecularReflection;
 
         public bool TextureRoughnessIsSpecular;
         public bool TextureRoughnessInMetalness;
 
-        /*
-        public GeoMaterial(string name)
-        {
-            BlendMode = BlendingFactor.OneMinusSrcAlpha;
-            ColorEmissive = new Vector4(0, 0, 0, 0);
-            ColorAlbedo = new Vector4(1, 1, 1, 1);
-            Opacity = 1;
-            TextureAlbedo = new GeoTexture();
-            TextureNormal = new GeoTexture();
-            TextureMetalness = new GeoTexture();
-            TextureRoughness = new GeoTexture();
-            Metalness = 0;
-            Roughness = 1;
-            TextureEmissive = new GeoTexture();
-            TextureLight = new GeoTexture();
-            TextureRoughnessInMetalness = false;
-            TextureRoughnessIsSpecular = false;
-            Name = name;
-        }
-        */
-     
+    
         public void SetTexture(string texture, TextureType type, int id)
         {
             if (type == TextureType.Albedo)

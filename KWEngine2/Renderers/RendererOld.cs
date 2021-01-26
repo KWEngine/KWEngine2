@@ -106,8 +106,8 @@ namespace KWEngine2.Renderers
             mUniform_TintColor = GL.GetUniformLocation(mProgramId, "uTintColor");
             mUniform_EmissiveColor = GL.GetUniformLocation(mProgramId, "uEmissiveColor");
 
-            mUniform_SpecularArea = GL.GetUniformLocation(mProgramId, "uSpecularArea");
-            mUniform_SpecularPower = GL.GetUniformLocation(mProgramId, "uSpecularPower");
+            //mUniform_SpecularArea = GL.GetUniformLocation(mProgramId, "uSpecularArea");
+            //mUniform_SpecularPower = GL.GetUniformLocation(mProgramId, "uSpecularPower");
 
             mUniform_uCameraPos = GL.GetUniformLocation(mProgramId, "uCameraPos");
             mUniform_uCameraDirection = GL.GetUniformLocation(mProgramId, "uCameraDirection");

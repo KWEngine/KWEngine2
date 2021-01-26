@@ -133,6 +133,8 @@ namespace KWEngine2.Renderers
 
             mUniform_TextureSkybox = GL.GetUniformLocation(mProgramId, "uTextureSkybox");
             mUniform_TextureIsSkybox = GL.GetUniformLocation(mProgramId, "uUseTextureSkybox");
+
+            mUniform_SpecularReflectionFactor = GL.GetUniformLocation(mProgramId, "uSpecularReflectionFactor");
         }
 
         internal override void Draw(GameObject g, ref Matrix4 viewProjection, ref Matrix4 viewProjectionShadowBiased, ref Matrix4 viewProjectionShadowBiased2, HelperFrustum frustum, ref float[] lightColors, ref float[] lightTargets, ref float[] lightPositions, int lightCount, ref int lightShadow)
@@ -249,6 +251,7 @@ namespace KWEngine2.Renderers
 
                     GL.Uniform1(mUniform_Roughness, meshMaterial.Roughness);
                     GL.Uniform1(mUniform_Metalness, meshMaterial.Metalness);
+                    GL.Uniform1(mUniform_SpecularReflectionFactor, meshMaterial.SpecularReflection ? 1 : 0);
 
                     // TODO: Check if overrides exist
                     GL.Uniform2(mUniform_TextureTransform, mesh.Terrain.mTexX, mesh.Terrain.mTexY);

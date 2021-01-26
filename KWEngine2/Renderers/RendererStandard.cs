@@ -112,9 +112,6 @@ namespace KWEngine2.Renderers
             mUniform_TintColor = GL.GetUniformLocation(mProgramId, "uTintColor");
             mUniform_EmissiveColor = GL.GetUniformLocation(mProgramId, "uEmissiveColor");
 
-            mUniform_SpecularArea = GL.GetUniformLocation(mProgramId, "uSpecularArea");
-            mUniform_SpecularPower = GL.GetUniformLocation(mProgramId, "uSpecularPower");
-
             mUniform_uCameraPos = GL.GetUniformLocation(mProgramId, "uCameraPos");
             mUniform_uCameraDirection = GL.GetUniformLocation(mProgramId, "uCameraDirection");
 
@@ -134,6 +131,8 @@ namespace KWEngine2.Renderers
 
             mUniform_TextureSkybox = GL.GetUniformLocation(mProgramId, "uTextureSkybox");
             mUniform_TextureIsSkybox = GL.GetUniformLocation(mProgramId, "uUseTextureSkybox");
+
+            mUniform_SpecularReflectionFactor = GL.GetUniformLocation(mProgramId, "uSpecularReflectionFactor");
         }
 
         internal override void Draw(GameObject g, ref Matrix4 viewProjection, ref Matrix4 viewProjectionShadowBiased, ref Matrix4 viewProjectionShadowBiased2, HelperFrustum frustum, ref float[] lightColors, ref float[] lightTargets, ref float[] lightPositions, int lightCount, ref int lightShadow)
@@ -278,6 +277,7 @@ namespace KWEngine2.Renderers
 
                     GL.Uniform1(mUniform_Roughness, meshMaterial.Roughness);
                     GL.Uniform1(mUniform_Metalness, meshMaterial.Metalness);
+                    GL.Uniform1(mUniform_SpecularReflectionFactor, meshMaterial.SpecularReflection ? 1 : 0);
                     GL.Uniform2(mUniform_TextureTransform, meshMaterial.TextureAlbedo.UVTransform.X == 0 ? 1 : meshMaterial.TextureAlbedo.UVTransform.X, meshMaterial.TextureAlbedo.UVTransform.Y == 0 ? 1 : meshMaterial.TextureAlbedo.UVTransform.Y);
 
                     // albedo map:
@@ -350,7 +350,7 @@ namespace KWEngine2.Renderers
                     {
                         GL.BindTexture(TextureTarget.Texture2D, meshMaterial.TextureMetalness.OpenGLID);
                         GL.Uniform1(mUniform_TextureMetalnessMap, 3);
-                        GL.Uniform1(mUniform_TextureUseMetalnessMap, 0);
+                        GL.Uniform1(mUniform_TextureUseMetalnessMap, 1);
                     }
                     else
                     {

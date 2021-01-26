@@ -1677,6 +1677,30 @@ namespace KWEngine2.GameObjects
         }
 
         /// <summary>
+        /// Aktiviert Lichtreflexionen bei glatten Oberflächen (niedrige Roughness)
+        /// </summary>
+        /// <param name="enabled">true (an), false  (aus)</param>
+        public void SetSpecularReflectionEnabled(bool enabled)
+        {
+            if (Model == null)
+                throw new Exception("Cannot set roughness - model is not set.");
+
+            if (Model.IsTerrain)
+            {
+                GeoMaterial terrainMaterial = Model.Meshes.Values.ElementAt(0).Material;
+                terrainMaterial.SpecularReflection = enabled;
+                Model.Meshes.Values.ElementAt(0).Material = terrainMaterial;
+            }
+            else
+            {
+                for (int i = 0; i < _materials.Length; i++)
+                {
+                    _materials[i].SpecularReflection = enabled;
+                }
+            }
+        }
+
+        /// <summary>
         /// Setzt die Rauheit der Objektoberfläche
         /// </summary>
         /// <param name="r">Rauheitsfaktor (Werte zwischen 0 und 1 sind erlaubt)</param>
