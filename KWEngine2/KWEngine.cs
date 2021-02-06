@@ -34,6 +34,29 @@ namespace KWEngine2
     }
 
     /// <summary>
+    /// Schriftart der HUD-Objekte
+    /// </summary>
+    public enum FontFace
+    {
+        /// <summary>
+        /// "Anonymous" (Standardschriftart)
+        /// </summary>
+        Anonymous = 0,
+        /// <summary>
+        /// "Major Mono Display"
+        /// </summary>
+        MajorMonoDisplay = 1,
+        /// <summary>
+        /// "Nova Mono"
+        /// </summary>
+        NovaMono = 2,
+        /// <summary>
+        /// "Xanh Mono"
+        /// </summary>
+        XanhMono = 3
+    }
+
+    /// <summary>
     /// Einheit zur Anzeige der Frame-Performance
     /// </summary>
     public enum PerformanceUnit
@@ -272,11 +295,7 @@ namespace KWEngine2
 
         internal static PrivateFontCollection Collection = new PrivateFontCollection();
 
-        /// <summary>
-        /// Schriftart der Engine
-        /// </summary>
-        public static int Font { get; internal set; } = 0;
-        internal static int[] FontTextureArray { get; set; } = new int[3];
+        internal static int[] FontTextureArray { get; set; } = new int[4];
 
         internal static void InitializeFont(string filename, int index)
         {
@@ -288,21 +307,7 @@ namespace KWEngine2
             FontTextureArray[index] = textureId;
         }
 
-        /// <summary>
-        /// Setzt die Schriftart der Engine
-        /// </summary>
-        /// <param name="index">Gültige Werte: 0-2</param>
-        public static void SetFont(int index)
-        {
-            if(index >= 0 && index <= 2)
-            {
-                Font = index;
-            }
-            else
-            {
-                throw new Exception("Font index out of bounds. Please use a font index 0 <= n <= 2");
-            }
-        }
+        
 
 
         internal static Dictionary<string, Renderer> Renderers { get; set; } = new Dictionary<string, Renderer>();

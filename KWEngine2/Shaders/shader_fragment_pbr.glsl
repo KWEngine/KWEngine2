@@ -198,7 +198,7 @@ void main()
 	if(uUseTextureMetalness > 0)
 	{
 		metalnessTextureLookup = texture(uTextureMetalness, vTexture).xyz;
-		metalness = metalnessTextureLookup;
+		metalness = vec3(metalnessTextureLookup.z);
 	}
 	reflection *= metalness;
 	reflection = min(refl, reflection);
@@ -209,7 +209,7 @@ void main()
 	float roughness = uRoughness;
 	if(uUseTextureRoughness > 0)
 	{
-		roughness = texture(uTextureRoughness, vTexture).x;
+		roughness = texture(uTextureRoughness, vTexture).y;
 		if(uUseTextureRoughnessIsSpecular > 0)
 		{
 			roughness = 1.0 - roughness;
@@ -217,9 +217,9 @@ void main()
 	}
 	else
 	{
-		if(uUseTextureRoughness == 0 && uUseTextureRoughnessIsSpecular > 0)
+		if(uUseTextureRoughnessIsSpecular > 0)
 		{
-			roughness = 1.0 - (metalnessTextureLookup.x + metalnessTextureLookup.y + metalnessTextureLookup.z) * 0.333333;
+			roughness = metalnessTextureLookup.y;
 		}
 	}
 	float roughnessInverted = 1.0 - roughness;

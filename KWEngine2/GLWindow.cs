@@ -197,6 +197,7 @@ namespace KWEngine2
             KWEngine.InitializeFont("anonymous.dds", 0);
             KWEngine.InitializeFont("anonymous2.dds", 1);
             KWEngine.InitializeFont("anonymous3.dds", 2);
+            KWEngine.InitializeFont("anonymous4.dds", 3);
             _bloomQuad = KWEngine.KWRect;
 
 

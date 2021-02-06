@@ -485,7 +485,7 @@ namespace KWEngine2.Model
                     geoMaterial.TextureNormal = tex;
                 }
 
-                // Metalness texture:
+                // Metalness/roughness texture:
                 if (material.PbrMetallicRoughness.MetallicRoughnessTexture != null)
                 {
                     geoMaterial.TextureRoughnessInMetalness = true;

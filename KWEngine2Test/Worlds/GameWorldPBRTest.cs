@@ -83,7 +83,8 @@ namespace KWEngine2Test.Worlds
 
         public override void Prepare()
         {
-            KWEngine.LoadModelFromFile("MatTest", @".\models\materialtest.glb");
+            KWEngine.LoadModelFromFile("MatTest", @".\models\gltftestcube.glb");
+            KWEngine.LoadModelFromFile("MatTest255", @".\models\gltftestcube255.glb");
 
             FOV = 45;
             FOVShadow = 30f;
@@ -160,6 +161,7 @@ namespace KWEngine2Test.Worlds
             floor.SetTexture(@".\textures\MetalPlates006_1K_Normal.jpg", TextureType.Normal);
             floor.SetTextureRepeat(2, 2);
             floor.IsShadowCaster = true;
+            floor.SetSpecularReflectionEnabled(true);
             AddGameObject(floor);
         }
 
@@ -181,12 +183,23 @@ namespace KWEngine2Test.Worlds
 
         private void CreateGLBTestObject()
         {
+            
+
             Immovable mattest = new Immovable();
             mattest.SetModel("MatTest");
-            mattest.SetPosition(-5, 0, 5);
+            mattest.SetPosition(-3, 1, 5);
             mattest.IsShadowCaster = true;
-            mattest.SetScale(0.5f);
+            mattest.SetScale(1f);
+            mattest.SetSpecularReflectionEnabled(true);
             AddGameObject(mattest);
+
+            Immovable mattest255 = new Immovable();
+            mattest255.SetModel("MatTest255");
+            mattest255.SetPosition(-7, 1, 5);
+            mattest255.IsShadowCaster = true;
+            mattest255.SetScale(1f);
+            mattest255.SetSpecularReflectionEnabled(true);
+            AddGameObject(mattest255);
         }
 
         private void CreateTerrainTestObject()

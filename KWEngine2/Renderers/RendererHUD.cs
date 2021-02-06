@@ -99,7 +99,7 @@ namespace KWEngine2.Renderers
                 {
                     GL.ActiveTexture(TextureUnit.Texture0);
                     if(ho._type == HUDObjectType.Text)
-                        GL.BindTexture(TextureTarget.Texture2D, KWEngine.FontTextureArray[KWEngine.Font]);
+                        GL.BindTexture(TextureTarget.Texture2D, KWEngine.FontTextureArray[(int)ho.Font]);
                     else
                         GL.BindTexture(TextureTarget.Texture2D, ho._textureId);
                     GL.Uniform1(mUniform_Texture, 0);

@@ -61,6 +61,11 @@ namespace KWEngine2.GameObjects
         /// </summary>
         public string Name { get; set; } = "undefined HUD object.";
 
+        /// <summary>
+        /// Schriftart des HUD-Objekts
+        /// </summary>
+        public FontFace Font { get; private set; } = FontFace.Anonymous;
+
         internal float _spread = 26f;
         /// <summary>
         /// Laufweite der Buchstaben (Standard: 26)
@@ -122,7 +127,7 @@ namespace KWEngine2.GameObjects
 
         private void UpdateTextures()
         {
-            _textureId = KWEngine.FontTextureArray[KWEngine.Font];
+            _textureId = KWEngine.FontTextureArray[(int)Font];
             for (int i = 0; i < _count; i++)
             {
                 int offset = (int)_text[i] - 32;
@@ -307,6 +312,15 @@ namespace KWEngine2.GameObjects
             }
             else
                 return false;
+        }
+
+        /// <summary>
+        /// Setzt die Schriftart der Instanz
+        /// </summary>
+        /// <param name="fontFace">zu nutzende Schriftart</param>
+        public void SetFont(FontFace fontFace)
+        {
+            Font = fontFace;
         }
     }
 }

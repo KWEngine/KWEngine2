@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="KWEngine2.Collision.Intersection">
-    <Position X="2.5" Y="12.75" Width="2.75" />
+    <Position X="2.5" Y="12.25" Width="2.75" />
     <Members>
       <Method Name="Intersection" Hidden="true" />
       <Field Name="mMTV" Hidden="true" />
@@ -66,7 +66,7 @@
       <Compartment Name="Nested Types" Collapsed="false" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>ARMIZBjFAKGAYKAQoCDAARCAUCAEABASKcjYSlUCmAA=</HashCode>
+      <HashCode>ARMIZBjFAKGAYKAQoCDAARCAUCAEABASKcjYSlUAmAA=</HashCode>
       <FileName>KWEngine.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -310,12 +310,12 @@
       <Method Name="UpdateTextures" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>QAAIAAAQAAAAUiR0AIAAQQQAAGAAQghIAGiAAgAAICE=</HashCode>
+      <HashCode>QAAIAAAQAAAAUiR0AIAAQQSAAGAAQghIAGiAAgACICE=</HashCode>
       <FileName>GameObjects\HUDObject.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="KWEngine2.GameObjects.LightObject">
-    <Position X="2.5" Y="8.5" Width="2.75" />
+    <Position X="2.5" Y="8" Width="2.75" />
     <Members>
       <Field Name="_frustumShadowMap2" Hidden="true" />
       <Field Name="_position" Hidden="true" />

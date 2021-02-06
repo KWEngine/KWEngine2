@@ -234,6 +234,7 @@
     <EmbeddedResource Include="Assets\Fonts\anonymous.dds" />
     <EmbeddedResource Include="Assets\Fonts\anonymous2.dds" />
     <EmbeddedResource Include="Assets\Fonts\anonymous3.dds" />
+    <EmbeddedResource Include="Assets\Fonts\anonymous4.dds" />
     <Content Include="Assets\readme.txt" />
     <None Include="OpenAL32.x86">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

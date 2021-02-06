@@ -15,6 +15,7 @@ namespace KWEngine2FontBuilder
             V2_1();
             V2_2();
             V2_3();
+            V2_4();
 
         }
 
@@ -134,6 +135,46 @@ namespace KWEngine2FontBuilder
             }
             g.Dispose();
             bitmap.Save("test3.png", System.Drawing.Imaging.ImageFormat.Png);
+            bitmap.Dispose();
+
+            //Console.ReadLine();
+        }
+
+        static void V2_4()
+        {
+            int maxDim = 16384;
+            int cellSize = 128;
+            int fontSize = cellSize / 2;
+
+            int offsetX = -12;
+            int offsetY = 4;
+
+            Bitmap bitmap = new Bitmap(maxDim, cellSize, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            PrivateFontCollection fc = new PrivateFontCollection();
+            fc.AddFontFile("XanhMono.ttf");
+            FontFamily fontFamily = fc.Families[0];
+
+            Font font = new Font(fontFamily, fontSize, FontStyle.Bold);
+
+            Graphics g = Graphics.FromImage(bitmap);
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            Brush brush = new SolidBrush(Color.White);
+            Pen p = new Pen(Color.Red);
+            p.Alignment = System.Drawing.Drawing2D.PenAlignment.Center;
+
+            for (int i = 32; i < 384; i++)
+            {
+                //g.DrawRectangle(p, (i-32) * (cellSize / 2f), 0, cellSize / 2f, cellSize);
+                g.DrawString(((char)i).ToString(), font, brush, (i - 32) * (cellSize / 2f) + offsetX, offsetY);
+                if ((i - 32) * (cellSize / 2) >= maxDim)
+                {
+                    break;
+                }
+            }
+            g.Dispose();
+            bitmap.Save("test4.png", System.Drawing.Imaging.ImageFormat.Png);
             bitmap.Dispose();
 
             //Console.ReadLine();
