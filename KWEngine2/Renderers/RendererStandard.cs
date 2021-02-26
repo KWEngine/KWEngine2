@@ -394,7 +394,6 @@ namespace KWEngine2.Renderers
                     GL.BindVertexArray(mesh.VAO);
                     GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
                     GL.DrawElements(mesh.Primitive, mesh.IndexCount, DrawElementsType.UnsignedInt, 0);
-                    HelperGL.CheckGLErrors();
                     GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
                     GL.BindVertexArray(0);
                     GL.BindTexture(TextureTarget.Texture2D, 0);

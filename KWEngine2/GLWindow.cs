@@ -351,16 +351,7 @@ namespace KWEngine2
                 SwitchToBufferAndClear(FramebufferMainMultisample);
                 GL.Viewport(ClientRectangle);
 
-                // Background rendering:
-                if (CurrentWorld._textureBackground > 0)
-                {
-
-                    KWEngine.Renderers["Background"].Draw(_dummy, ref _modelViewProjectionMatrixBackground);
-                }
-                else if (CurrentWorld._textureSkybox > 0)
-                {
-                    KWEngine.Renderers["Skybox"].Draw(_dummy, ref _projectionMatrix);
-                }
+                
 
                 if(CurrentWorld.DebugShowCoordinateSystemGrid != GridType.None)
                 {
@@ -404,6 +395,17 @@ namespace KWEngine2
                                     KWEngine.RendererSimple.DrawHitbox(g, ref viewProjection);
                             }
                         }
+                    }
+
+                    // Background rendering:
+                    if (CurrentWorld._textureBackground > 0)
+                    {
+
+                        KWEngine.Renderers["Background"].Draw(_dummy, ref _modelViewProjectionMatrixBackground);
+                    }
+                    else if (CurrentWorld._textureSkybox > 0)
+                    {
+                        KWEngine.Renderers["Skybox"].Draw(_dummy, ref _projectionMatrix);
                     }
 
                     mInstancesRenderLast.Sort((x, y) => x == null ? (y == null ? 0 : -1) : (y == null ? 1 : y.DistanceToCamera.CompareTo(x.DistanceToCamera)));

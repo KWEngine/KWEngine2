@@ -110,11 +110,11 @@ namespace KWEngine2
         /// <summary>
         /// Frontseite (+Z)
         /// </summary>
-        Front = 0,
+        Front = 1,
         /// <summary>
         /// Rückseite (-Z)
         /// </summary>
-        Back = 1,
+        Back = 5,
         /// <summary>
         /// Links (-X)
         /// </summary>
@@ -122,15 +122,15 @@ namespace KWEngine2
         /// <summary>
         /// Rechts (+X)
         /// </summary>
-        Right = 3,
+        Right = 4,
         /// <summary>
         /// Oben (+Y)
         /// </summary>
-        Top = 4,
+        Top = 0,
         /// <summary>
         /// Unten (-Y)
         /// </summary>
-        Bottom = 5
+        Bottom = 3
     }
     /// <summary>
     /// Art der Textur (Standard: Diffuse)

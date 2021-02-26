@@ -183,8 +183,6 @@ namespace KWEngine2Test.Worlds
 
         private void CreateGLBTestObject()
         {
-            
-
             Immovable mattest = new Immovable();
             mattest.SetModel("MatTest");
             mattest.SetPosition(-3, 1, 5);
@@ -200,6 +198,15 @@ namespace KWEngine2Test.Worlds
             mattest255.SetScale(1f);
             mattest255.SetSpecularReflectionEnabled(true);
             AddGameObject(mattest255);
+
+            Immovable kwcube6test = new Immovable();
+            kwcube6test.SetModel("KWCube6");
+            kwcube6test.SetPosition(-5, -0.5f, 5);
+            kwcube6test.SetScale(10, 1, 10);
+            kwcube6test.SetTexture(@".\textures\pavement01.jpg", TextureType.Albedo, CubeSide.Top);
+            kwcube6test.SetTexture(@".\textures\pavement01_normal.jpg", TextureType.Normal, CubeSide.Front);
+            kwcube6test.SetTextureRepeat(5, 1, CubeSide.Front);
+            AddGameObject(kwcube6test);
         }
 
         private void CreateTerrainTestObject()
