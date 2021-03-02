@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using KWEngine2.Helper;
 using OpenTK;
-using OpenTK.Input;
+using OpenTK.Graphics.OpenGL4;
 
 namespace KWEngine2.GameObjects
 {
@@ -19,20 +19,58 @@ namespace KWEngine2.GameObjects
         /// </summary>
         Directional,
         /// <summary>
-        /// Schattenwerfendes Licht
+        /// Gerichtetes Licht mit unbegrenzter Reichweite
         /// </summary>
-        DirectionalShadow
+        Sun
     };
 
     /// <summary>
     /// Lichtklasse
     /// </summary>
-    public abstract class LightObject
+    public class LightObject
     {
         /// <summary>
         /// Name
         /// </summary>
         public string Name { get; set; } = "undefined light object.";
+
+        private bool _isShadowCaster = false;
+
+        /// <summary>
+        /// Gibt an, ob das Licht Schatten wirft (maximal 3x pro Welt erlaubt)
+        /// </summary>
+        public bool IsShadowCaster
+        {
+            get
+            {
+                return _isShadowCaster;
+            }
+            set
+            {
+                _isShadowCaster = value;
+                if(value == true)
+                {
+                    ApplyFramebuffer();
+                    UpdateMatrices();
+                }
+                else
+                {
+                    RemoveFramebuffer();
+                }
+                    
+            }
+        }
+
+        private void ApplyFramebuffer()
+        {
+
+        }
+
+        private void RemoveFramebuffer()
+        {
+
+        }
+
         /// <summary>
         /// Art des Lichts
         /// </summary>
@@ -42,10 +80,10 @@ namespace KWEngine2.GameObjects
             {
                 return _type;
             }
-            set
+            internal set
             {
                 _type = value;
-                if(value == LightType.DirectionalShadow)
+                if(IsShadowCaster)
                 {
                     UpdateMatrices();
                 }
@@ -57,18 +95,9 @@ namespace KWEngine2.GameObjects
         /// </summary>
         public Vector4 Color { get; internal set; }
         internal World World { get; set; }
-        internal float FOVShadow2 { get; set; } = 60f;
+        internal float FOVShadow { get; set; } = 60f;
         internal float ShadowMapBiasCoefficient = 0.005f;
-        internal Matrix4 _shadowViewMatrix = Matrix4.Identity;
         internal LightType _type = LightType.Point;
-        /// <summary>
-        /// Aktuelle Welt
-        /// </summary>
-        /// <returns>Instanz</returns>
-        public World GetCurrentWorld()
-        {
-            return World;
-        }
 
         /// <summary>
         /// Aktuelle Welt
@@ -80,17 +109,33 @@ namespace KWEngine2.GameObjects
 
         internal Vector3 _target = new Vector3(0, -1, 0);
         internal Vector3 _position = new Vector3(0, 0, 0);
-        internal HelperFrustum _frustumShadowMap2 = new HelperFrustum();
-        internal Matrix4 _projectionMatrixShadow2 = Matrix4.Identity;
-        internal Matrix4 _viewProjectionMatrixShadow2 = Matrix4.Identity;
+        internal HelperFrustum _frustumShadowMap = new HelperFrustum();
+        internal Matrix4 _projectionMatrixShadow = Matrix4.Identity;
+        internal Matrix4 _viewProjectionMatrixShadow = Matrix4.Identity;
+        internal Matrix4[] _viewMatrixShadow = new Matrix4[6];
 
         private void UpdateMatrices()
         {
-            if (_type == LightType.DirectionalShadow)
+            if (IsShadowCaster)
             {
-                _shadowViewMatrix = Matrix4.LookAt(Position, Target, KWEngine.WorldUp);
-                _frustumShadowMap2.CalculateFrustum(_projectionMatrixShadow2, _shadowViewMatrix);
-                _viewProjectionMatrixShadow2 = _shadowViewMatrix * _projectionMatrixShadow2;
+                if(Type == LightType.Point)
+                {
+                    _viewMatrixShadow[0] = Matrix4.LookAt(Position, Position + new Vector3(1,0,0), new Vector3(0, -1, 0));
+                    _viewMatrixShadow[1] = Matrix4.LookAt(Position, Position + new Vector3(-1,0,0), new Vector3(0, -1, 0));
+                    
+                    _viewMatrixShadow[2] = Matrix4.LookAt(Position, Position + new Vector3(0, 1, 0), new Vector3(0, 0, 1));
+                    _viewMatrixShadow[3] = Matrix4.LookAt(Position, Position + new Vector3(0, -1, 0), new Vector3(0, 0, -1));
+
+                    _viewMatrixShadow[4] = Matrix4.LookAt(Position, Position + new Vector3(0, 0, 1), new Vector3(0, -1, 0));
+                    _viewMatrixShadow[5] = Matrix4.LookAt(Position, Position + new Vector3(0, 0, -1), new Vector3(0, -1, 0));
+                }
+                else
+                {
+                    _viewMatrixShadow[0] = Matrix4.LookAt(Position, Target, KWEngine.WorldUp);
+                    _frustumShadowMap.CalculateFrustum(_projectionMatrixShadow, _viewMatrixShadow[0]);
+                    _viewProjectionMatrixShadow = _viewMatrixShadow[0] * _projectionMatrixShadow;
+                }
+                
             }
         }
 
@@ -127,25 +172,37 @@ namespace KWEngine2.GameObjects
         public float DistanceMultiplier { get; private set; } = 10;
 
         /// <summary>
-        /// Act
-        /// </summary>
-        /// <param name="ks">Keyboardinfos</param>
-        /// <param name="ms">Mausinfos</param>
-        /// <param name="deltaTimeFactor">Delta-Time-Faktor (Standard: 1.0)</param>
-        public abstract void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor);
-
-        /// <summary>
         /// Konstruktormethode
         /// </summary>
         protected LightObject()
+            : this(LightType.Point)
         {
             Position = new Vector3(0, 0, 0);
-            Target = new Vector3(0, 0, 0);
+            Target = new Vector3(0, -1, 0);
             Color = new Vector4(1, 1, 1, 1);
             Type = LightType.Point;
             DistanceMultiplier = 10;
+            IsShadowCaster = false;
             SetFOVShadowPrivate(179);
         }
+
+        /// <summary>
+        /// Erstellt ein Lichtinstanz des angegebenen Typs
+        /// </summary>
+        /// <param name="type">Art des Lichts</param>
+        /// <param name="isShadowCaster">Art des Lichts</param>
+        public LightObject(LightType type, bool isShadowCaster = false)
+        {
+            Position = new Vector3(0, 0, 0);
+            Target = new Vector3(0, -1, 0);
+            Color = new Vector4(1, 1, 1, 1);
+            Type = type;
+            DistanceMultiplier = 10;
+            IsShadowCaster = false;
+            SetFOVShadowPrivate(179);
+        }
+
+
 
         /// <summary>
         /// Ändert den Distanzmultiplikator des Lichts
@@ -167,7 +224,7 @@ namespace KWEngine2.GameObjects
         /// <param name="red">Rot</param>
         /// <param name="green">Grün</param>
         /// <param name="blue">Blau</param>
-        /// <param name="intensity">Helligkeit (0 bis 1024)</param>
+        /// <param name="intensity">Helligkeit (0 bis 1024, Standard: 1)</param>
         public void SetColor(float red, float green, float blue, float intensity)
         {
             Color = new Vector4(
@@ -218,34 +275,39 @@ namespace KWEngine2.GameObjects
         public void SetTarget(Vector3 target)
         {
             if (Type == LightType.Point)
-                throw new Exception("Light instance is not of type 'Directional'.");
+                throw new Exception("Light instance is not of type 'Directional' or 'Sun'.");
             Target = target;
         }
 
         private void SetFOVShadowPrivate(float fov)
         {
-            FOVShadow2 = HelperGL.Clamp(fov, 60, 179);
+            FOVShadow = HelperGL.Clamp(fov, 30, 179);
             if(KWEngine.CurrentWorld != null)
             {
-                _projectionMatrixShadow2 = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(FOVShadow2 / 2), KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize, 1f, CurrentWorld != null ? CurrentWorld.ZFar / 10 : 100f);
+                _projectionMatrixShadow = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(FOVShadow / 2), KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize, 1f, CurrentWorld != null ? CurrentWorld.ZFar / 10 : 100f);
                 UpdateMatrices();
             }
         }
 
         /// <summary>
-        /// Setzt das Field of View (in Grad) für das schattenwerfende Licht (DirectionalShadow)
+        /// Setzt das Field of View (in Grad) für das schattenwerfende Licht
         /// </summary>
-        /// <param name="fov">Blickfeld nach links und rechts in Grad (Minimum: 60, Maximum: 180)</param>
+        /// <param name="fov">Blickfeld nach links und rechts in Grad (Minimum: 30, Maximum: 180)</param>
         public void SetFOVShadow(float fov)
         {
-            if (Type != LightType.DirectionalShadow)
-                throw new Exception("Cannot set FOV for a LightObject that is not of Type 'DirectionalShadow'.");
-            else
+            if(IsShadowCaster)
             {
-                FOVShadow2 = HelperGL.Clamp(fov, 60, 179);
+                FOVShadow = HelperGL.Clamp(fov, 30, 179);
                 if (KWEngine.CurrentWorld != null)
                 {
-                    _projectionMatrixShadow2 = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(FOVShadow2 / 2), KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize, 1f, CurrentWorld != null ? CurrentWorld.ZFar / 10 : 100f);
+                    if (Type == LightType.Point)
+                    {
+                        FOVShadow = 90;
+                        _projectionMatrixShadow = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(FOVShadow / 2), KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize, 0.1f, DistanceMultiplier);
+                        
+                    }
+                    else
+                        _projectionMatrixShadow = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(FOVShadow / 2), KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize, 0.1f, DistanceMultiplier);
                     UpdateMatrices();
                 }
             }
@@ -257,7 +319,7 @@ namespace KWEngine2.GameObjects
         /// <param name="bias">Biaswert (Standard: 0.005f; Bereich: 0.00001f bis 1f)</param>
         public void SetFOVShadowBiasCoefficient(float bias = 0.005f)
         {
-            if (Type != LightType.DirectionalShadow)
+            if (!IsShadowCaster)
                 throw new Exception("Cannot set FOV for a LightObject that is not of Type 'DirectionalShadow'.");
             else
             {
@@ -276,11 +338,11 @@ namespace KWEngine2.GameObjects
                 enumerator.MoveNext();
                 LightObject l = enumerator.Current;
                 bool isInFrustum =
-                    KWEngine.CurrentWindow.Frustum.SphereVsFrustum(l.Position, l.Type == LightType.DirectionalShadow ? l.DistanceMultiplier * 100 : l.DistanceMultiplier * 10);
+                    KWEngine.CurrentWindow.Frustum.SphereVsFrustum(l.Position, l.DistanceMultiplier * 10);
 
                 if (isInFrustum)
                 {
-                    if (l.Type == LightType.DirectionalShadow)
+                    if (l.IsShadowCaster)
                     {
                         shadowLight = i;
                     }
@@ -293,7 +355,28 @@ namespace KWEngine2.GameObjects
                     targets[arraycounter + 0] = l.Target.X;
                     targets[arraycounter + 1] = l.Target.Y;
                     targets[arraycounter + 2] = l.Target.Z;
-                    targets[arraycounter + 3] = l.Type == LightType.Directional || l.Type == LightType.DirectionalShadow ? 1 : -1;
+                    if(l.Type == LightType.Point)
+                    {
+                        if (l.IsShadowCaster)
+                            targets[arraycounter + 3] = -2;
+                        else
+                            targets[arraycounter + 3] = -1;
+                    }
+                    else if(l.Type== LightType.Directional)
+                    {
+                        if (l.IsShadowCaster)
+                            targets[arraycounter + 3] = 2;
+                        else
+                            targets[arraycounter + 3] = 1;
+                    }
+                    else
+                    {
+                        if (l.IsShadowCaster)
+                            targets[arraycounter + 3] = 200;
+                        else
+                            targets[arraycounter + 3] = 100;
+                    }
+                    //targets[arraycounter + 3] = l.Type == LightType.Directional || l.Type == LightType.DirectionalShadow ? 1 : -1;
 
                     positions[arraycounter + 0] = l.Position.X;
                     positions[arraycounter + 1] = l.Position.Y;

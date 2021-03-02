@@ -155,6 +155,7 @@
     <Compile Include="Renderers\RendererMerge.cs" />
     <Compile Include="Renderers\RendererHUD.cs" />
     <Compile Include="Renderers\RendererParticle.cs" />
+    <Compile Include="Renderers\RendererShadowCubeMap.cs" />
     <Compile Include="Renderers\RendererSkybox.cs" />
     <Compile Include="Renderers\RendererBloom.cs" />
     <Compile Include="Renderers\RendererBackground.cs" />

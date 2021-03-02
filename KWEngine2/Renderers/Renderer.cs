@@ -16,6 +16,7 @@ namespace KWEngine2.Renderers
 
         protected int mProgramId = -1;
         protected int mShaderFragmentId = -1;
+        protected int mShaderGeometryId = -1;
         protected int mShaderVertexId = -1;
 
         protected int mAttribute_vpos = -1;

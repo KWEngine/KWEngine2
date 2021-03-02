@@ -563,8 +563,7 @@ namespace KWEngine2
         /// </summary>
         /// <param name="ks">Keyboardinfos</param>
         /// <param name="ms">Mausinfos</param>
-        /// <param name="deltaTimeFactor">Delta-Time-Faktor (Standard: 1.0)</param>
-        public abstract void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor);
+        public abstract void Act(KeyboardState ks, MouseState ms);
 
         /// <summary>
         /// Erfragt ein Modell aus der Engine-Datenbank
