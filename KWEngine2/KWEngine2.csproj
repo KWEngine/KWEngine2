@@ -229,6 +229,9 @@
     <EmbeddedResource Include="Shaders\shader_vertex_test.glsl" />
     <EmbeddedResource Include="Shaders\shader_fragment_terrain_pbr.glsl" />
     <EmbeddedResource Include="Shaders\shader_vertex_terrain_pbr.glsl" />
+    <EmbeddedResource Include="Shaders\shader_fragment_shadow_cube.glsl" />
+    <EmbeddedResource Include="Shaders\shader_vertex_shadow_cube.glsl" />
+    <EmbeddedResource Include="Shaders\shader_geometry_shadow_cube.glsl" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

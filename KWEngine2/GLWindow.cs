@@ -89,7 +89,7 @@ namespace KWEngine2
         /// <param name="width">Breite des Fensters</param>
         /// <param name="height">Höhe des Fensters</param>
         protected GLWindow(int width, int height)
-           : this(width, height, GameWindowFlags.Default, 0, true, false)
+           : this(width, height, GameWindowFlags.FixedWindow, 0, true, false)
         {
 
         }
@@ -107,13 +107,16 @@ namespace KWEngine2
         /// <param name="vSync">VSync aktivieren</param>
         /// <param name="multithreading">Multithreading aktivieren (Standard: false)</param>
         /// <param name="textureAnisotropy">Level der anisotropischen Texturfilterung [1 bis 16, Standard: 1 (aus)]</param>
-        protected GLWindow(int width, int height, GameWindowFlags flag, int antialiasing = 0, bool vSync = true, bool multithreading = false, int textureAnisotropy = 1)
+        /// <param name="textureSizeShadowMap">Auflösung der quadratischen Schattentextur (Standard: 1024)</param>
+        protected GLWindow(int width, int height, GameWindowFlags flag, int antialiasing = 0, bool vSync = true, bool multithreading = false, int textureAnisotropy = 1, int textureSizeShadowMap)
             : base(width, height, GraphicsMode.Default, "KWEngine2 - C# 3D Gaming", flag == GameWindowFlags.Default ? GameWindowFlags.FixedWindow : flag, DisplayDevice.Default, 4, 5, GraphicsContextFlags.ForwardCompatible, null, !multithreading)
         {
             _multithreaded = multithreading;
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             Width = width;
             Height = height;
+
+            KWEngine.ShadowMapSize = textureSizeShadowMap;
 
             _bloomwidth = HelperTexture.RoundDownToPowerOf2(width);
             if (_bloomwidth > 1024)

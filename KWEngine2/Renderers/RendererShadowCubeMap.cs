@@ -16,6 +16,9 @@ namespace KWEngine2.Renderers
     internal class RendererShadowCubeMap : Renderer
     {
         private Matrix4 _identityMatrix = Matrix4.Identity;
+
+        private int mUniform_ViewProjectionMatrix = -1;
+
         public override void Initialize()
         {
             Name = "ShadowCubeMap";
@@ -57,7 +60,9 @@ namespace KWEngine2.Renderers
             mAttribute_vjoints = GL.GetAttribLocation(mProgramId, "aBoneIds");
             mAttribute_vweights = GL.GetAttribLocation(mProgramId, "aBoneWeights");
 
-            mUniform_MVP = GL.GetUniformLocation(mProgramId, "uMVP");
+            //mUniform_MVP = GL.GetUniformLocation(mProgramId, "uMVP");
+            mUniform_ViewProjectionMatrix = GL.GetUniformLocation(mProgramId, "uVP");
+            mUniform_ModelMatrix = GL.GetUniformLocation(mProgramId, "uM");
             mUniform_UseAnimations = GL.GetUniformLocation(mProgramId, "uUseAnimations");
             mUniform_BoneTransforms = GL.GetUniformLocation(mProgramId, "uBoneTransforms");
         }
@@ -66,7 +71,6 @@ namespace KWEngine2.Renderers
         {
             if (g == null || !g.HasModel)
                 return;
-            bool isInsideFrustum = frustum.SphereVsFrustum(g.GetCenterPointForAllHitboxes(), g.GetMaxDiameter() / 2);
             
             lock (g)
             {
@@ -81,18 +85,16 @@ namespace KWEngine2.Renderers
                     GeoMesh mesh = g.Model.Meshes[meshName];
                     bool useMeshTransform = mesh.BoneNames.Count == 0 || !(g.AnimationID >= 0 && g.Model.Animations != null && g.Model.Animations.Count > 0);
                     
-                    if (isSun)
+                    if (useMeshTransform)
                     {
-                        if (useMeshTransform)
-                        {
-                            Matrix4.Mult(ref mesh.Transform, ref g._modelMatrix, out g.ModelMatrixForRenderPass[index]);
-                        }
-                        else
-                        {
-                            g.ModelMatrixForRenderPass[index] = g._modelMatrix;
-                        }
+                        Matrix4.Mult(ref mesh.Transform, ref g._modelMatrix, out g.ModelMatrixForRenderPass[index]);
                     }
-                    if (mesh.Material.Opacity <= 0 || !isInsideFrustum)
+                    else
+                    {
+                        g.ModelMatrixForRenderPass[index] = g._modelMatrix;
+                    }
+
+                    if (mesh.Material.Opacity <= 0)
                     {
                         continue;
                     }
@@ -115,8 +117,9 @@ namespace KWEngine2.Renderers
                             GL.Uniform1(mUniform_UseAnimations, 0);
                         }
 
-                        Matrix4.Mult(ref g.ModelMatrixForRenderPass[index], ref viewProjection, out _modelViewProjection);
-                        GL.UniformMatrix4(mUniform_MVP, false, ref _modelViewProjection);
+                        //Matrix4.Mult(ref g.ModelMatrixForRenderPass[index], ref viewProjection, out _modelViewProjection);
+                        GL.UniformMatrix4(mUniform_ViewProjectionMatrix, false, ref viewProjection);
+                        GL.UniformMatrix4(mUniform_ModelMatrix, false, ref g.ModelMatrixForRenderPass[index]);
                         GL.BindVertexArray(mesh.VAO);
                         GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
                         GL.DrawElements(mesh.Primitive, mesh.IndexCount, DrawElementsType.UnsignedInt, 0);

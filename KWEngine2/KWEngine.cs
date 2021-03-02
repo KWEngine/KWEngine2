@@ -474,9 +474,9 @@ namespace KWEngine2
             Renderers.Add("Terrain", new RendererTerrain());
             Renderers.Add("HUD", new RendererHUD());
             Renderers.Add("Merge", new RendererMerge());
+            Renderers.Add("ShadowCubeMap", new RendererShadowCubeMap());
 
             RendererSimple = new RendererSimple();
-            //RendererPBR = new RendererStandardPBR();
         }
 
         internal static void InitializeParticles()
@@ -596,7 +596,7 @@ namespace KWEngine2
             {
                 return _shadowMapSize;
             }
-            set
+            internal set
             {
                 if(value >= 512 && value <= 8192)
                 {
