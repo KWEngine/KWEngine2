@@ -50,6 +50,7 @@ uniform vec3 uCameraPos;
 uniform vec3 uCameraDirection;
 
 uniform samplerCube uTextureSkybox;
+uniform sampler2D uTexture2D;
 uniform int uUseTextureSkybox;
 
 uniform float uBiasCoefficient;
@@ -193,6 +194,14 @@ void main()
 		vec3 reflectedCameraSurfaceNormal = reflect(-fragmentToCamera, theNormal);
 		refl = texture(uTextureSkybox, reflectedCameraSurfaceNormal).xyz * uSunIntensity.xyz * max(uSunAmbient, uSunIntensity.w);
 	}
+	else if(uUseTextureSkybox < 0)
+	{
+		vec3 reflectedCameraSurfaceNormal = reflect(-fragmentToCamera, theNormal);
+		vec2 coordinates = (reflectedCameraSurfaceNormal.xy + 1.0) / 2.0;
+		coordinates.y = -coordinates.y;
+		refl = texture(uTexture2D, coordinates).xyz * uSunIntensity.xyz * max(uSunAmbient, uSunIntensity.w);
+	}
+	
 	vec3 reflection = refl;
 	vec3 metalness = vec3(uMetalness);
 	if(uUseTextureMetalness > 0)

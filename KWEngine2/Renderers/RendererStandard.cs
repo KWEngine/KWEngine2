@@ -130,6 +130,7 @@ namespace KWEngine2.Renderers
             mUniform_TextureTransform = GL.GetUniformLocation(mProgramId, "uTextureTransform");
 
             mUniform_TextureSkybox = GL.GetUniformLocation(mProgramId, "uTextureSkybox");
+            mUniform_Texture2D = GL.GetUniformLocation(mProgramId, "uTexture2D");
             mUniform_TextureIsSkybox = GL.GetUniformLocation(mProgramId, "uUseTextureSkybox");
 
             mUniform_SpecularReflectionFactor = GL.GetUniformLocation(mProgramId, "uSpecularReflectionFactor");
@@ -194,9 +195,15 @@ namespace KWEngine2.Renderers
 
                 // Upload skybox for metal reflections:
                 GL.ActiveTexture(TextureUnit.Texture12);
-                GL.BindTexture(TextureTarget.TextureCubeMap, g.CurrentWorld._textureSkybox >= 0 ? g.CurrentWorld._textureSkybox : KWEngine.TextureCubemapEmpty);
+                GL.BindTexture(TextureTarget.TextureCubeMap, g.CurrentWorld._textureSkybox > 0 ? g.CurrentWorld._textureSkybox : KWEngine.TextureCubemapEmpty);
                 GL.Uniform1(mUniform_TextureSkybox, 12);
-                GL.Uniform1(mUniform_TextureIsSkybox, g.CurrentWorld._textureSkybox >= 0 ? 1 : 0);
+                
+                // Upload 2d static bg for metal reflections:
+                GL.ActiveTexture(TextureUnit.Texture13);
+                GL.BindTexture(TextureTarget.Texture2D, g.CurrentWorld._textureBackground > 0 ? g.CurrentWorld._textureBackground : KWEngine.TextureBlack);
+                GL.Uniform1(mUniform_Texture2D, 13);
+
+                GL.Uniform1(mUniform_TextureIsSkybox, g.CurrentWorld._textureSkybox > 0 ? 1 : g.CurrentWorld._textureBackground > 0 ? -1 : 0);
 
                 if (g.ColorEmissive.W > 0)
                 {
