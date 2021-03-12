@@ -10,7 +10,7 @@ namespace KWEngine2Test.Objects.Main
 {
     class Immovable : GameObject
     {
-        public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState ks, MouseState ms)
         {
 
         }

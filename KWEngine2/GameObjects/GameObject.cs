@@ -35,14 +35,12 @@ namespace KWEngine2.GameObjects
         /// Höhenkorrektur für den First-Person-Modus (Standard: 0)
         /// </summary>
         public float FPSEyeOffset { get; set; } = 0;
-        /// <summary>
-        /// Gibt an, ob das Objekt von der Sonne beschienen wird
-        /// </summary>
-        public bool IsAffectedBySun { get; set; } = true;
+       
         /// <summary>
         /// Gibt an, ob das Objekt von anderen Lichtquellen betroffen ist
         /// </summary>
         public bool IsAffectedByLight { get; set; } = true;
+
         /// <summary>
         /// Aktuelle Spielwelt
         /// </summary>
@@ -258,6 +256,7 @@ namespace KWEngine2.GameObjects
             set
             {
                 _animationPercentage = HelperGL.Clamp(value, 0f, 1f);
+                ProcessCurrentAnimation();
             }
         }
         /// <summary>
@@ -626,8 +625,7 @@ namespace KWEngine2.GameObjects
         /// </summary>
         /// <param name="ks">Keyboardinfos</param>
         /// <param name="ms">Mausinfos</param>
-        /// <param name="deltaTimeFactor">Delta-Zeit-Faktor (Standard: 1.0)</param>
-        public abstract void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor);
+        public abstract void Act(KeyboardState ks, MouseState ms);
 
         #region Gameplay
         /// <summary>

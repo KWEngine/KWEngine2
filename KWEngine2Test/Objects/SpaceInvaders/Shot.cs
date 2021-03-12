@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using KWEngine2;
 using KWEngine2.Collision;
 using KWEngine2.GameObjects;
 using OpenTK.Input;
@@ -19,7 +20,7 @@ namespace KWEngine2Test.Objects.SpaceInvaders
             _parent = parent;
         }
 
-        public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState ks, MouseState ms)
         {
             if (!IsInsideScreenSpace)
             {
@@ -27,7 +28,7 @@ namespace KWEngine2Test.Objects.SpaceInvaders
                 return;
             }
 
-            Move(_movementSpeed * deltaTimeFactor);
+            Move(_movementSpeed * KWEngine.DeltaTimeFactor);
 
             Intersection intersection;
             if(_parent is Player)

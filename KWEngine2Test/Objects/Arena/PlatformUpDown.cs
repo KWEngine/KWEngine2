@@ -1,4 +1,5 @@
-﻿using KWEngine2.Collision;
+﻿using KWEngine2;
+using KWEngine2.Collision;
 using KWEngine2.GameObjects;
 using OpenTK.Input;
 using System;
@@ -17,7 +18,7 @@ namespace KWEngine2Test.Objects.Arena
         private float _limitLow = 1.5f;
         private float _limitUp = 9f;
 
-        public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState ks, MouseState ms)
         {
             long timeStamp = GetCurrentTimeInMilliseconds();
             if((int)_dir > 1 && timeStamp - _stateTime > 3000)
@@ -35,7 +36,7 @@ namespace KWEngine2Test.Objects.Arena
             }
             else if (_dir == Direction.Up)
             {
-                MoveOffset(0, 0.1f * deltaTimeFactor, 0);
+                MoveOffset(0, 0.1f * KWEngine.DeltaTimeFactor, 0);
                 if(Position.Y > _limitUp)
                 {
                     ChangeState(timeStamp);
@@ -43,7 +44,7 @@ namespace KWEngine2Test.Objects.Arena
             }
             else if (_dir == Direction.Down)
             {
-                MoveOffset(0, -0.1f * deltaTimeFactor, 0);
+                MoveOffset(0, -0.1f * KWEngine.DeltaTimeFactor, 0);
                 if (Position.Y <= _limitLow)
                 {
                     ChangeState(timeStamp);

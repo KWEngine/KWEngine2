@@ -29,8 +29,8 @@ namespace KWEngine2.Renderers
         protected int mAttribute_vweights = -1;
 
         protected int mUniform_MVP = -1;
-        protected int mUniform_MVPShadowMap = -1;
-        protected int mUniform_MVPShadowMap2 = -1;
+        protected int mUniform_VPShadowMap = -1;
+        protected int mUniform_ViewProjectionMatrices = -1;
         protected int mUniform_NormalMatrix = -1;
         protected int mUniform_ModelMatrix = -1;
         protected int mUniform_Texture = -1;
@@ -38,15 +38,13 @@ namespace KWEngine2.Renderers
         protected int mUniform_UseAnimations = -1;
         protected int mUniform_BoneTransforms = -1;
 
-        protected int mUniform_ShadowLightPosition = -1;
-
         protected int mUniform_Opacity = -1;
+        protected int mUniform_FarPlane = -1;
 
         protected int mUniform_SunPosition = -1;
         protected int mUniform_SunDirection = -1;
         protected int mUniform_SunIntensity = -1;
         protected int mUniform_SunAmbient = -1;
-        protected int mUniform_SunAffection = -1;
         protected int mUniform_LightAffection = -1;
 
         protected int mUniform_BloomStep = -1;
@@ -66,15 +64,13 @@ namespace KWEngine2.Renderers
         protected int mUniform_TextureUseEmissiveMap = -1;
         protected int mUniform_TextureIsSkybox = -1;
         protected int mUniform_TextureShadowMap = -1;
-        protected int mUniform_TextureShadowMap2 = -1;
-        protected int mUniform_TextureUseShadowMap2 = -1;
+        protected int mUniform_TextureShadowMapCubeMap = -1;
         protected int mUniform_BaseColor = -1;
         protected int mUniform_TintColor = -1;
         protected int mUniform_Glow = -1;
         protected int mUniform_Outline = -1;
 
-        protected int mUniform_BiasCoefficient = -1;
-        protected int mUniform_BiasCoefficient2 = -1;
+        protected int mUniform_LightsMeta = -1;
 
         protected int mUniform_uCameraPos = -1;
         protected int mUniform_uCameraDirection = -1;
@@ -249,11 +245,6 @@ namespace KWEngine2.Renderers
             return mUniform_SunIntensity;
         }
 
-        public int GetUniformSunAffection()
-        {
-            return mUniform_SunAffection;
-        }
-
         public int GetUniformBaseColor()
         {
             return mUniform_BaseColor;
@@ -264,9 +255,9 @@ namespace KWEngine2.Renderers
             return mUniform_EmissiveColor;
         }
 
-        public int GetUniformHandleMVPShadowMap()
+        public int GetUniformHandleVPShadowMap()
         {
-            return mUniform_MVPShadowMap;
+            return mUniform_VPShadowMap;
         }
 
         public int GetUniformHandleTextureSkybox()
@@ -339,11 +330,9 @@ namespace KWEngine2.Renderers
             return mUniform_TextureUseLightMap;
         }
 
-        internal abstract void Draw(GameObject g, ref Matrix4 viewProjection);
-        internal abstract void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum, bool isSun);
-        internal abstract void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum);
-        internal abstract void Draw(GameObject g, ref Matrix4 viewProjection, ref Matrix4 viewProjectionShadow, ref Matrix4 viewProjectionShadow2, HelperFrustum frustum, ref float[] lightColors, ref float[] lightTargets, ref float[] lightPositions, int lightCount, ref int lightShadow );
-        internal abstract void Draw(ParticleObject po, ref Matrix4 viewProjection);
-        internal abstract void Draw(HUDObject ho, ref Matrix4 viewProjection);
+        public int GetUniformHandleFarPlane()
+        {
+            return mUniform_FarPlane;
+        }
     }
 }

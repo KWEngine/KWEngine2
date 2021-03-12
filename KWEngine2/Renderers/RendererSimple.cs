@@ -27,13 +27,11 @@ namespace KWEngine2.Renderers
             using (Stream s = assembly.GetManifestResourceStream(resourceNameVertexShader))
             {
                 mShaderVertexId = LoadShader(s, ShaderType.VertexShader, mProgramId);
-                //Console.WriteLine(GL.GetShaderInfoLog(mShaderVertexId));
             }
 
             using (Stream s = assembly.GetManifestResourceStream(resourceNameFragmentShader))
             {
                 mShaderFragmentId = LoadShader(s, ShaderType.FragmentShader, mProgramId);
-                //Console.WriteLine(GL.GetShaderInfoLog(mShaderFragmentId));
             }
 
             if (mShaderFragmentId >= 0 && mShaderVertexId >= 0)
@@ -52,26 +50,6 @@ namespace KWEngine2.Renderers
             mAttribute_vpos = GL.GetAttribLocation(mProgramId, "aPosition");
             mUniform_MVP = GL.GetUniformLocation(mProgramId, "uMVP");
             mUniform_BaseColor = GL.GetUniformLocation(mProgramId, "uBaseColor");
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(ParticleObject po, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(HUDObject ho, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
         }
 
         internal Matrix4 rotMat = Matrix4.CreateRotationX((float)(Math.PI / 2.0));
@@ -135,8 +113,8 @@ namespace KWEngine2.Renderers
                 }
             }
         }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, ref Matrix4 viewProjectionShadowBiased, ref Matrix4 viewProjectionShadowBiased2, HelperFrustum frustum, ref float[] lightColors, ref float[] lightTargets, ref float[] lightPositions, int lightCount, ref int lightShadow)
+        /*
+        internal void Draw(GameObject g, ref Matrix4 viewProjection, ref Matrix4 viewProjectionShadowBiased, ref Matrix4 viewProjectionShadowBiased2, HelperFrustum frustum, ref float[] lightColors, ref float[] lightTargets, ref float[] lightPositions, int lightCount, ref int lightShadow)
         {
             if (g == null || !g.HasModel || g.CurrentWorld == null || g.Opacity <= 0)
                 return;
@@ -181,10 +159,6 @@ namespace KWEngine2.Renderers
 
             GL.UseProgram(0);
         }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum, bool isSun)
-        {
-            throw new NotImplementedException();
-        }
+        */
     }
 }

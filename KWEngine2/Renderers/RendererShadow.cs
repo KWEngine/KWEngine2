@@ -58,7 +58,7 @@ namespace KWEngine2.Renderers
             mUniform_BoneTransforms = GL.GetUniformLocation(mProgramId, "uBoneTransforms");
         }
 
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum, bool isSun)
+        internal void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum)
         {
             if (g == null || !g.HasModel)
                 return;
@@ -70,30 +70,12 @@ namespace KWEngine2.Renderers
                 foreach (string meshName in g.Model.Meshes.Keys)
                 {
                     index++;
-                    if(g.Model.IsKWCube6)
-                    {
-                        index = 0;
-                    }
                     GeoMesh mesh = g.Model.Meshes[meshName];
                     bool useMeshTransform = mesh.BoneNames.Count == 0 || !(g.AnimationID >= 0 && g.Model.Animations != null && g.Model.Animations.Count > 0);
-                    
-                    if (isSun)
-                    {
-                        if (useMeshTransform)
-                        {
-                            Matrix4.Mult(ref mesh.Transform, ref g._modelMatrix, out g.ModelMatrixForRenderPass[index]);
-                        }
-                        else
-                        {
-                            g.ModelMatrixForRenderPass[index] = g._modelMatrix;
-                        }
-                    }
                     if (mesh.Material.Opacity <= 0 || !isInsideFrustum)
                     {
                         continue;
                     }
-
-                    
 
                     if (g.IsShadowCaster && g.Opacity > 0f)
                     {
@@ -111,7 +93,7 @@ namespace KWEngine2.Renderers
                             GL.Uniform1(mUniform_UseAnimations, 0);
                         }
 
-                        Matrix4.Mult(ref g.ModelMatrixForRenderPass[index], ref viewProjection, out _modelViewProjection);
+                        Matrix4.Mult(ref g.ModelMatrixForRenderPass[g.Model.IsKWCube6 ? 0 : index], ref viewProjection, out _modelViewProjection);
                         GL.UniformMatrix4(mUniform_MVP, false, ref _modelViewProjection);
                         GL.BindVertexArray(mesh.VAO);
                         GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
@@ -121,31 +103,6 @@ namespace KWEngine2.Renderers
                     }
                 }
             }
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(ParticleObject po, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(HUDObject ho, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, ref Matrix4 viewProjectionShadow, ref Matrix4 viewProjectionShadow2, HelperFrustum frustum, ref float[] lightColors, ref float[] lightTargets, ref float[] lightPositions, int lightCount, ref int lightShadow)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum)
-        {
-            throw new NotImplementedException();
         }
     }
 }

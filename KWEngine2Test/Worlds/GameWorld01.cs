@@ -20,7 +20,7 @@ namespace KWEngine2Test.Worlds
             return p;
         }
 
-        public override void Act(KeyboardState kb, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState kb, MouseState ms)
         {
             if(kb[Key.Escape])
             {
@@ -62,10 +62,10 @@ namespace KWEngine2Test.Worlds
             KWEngine.BuildTerrainModel("Terrain", @".\textures\heightmap.png", @".\textures\sand_diffuse.jpg", 100, 2, 100, 5, 5);
             KWEngine.ShadowMapCoefficient = 0.0005f;
             FOVShadow = 40f;
-            SetSunPosition(250, 250, -250);
-            SetSunColor(0.25f, 0.5f, 1, 0.7f);
+            //SetSunPosition(250, 250, -250);
+            //SetSunColor(0.25f, 0.5f, 1, 0.7f);
 
-            SunAmbientFactor = 0.1f;
+            //SunAmbientFactor = 0.1f;
             SetCameraPosition(100, 100, 100);
             WorldDistance = 1000;
 
@@ -137,8 +137,6 @@ namespace KWEngine2Test.Worlds
             AddGameObject(p);
             //SetFirstPersonObject(p);
 
-            p._flashlight = new Flashlight();
-            p._flashlight.Type = LightType.DirectionalShadow;
             p._flashlight.SetDistanceMultiplier(5);
             p._flashlight.SetColor(1, 0.75f, 0, 5f);
             p._flashlight.SetFOVShadow(180);
@@ -164,6 +162,7 @@ namespace KWEngine2Test.Worlds
             panel.IsCollisionObject = true;
             AddGameObject(panel);
             
+            /*
             PanelLight pLight = new PanelLight();
             pLight.Type = LightType.Directional;
             pLight.SetColor(1, 1, 1, 1);
@@ -171,7 +170,7 @@ namespace KWEngine2Test.Worlds
             pLight.SetTarget(10, 0, -5);
             pLight.SetDistanceMultiplier(5f);
             AddLightObject(pLight);
-            
+            */
 
             HUDObject ho = new HUDObject(HUDObjectType.Text, 24, 24);
             ho.SetText("kwengine.de");

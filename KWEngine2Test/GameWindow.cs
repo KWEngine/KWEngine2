@@ -12,12 +12,12 @@ namespace KWEngine2Test
                   720,                              // height
                   OpenTK.GameWindowFlags.Default,   // window mode
                   1,                                // anti-aliasing (1 to 8)
-                  true,                             // vsync?
+                  false,                            // vsync?
                   false,                            // multithreading (experimental)
-                  4)                                // anisotropic filtering (1 to 16)
+                  1)                                // anisotropic filtering (1 to 16)
         {
             KWEngine.PostProcessQuality = PostProcessingQuality.Standard;
-            SetWorld(new GameWorldStart());
+            SetWorld(new GameWorldPBRTest());
         }
     }
 }

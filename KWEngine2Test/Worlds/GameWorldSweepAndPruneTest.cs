@@ -8,7 +8,7 @@ namespace KWEngine2Test.Worlds
     class GameWorldSweepAndPruneTest : World
     {
         
-        public override void Act(KeyboardState kb, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState kb, MouseState ms)
         {
            
         }

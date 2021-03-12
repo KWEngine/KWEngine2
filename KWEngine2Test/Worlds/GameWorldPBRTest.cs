@@ -19,18 +19,18 @@ namespace KWEngine2Test.Worlds
         private HUDObject ho;
         private HUDObject ho2;
 
-        public override void Act(KeyboardState kb, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState kb, MouseState ms)
         {
             if (kb[Key.Escape])
             {
                 CurrentWindow.SetWorld(new GameWorldStart());
                 return;
             }
-            
+            /*
             if(kb[Key.U])
             {
                 float i = GetSunColor().W;
-                i -= 0.05f * deltaTimeFactor;
+                i -= 0.05f * KWEngine.DeltaTimeFactor;
                 i = HelperGL.Clamp(i, 0, 2);
                 SetSunColor(GetSunColor().X, GetSunColor().Y, GetSunColor().Z, i);
                 Console.WriteLine("SunIntensity: " + i);
@@ -38,7 +38,7 @@ namespace KWEngine2Test.Worlds
             else if (kb[Key.I])
             {
                 float i = GetSunColor().W;
-                i += 0.05f * deltaTimeFactor;
+                i += 0.05f * KWEngine.DeltaTimeFactor;
                 i = HelperGL.Clamp(i, 0, 2);
                 SetSunColor(GetSunColor().X, GetSunColor().Y, GetSunColor().Z, i);
                 Console.WriteLine("SunIntensity: " + i);
@@ -47,7 +47,7 @@ namespace KWEngine2Test.Worlds
             if (kb[Key.J])
             {
                 float i = SunAmbientFactor;
-                i -= 0.01f * deltaTimeFactor;
+                i -= 0.01f * KWEngine.DeltaTimeFactor;
                 i = HelperGL.Clamp(i, 0, 1);
                 SetSunAmbientFactor(i);
                 Console.WriteLine("Ambient: " + i);
@@ -55,11 +55,12 @@ namespace KWEngine2Test.Worlds
             else if (kb[Key.K])
             {
                 float i = SunAmbientFactor;
-                i += 0.01f * deltaTimeFactor;
+                i += 0.01f * KWEngine.DeltaTimeFactor;
                 i = HelperGL.Clamp(i, 0, 1);
                 SetSunAmbientFactor(i);
                 Console.WriteLine("Ambient: " + i);
             }
+            */
 
             SpawnParticles();
         }
@@ -89,10 +90,11 @@ namespace KWEngine2Test.Worlds
             FOV = 45;
             FOVShadow = 30f;
 
-            SetSunPosition(100, 100, 100);
-            SetSunTarget(0, 0, 0);
-            SetSunAmbientFactor(0.5f);
-            SetSunColor(1, 1, 1, 0.5f);
+            //SetSunPosition(100, 100, 100);
+            //SetSunTarget(0, 0, 0);
+            //SetSunAmbientFactor(0.5f);
+            //SetSunColor(1, 1, 1, 0.5f);
+            SetAmbientLight(1, 1, 1, 0.25f);
 
             SetCameraPosition(0, 25, 50);
             SetCameraTarget(0, 0, 0);
@@ -100,30 +102,32 @@ namespace KWEngine2Test.Worlds
             SetTextureSkybox(@".\textures\skybox1.jpg");
 
             CreateMetalSphereTestObject();
-            CreateCubeTestObject();
-            CreateGLBTestObject();
+            //CreateCubeTestObject();
+            //CreateGLBTestObject();
             CreateTerrainTestObject();
 
 
             CreateFreeFloatPlayer();
 
-            
 
             
-            PointLight p = new PointLight();
-            p.Type = LightType.Point;
-            p.SetPosition(-2, 2, 4);
-            p.SetColor(1, 0, 0, 1f);
-            p.SetDistanceMultiplier(3);
-            //AddLightObject(p);
+           
 
-            DirectionalLight p2 = new DirectionalLight();
-            p2.Type = LightType.DirectionalShadow;
-            p2.SetPosition(-10, 5, -10);
-            p2.SetTarget(0, 2.5f, 0);
-            p2.SetColor(0, 1, 0, 10f);
-            p2.SetDistanceMultiplier(10);
-            //AddLightObject(p2);
+            LightObject l1 = new LightObject(LightType.Directional, true);
+            l1.SetPosition(0, 10, 0);
+            l1.SetTarget(-5, 0, -5);
+            l1.SetColor(1, 0, 0, 1);
+            //AddLightObject(l1);
+
+            
+            LightObject l2 = new LightObject(LightType.Directional, true);
+            l2.SetPosition(0, 10, -10);
+            l2.SetTarget(-5, 0, -5);
+            l2.SetColor(0, 1, 0, 1);
+            l2.SetDistanceMultiplier(20);
+            //AddLightObject(l2);
+            
+
 
             DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
             DebugShowCoordinateSystemGrid = GridType.GridXZ;
@@ -154,6 +158,7 @@ namespace KWEngine2Test.Worlds
 
             CubeRoughnessTest floor = new CubeRoughnessTest();
             floor.SetModel("KWCube");
+            floor.Name = "Test";
             floor.SetPosition(-5, -0.5f, -5);
             floor.SetScale(10, 1, 10);
             floor.SetColor(1, 0, 0);

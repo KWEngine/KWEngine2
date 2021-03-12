@@ -14,7 +14,7 @@ namespace KWEngine2Test.Worlds
     {
         private Player _player = new Player();
 
-        public override void Act(KeyboardState kb, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState kb, MouseState ms)
         {
             if (kb[Key.Escape])
             {
@@ -26,9 +26,9 @@ namespace KWEngine2Test.Worlds
         public override void Prepare()
         {
             FOV = 90;
-            SunAmbientFactor = 0.8f;
-            SetSunPosition(25, 20, 50);
-            SetSunTarget(10, 0, 0);
+            //SunAmbientFactor = 0.8f;
+            //SetSunPosition(25, 20, 50);
+            //SetSunTarget(10, 0, 0);
             //KWEngine.ShadowMapCoefficient = 0.00075f;
             //DebugShowHitboxes = true;
             //DebugShadowCaster = true;

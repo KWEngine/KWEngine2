@@ -27,19 +27,22 @@ namespace KWEngine2.GameObjects
     /// <summary>
     /// Lichtklasse
     /// </summary>
-    public class LightObject
+    public sealed class LightObject
     {
+        private int _frustumMultiplier = 2;
+
         /// <summary>
         /// Name
         /// </summary>
         public string Name { get; set; } = "undefined light object.";
 
         private bool _isShadowCaster = false;
+        internal int _framebufferIndex = -1;
 
         /// <summary>
         /// Gibt an, ob das Licht Schatten wirft (maximal 3x pro Welt erlaubt)
         /// </summary>
-        public bool IsShadowCaster
+        internal bool IsShadowCaster
         {
             get
             {
@@ -55,7 +58,8 @@ namespace KWEngine2.GameObjects
                 }
                 else
                 {
-                    RemoveFramebuffer();
+                    if(_framebufferIndex >= 0)
+                        RemoveFramebuffer();
                 }
                     
             }
@@ -63,12 +67,21 @@ namespace KWEngine2.GameObjects
 
         private void ApplyFramebuffer()
         {
-
+            _framebufferIndex = KWEngine.CurrentWindow.GetFreeIdForShadowMap(this.Type);
+            
         }
 
-        private void RemoveFramebuffer()
+        internal void RemoveFramebuffer()
         {
-
+            if(_framebufferIndex >= 0 && _framebufferIndex < KWEngine.MAX_SHADOWMAPS)
+            {
+                KWEngine.CurrentWindow.AddIdForShadowMap(_framebufferIndex, this.Type);
+                _framebufferIndex = -1;
+            }
+            else
+            {
+                throw new Exception("Internal error occured: cannot remove light framebuffer for shadow mapping.");
+            }
         }
 
         /// <summary>
@@ -83,10 +96,6 @@ namespace KWEngine2.GameObjects
             internal set
             {
                 _type = value;
-                if(IsShadowCaster)
-                {
-                    UpdateMatrices();
-                }
             }
         }
 
@@ -111,7 +120,9 @@ namespace KWEngine2.GameObjects
         internal Vector3 _position = new Vector3(0, 0, 0);
         internal HelperFrustum _frustumShadowMap = new HelperFrustum();
         internal Matrix4 _projectionMatrixShadow = Matrix4.Identity;
-        internal Matrix4 _viewProjectionMatrixShadow = Matrix4.Identity;
+        internal Matrix4[] _viewProjectionMatrixShadow = new Matrix4[6];
+        //internal Matrix4[] _viewProjectionMatrixShadowBiased = new Matrix4[6];
+        // HelperMatrix.BiasedMatrixForShadowMapping;
         internal Matrix4[] _viewMatrixShadow = new Matrix4[6];
 
         private void UpdateMatrices()
@@ -128,12 +139,19 @@ namespace KWEngine2.GameObjects
 
                     _viewMatrixShadow[4] = Matrix4.LookAt(Position, Position + new Vector3(0, 0, 1), new Vector3(0, -1, 0));
                     _viewMatrixShadow[5] = Matrix4.LookAt(Position, Position + new Vector3(0, 0, -1), new Vector3(0, -1, 0));
+
+                    for(int i =0; i < 6; i++)
+                    {
+                        _viewProjectionMatrixShadow[i] = _viewMatrixShadow[i] * _projectionMatrixShadow;
+                        //_viewProjectionMatrixShadowBiased[i] = _viewProjectionMatrixShadow[i] * HelperMatrix.BiasedMatrixForShadowMapping;
+                    }
                 }
                 else
                 {
                     _viewMatrixShadow[0] = Matrix4.LookAt(Position, Target, KWEngine.WorldUp);
                     _frustumShadowMap.CalculateFrustum(_projectionMatrixShadow, _viewMatrixShadow[0]);
-                    _viewProjectionMatrixShadow = _viewMatrixShadow[0] * _projectionMatrixShadow;
+                    _viewProjectionMatrixShadow[0] = _viewMatrixShadow[0] * _projectionMatrixShadow;
+                    //_viewProjectionMatrixShadowBiased[0] = _viewProjectionMatrixShadow[0] * HelperMatrix.BiasedMatrixForShadowMapping;
                 }
                 
             }
@@ -162,43 +180,36 @@ namespace KWEngine2.GameObjects
             }
             set
             {
-                _target = value;
+                _target = new Vector3(value.X, value.Y, value.Z + 0.000001f);
                 UpdateMatrices();
             }
         }
-        /// <summary>
-        /// Distanzmultiplikator (Standard: 10)
-        /// </summary>
-        public float DistanceMultiplier { get; private set; } = 10;
+
+        private float _distanceMultiplier = 10;
+
 
         /// <summary>
         /// Konstruktormethode
         /// </summary>
-        protected LightObject()
-            : this(LightType.Point)
+        private LightObject()
+            : this(LightType.Point, false)
         {
-            Position = new Vector3(0, 0, 0);
-            Target = new Vector3(0, -1, 0);
-            Color = new Vector4(1, 1, 1, 1);
-            Type = LightType.Point;
-            DistanceMultiplier = 10;
-            IsShadowCaster = false;
-            SetFOVShadowPrivate(179);
+            
         }
 
         /// <summary>
         /// Erstellt ein Lichtinstanz des angegebenen Typs
         /// </summary>
         /// <param name="type">Art des Lichts</param>
-        /// <param name="isShadowCaster">Art des Lichts</param>
-        public LightObject(LightType type, bool isShadowCaster = false)
+        /// <param name="isShadowCaster">Wirft das Licht Schatten?</param>
+        public LightObject(LightType type, bool isShadowCaster)
         {
             Position = new Vector3(0, 0, 0);
             Target = new Vector3(0, -1, 0);
             Color = new Vector4(1, 1, 1, 1);
             Type = type;
-            DistanceMultiplier = 10;
-            IsShadowCaster = false;
+            _distanceMultiplier = 10;
+            IsShadowCaster = isShadowCaster;
             SetFOVShadowPrivate(179);
         }
 
@@ -212,10 +223,11 @@ namespace KWEngine2.GameObjects
         {
             if (multiplier > 0)
             {
-                DistanceMultiplier = multiplier;
+                _distanceMultiplier = multiplier;
             }
             else
-                DistanceMultiplier = 1;
+                _distanceMultiplier = 10;
+            SetFOVShadow(FOVShadow);
         }
 
         /// <summary>
@@ -284,7 +296,12 @@ namespace KWEngine2.GameObjects
             FOVShadow = HelperGL.Clamp(fov, 30, 179);
             if(KWEngine.CurrentWorld != null)
             {
-                _projectionMatrixShadow = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(FOVShadow / 2), KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize, 1f, CurrentWorld != null ? CurrentWorld.ZFar / 10 : 100f);
+                _projectionMatrixShadow = Matrix4.CreatePerspectiveFieldOfView(
+                        MathHelper.DegreesToRadians(FOVShadow / 2), 
+                        KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize, 
+                        0.1f, 
+                        _distanceMultiplier * _frustumMultiplier
+                );
                 UpdateMatrices();
             }
         }
@@ -303,11 +320,19 @@ namespace KWEngine2.GameObjects
                     if (Type == LightType.Point)
                     {
                         FOVShadow = 90;
-                        _projectionMatrixShadow = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(FOVShadow / 2), KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize, 0.1f, DistanceMultiplier);
+                        _projectionMatrixShadow = Matrix4.CreatePerspectiveFieldOfView(
+                            MathHelper.DegreesToRadians(FOVShadow / 2), 
+                            KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize, 
+                            0.1f, 
+                            _distanceMultiplier * _frustumMultiplier);
                         
                     }
                     else
-                        _projectionMatrixShadow = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(FOVShadow / 2), KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize, 0.1f, DistanceMultiplier);
+                        _projectionMatrixShadow = Matrix4.CreatePerspectiveFieldOfView(
+                            MathHelper.DegreesToRadians(FOVShadow / 2), 
+                            KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize, 
+                            0.1f, 
+                            _distanceMultiplier * _frustumMultiplier);
                     UpdateMatrices();
                 }
             }
@@ -320,33 +345,28 @@ namespace KWEngine2.GameObjects
         public void SetFOVShadowBiasCoefficient(float bias = 0.005f)
         {
             if (!IsShadowCaster)
-                throw new Exception("Cannot set FOV for a LightObject that is not of Type 'DirectionalShadow'.");
+                throw new Exception("Setting FOV for Light is available for directional shadow casting lights only.");
             else
             {
                 ShadowMapBiasCoefficient = HelperGL.Clamp(bias, 0.00001f, 1);
             }
         }
 
-        internal static void PrepareLightsForRenderPass(List<LightObject> lights, ref float[] colors, ref float[] targets, ref float[] positions, ref int count, ref int shadowLight)
+        internal static void PrepareLightsForRenderPass(List<LightObject> lights, ref float[] colors, ref float[] targets, ref float[] positions, ref float[] meta, ref int count)
         {
             int countTemp = 0;
             IEnumerator<LightObject> enumerator = lights.GetEnumerator();
             enumerator.Reset();
-            for (int i = 0, arraycounter = 0; i < lights.Count; i++)
+            for (int i = 0, twocounter = 0, arraycounter = 0; i < lights.Count; i++)
             {
 
                 enumerator.MoveNext();
                 LightObject l = enumerator.Current;
                 bool isInFrustum =
-                    KWEngine.CurrentWindow.Frustum.SphereVsFrustum(l.Position, l.DistanceMultiplier * 10);
+                    KWEngine.CurrentWindow.Frustum.SphereVsFrustum(l.Position, l._distanceMultiplier * l._frustumMultiplier);
 
                 if (isInFrustum)
                 {
-                    if (l.IsShadowCaster)
-                    {
-                        shadowLight = i;
-                    }
-
                     colors[arraycounter + 0] = l.Color.X;
                     colors[arraycounter + 1] = l.Color.Y;
                     colors[arraycounter + 2] = l.Color.Z;
@@ -357,34 +377,27 @@ namespace KWEngine2.GameObjects
                     targets[arraycounter + 2] = l.Target.Z;
                     if(l.Type == LightType.Point)
                     {
-                        if (l.IsShadowCaster)
-                            targets[arraycounter + 3] = -2;
-                        else
-                            targets[arraycounter + 3] = -1;
+                        targets[arraycounter + 3] = 0;
                     }
                     else if(l.Type== LightType.Directional)
                     {
-                        if (l.IsShadowCaster)
-                            targets[arraycounter + 3] = 2;
-                        else
-                            targets[arraycounter + 3] = 1;
+                        targets[arraycounter + 3] = 1;
                     }
                     else
                     {
-                        if (l.IsShadowCaster)
-                            targets[arraycounter + 3] = 200;
-                        else
-                            targets[arraycounter + 3] = 100;
+                        targets[arraycounter + 3] = -1;
                     }
-                    //targets[arraycounter + 3] = l.Type == LightType.Directional || l.Type == LightType.DirectionalShadow ? 1 : -1;
 
                     positions[arraycounter + 0] = l.Position.X;
                     positions[arraycounter + 1] = l.Position.Y;
                     positions[arraycounter + 2] = l.Position.Z;
-                    positions[arraycounter + 3] = l.DistanceMultiplier;
+                    positions[arraycounter + 3] = l._distanceMultiplier;
 
+                    meta[twocounter] = l.ShadowMapBiasCoefficient;
+                    meta[twocounter + 1] = l.IsShadowCaster ? 1 : 0;
                     countTemp++;
                     arraycounter += 4;
+                    twocounter += 2;
                 }
             }
 

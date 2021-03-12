@@ -1,4 +1,5 @@
 ﻿using KWEngine2;
+using KWEngine2.GameObjects;
 using KWEngine2.Helper;
 using KWEngine2Test.Objects.JumpAndRun.Actors;
 using KWEngine2Test.Objects.JumpAndRun.Platforms;
@@ -15,7 +16,7 @@ namespace KWEngine2Test.Worlds
     {
         private Player _player;
 
-        public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState ks, MouseState ms)
         {
             if (ks[Key.Escape])
             {
@@ -38,14 +39,14 @@ namespace KWEngine2Test.Worlds
 
             SetTextureBackground(@".\Textures\bg_greenmountains.png", 1, 1);
             SetTextureBackgroundBrightnessMultiplier(0.75f);
-            SetSunColor(1, 1, 1, 1);
+            //SetSunColor(1, 1, 1, 1);
             WorldDistance = 1000;
 
             SetCameraPosition(0, 0, 50);
             SetCameraTarget(0, 0, 0);
             FOV = 30;
 
-            GeneratePlatforms();
+            //GeneratePlatforms();
 
             // Player object:
             _player = new Player();
@@ -57,13 +58,16 @@ namespace KWEngine2Test.Worlds
             _player.SetPosition(0, 4f, 0);
             _player.IsCollisionObject = true;
             _player.UpdateLast = true;
-            AddGameObject(_player);
+            //AddGameObject(_player);
 
             Platform floor = new Platform();
             floor.SetModel("Platform02");
             floor.IsCollisionObject = true;
             floor.SetPosition(0, 3f, 0);
             AddGameObject(floor);
+
+            //LightObject l1 = new LightObject(LightType.Directional, true);
+            //AddLightObject(l1);
         }
 
         private void GeneratePlatforms()

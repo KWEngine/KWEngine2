@@ -22,10 +22,47 @@ namespace KWEngine2
         /// Zeige Hitbox von allen als Kollisionsobjekt markierten GameObject-Instanzen
         /// </summary>
         public bool DebugShowHitboxes { get; set; } = false;
+
+        private int _debugShadowCasterIndex = -1;
+        public int DebugShadowCasterIndex 
+        {
+            get
+            {
+                return _debugShadowCasterIndex;
+            }
+            set
+            {
+                if(value >= 0 && value < KWEngine.MAX_SHADOWMAPS)
+                {
+                    _debugShadowCasterIndex = value;
+                }
+                else
+                {
+                    _debugShadowCasterIndex = -1;
+                }
+            }
+        }
+
+        private bool _debugShadowCaster = false;
         /// <summary>
         /// Zeige die Welt aus der Sicht der Sonne
         /// </summary>
-        public bool DebugShadowCaster { get; set; } = false;
+        public bool DebugShadowCaster {
+            get
+            {
+                return _debugShadowCasterIndex >= 0;
+            }
+            set
+            {
+                if(value == true)
+                {
+                    if (_debugShadowCasterIndex < 0)
+                        _debugShadowCasterIndex = 0;
+                    _debugShadowCaster = value;
+                }
+            }
+        }
+
         /// <summary>
         /// Zeige Koordinatensystem
         /// </summary>
@@ -292,10 +329,8 @@ namespace KWEngine2
         private Vector3 _cameraPosition = new Vector3(0, 0, 25);
         private Vector3 _cameraTarget = new Vector3(0, 0, 0);
         private Vector3 _cameraLookAt = new Vector3(0, 0, 1);
-        private Vector3 _sunPosition = new Vector3(50, 50, 50);
-        private Vector3 _sunTarget = new Vector3(0, 0, 0);
-        private Vector4 _sunColor = new Vector4(1, 1, 1, 0.75f);
-        private float _sunAmbient = 0.25f;
+
+        internal Vector4 _ambientLight = new Vector4(1, 1, 1, 0.75f);
 
         private float _fov = 45f;
         private float _fovShadow = 45f;
@@ -438,120 +473,32 @@ namespace KWEngine2
         }
 
         /// <summary>
-        /// Erfragt die Position der Sonne
+        /// Setzt das Umgebungslichts (dort wo die Sonne nicht scheint)
         /// </summary>
-        /// <returns>Position</returns>
-        public Vector3 GetSunPosition()
+        /// <param name="ambient">Umgebungslicht</param>
+        public void SetAmbientLight(Vector4 ambient)
         {
-            return _sunPosition;
+            _ambientLight.X = HelperGL.Clamp(ambient.X, 0, 1);
+            _ambientLight.Y = HelperGL.Clamp(ambient.Y, 0, 1);
+            _ambientLight.Z = HelperGL.Clamp(ambient.Z, 0, 1);
+            _ambientLight.W = HelperGL.Clamp(ambient.W, 0, 1);
         }
-
-        /// <summary>
-        /// Erfragt das Blickziel der Sonne
-        /// </summary>
-        /// <returns>Position</returns>
-        public Vector3 GetSunTarget()
-        {
-            return _sunTarget;
-        }
-
-        /// <summary>
-        /// Setzt die Position der Sonne
-        /// </summary>
-        /// <param name="x">x</param>
-        /// <param name="y">y</param>
-        /// <param name="z">z</param>
-        public void SetSunPosition(float x, float y, float z)
-        {
-            SetSunPosition(new Vector3(x, y, z + 0.000001f));
-        }
-
-        /// <summary>
-        /// Setzt die Position der Sonne
-        /// </summary>
-        /// <param name="p">Position</param>
-        public void SetSunPosition(Vector3 p)
-        {
-            p.Z += +0.000001f;
-            _sunPosition = p;
-            _viewMatrixShadow = Matrix4.LookAt(_sunPosition, _sunTarget, KWEngine.WorldUp);
-            _sunDirectionInverted = Vector3.NormalizeFast(_sunPosition - _sunTarget);
-        }
-
-        internal Vector3 _sunDirectionInverted = new Vector3(0.577350f, 0.577350f, 0.577350f);
-
-        /// <summary>
-        /// Setzt das Blickziel der Sonne
-        /// </summary>
-        /// <param name="x">x</param>
-        /// <param name="y">y</param>
-        /// <param name="z">z</param>
-        public void SetSunTarget(float x, float y, float z)
-        {
-            SetSunTarget(new Vector3(x, y, z));
-        }
-
-        /// <summary>
-        /// Setzt das Blickziel der Sonne
-        /// </summary>
-        /// <param name="p">Position</param>
-        public void SetSunTarget(Vector3 p)
-        {
-            _sunTarget = p;
-            _viewMatrixShadow = Matrix4.LookAt(_sunPosition, _sunTarget, KWEngine.WorldUp);
-            _sunDirectionInverted = Vector3.NormalizeFast(_sunPosition - _sunTarget);
-        }
-
-        /// <summary>
-        /// Helligkeit des Umgebungslichts (dort wo die Sonne nicht scheint)
-        /// </summary>
-        /// <param name="a">Helligkeit (0 bis 1)</param>
-        public void SetSunAmbientFactor(float a)
-        {
-            SunAmbientFactor = a;
-        }
-
-        /// <summary>
-        /// Helligkeit des Umgebungslichts (dort wo die Sonne nicht scheint), Wertebereich: 0 bis 1
-        /// </summary>
-        public float SunAmbientFactor
-        {
-            get
-            {
-                return _sunAmbient;
-            }
-            set
-            {
-                _sunAmbient = Helper.HelperGL.Clamp(value, 0f, 1f);
-            }
-        }
-
-        /// <summary>
-        /// Setzt die Farbe des Sonnenlichts
-        /// </summary>
-        /// <param name="red">Rotanteil (0 bis 1)</param>
-        /// <param name="green">Grünanteil (0 bis 1)</param>
-        /// <param name="blue">Blauanteil (0 bis 1)</param>
-        /// <param name="intensity">Helligkeitsanteil (0 bis 1024)</param>
-        public void SetSunColor(float red, float green, float blue, float intensity)
-        {
-            _sunColor.X = HelperGL.Clamp(red, 0, 1);
-            _sunColor.Y = HelperGL.Clamp(green, 0, 1);
-            _sunColor.Z = HelperGL.Clamp(blue, 0, 1);
-            _sunColor.W = HelperGL.Clamp(intensity, 0, 1024);
-        }
-
 
 
         /// <summary>
-        /// Erfragt die Farbe der Sonne
+        /// Setzt das Umgebungslichts (dort wo sonst kein Licht scheint)
         /// </summary>
-        /// <returns>Farbinfos</returns>
-        public Vector4 GetSunColor()
+        /// <param name="r">Rotanteil (0 - 1)</param>
+        /// <param name="g">Grünanteil (0 - 1)</param>
+        /// <param name="b">Blauanteil (0 - 1)</param>
+        /// <param name="intensity">Intensität (0 - 1)</param>
+        public void SetAmbientLight(float r, float g, float b, float intensity)
         {
-            return _sunColor;
+            _ambientLight.X = HelperGL.Clamp(r, 0, 1);
+            _ambientLight.Y = HelperGL.Clamp(g, 0, 1);
+            _ambientLight.Z = HelperGL.Clamp(b, 0, 1);
+            _ambientLight.W = HelperGL.Clamp(intensity, 0, 1);
         }
-
 
         /// <summary>
         /// Vorbereitungsmethode
@@ -664,6 +611,7 @@ namespace KWEngine2
                 foreach (LightObject g in _lightObjectsTBR)
                 {
                     g.CurrentWorld = null;
+                    g.RemoveFramebuffer();
                     _lightObjects.Remove(g);
                 }
                 _lightObjectsTBR.Clear();
@@ -671,22 +619,14 @@ namespace KWEngine2
 
                 foreach (LightObject g in _lightObjectsTBA)
                 {
-                    if(g.Type == LightType.DirectionalShadow)
-                    {
-                        LightObject shadowLight = _lightObjects.FirstOrDefault(l => l.Type == LightType.DirectionalShadow);
-                        if(shadowLight != null)
-                        {
-                            throw new Exception("Only one light of type DirectionalShadow is allowed per World instance.");
-                        }
-                    }
-                    if (!_lightObjects.Contains(g) && _lightcount <= 10)
+                    if (!_lightObjects.Contains(g) && _lightcount <= KWEngine.MAX_LIGHTS)
                     {
                         _lightObjects.Add(g);
                         g.CurrentWorld = this;
                     }
                     else
                     {
-                        throw new Exception("Please do not add more than 10 lights.");
+                        throw new Exception("Please do not add more than " + KWEngine.MAX_LIGHTS + " lights.");
                     }
                 }
                 _lightObjectsTBA.Clear();

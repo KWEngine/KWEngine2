@@ -85,35 +85,5 @@ namespace KWEngine2.Renderers
             mUniform_Resolution = GL.GetUniformLocation(mProgramId, "uResolution");
             mUniform_BloomRadius = GL.GetUniformLocation(mProgramId, "uBloomRadius");
         }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(ParticleObject po, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(HUDObject ho, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, ref Matrix4 viewProjectionShadow, ref Matrix4 viewProjectionShadow2, HelperFrustum frustum, ref float[] lightColors, ref float[] lightTargets, ref float[] lightPositions, int lightCount, ref int lightShadow)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum, bool isSun)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -80,7 +80,6 @@ namespace KWEngine2.Renderers
 
         }
 
-
         internal void Draw(Explosion e, ref Matrix4 viewProjection)
         {
             if (e == null || e._model == null || e._currentWorld == null)
@@ -93,7 +92,7 @@ namespace KWEngine2.Renderers
                 int type = (int)e._type;
 
                 GL.Uniform4(mUniform_Glow, e.Glow.X, e.Glow.Y, e.Glow.Z, e.Glow.W);
-                GL.Uniform1(mUniform_SunAmbient, HelperGL.Clamp(e._currentWorld.SunAmbientFactor * 2f, 0, 1));
+                GL.Uniform1(mUniform_SunAmbient, HelperGL.Clamp(e._currentWorld._ambientLight.W * 2f, 0, 1));
                 GL.Uniform1(mUniform_Number, (float)e._amount);
                 GL.Uniform1(mUniform_Spread, e._spread);
                 GL.Uniform3(mUniform_Position, e.Position);
@@ -135,36 +134,6 @@ namespace KWEngine2.Renderers
 
             GL.UseProgram(0);
             
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(ParticleObject po, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(HUDObject ho, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, ref Matrix4 viewProjectionShadow, ref Matrix4 viewProjectionShadow2, HelperFrustum frustum, ref float[] lightColors, ref float[] lightTargets, ref float[] lightPositions, int lightCount, ref int lightShadow)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum, bool isSun)
-        {
-            throw new NotImplementedException();
         }
     }
 }

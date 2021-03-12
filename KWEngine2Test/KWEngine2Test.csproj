@@ -56,9 +56,7 @@
     <Compile Include="Objects\JumpAndRun\Platforms\Platform.cs" />
     <Compile Include="Objects\JumpAndRun\Actors\Player.cs" />
     <Compile Include="Objects\TestAll\CubeRoughnessTest.cs" />
-    <Compile Include="Objects\TestAll\DirectionalLight.cs" />
     <Compile Include="Objects\TestAll\PlayerFloat.cs" />
-    <Compile Include="Objects\TestAll\PointLight.cs" />
     <Compile Include="Objects\School\Immovable.cs" />
     <Compile Include="Objects\School\Player.cs" />
     <Compile Include="Objects\SpaceInvaders\Box.cs" />
@@ -79,10 +77,8 @@
     <Compile Include="Worlds\GameWorldSweepAndPruneTest.cs" />
     <Compile Include="Worlds\GameWorldStart.cs" />
     <Compile Include="Objects\TestAll\Cube.cs" />
-    <Compile Include="Objects\Main\Flashlight.cs" />
     <Compile Include="Objects\Main\Immovable.cs" />
     <Compile Include="Objects\Main\Panel.cs" />
-    <Compile Include="Objects\Main\PanelLight.cs" />
     <Compile Include="Objects\Main\Player.cs" />
     <Compile Include="GameWindow.cs" />
     <Compile Include="Worlds\GameWorld01.cs" />

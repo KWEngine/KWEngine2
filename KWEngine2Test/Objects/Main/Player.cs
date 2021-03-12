@@ -14,11 +14,11 @@ namespace KWEngine2Test.Objects.Main
 {
     class Player : GameObject
     {
-        public Flashlight _flashlight { get; set; } = new Flashlight();
+        public LightObject _flashlight { get; set; } = new LightObject(LightType.Directional, true);
         private float _animationPercentage = 0;
         private float _height = 50;
 
-        public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState ks, MouseState ms)
         {
             bool runs = false;
             if (CurrentWorld.IsFirstPersonMode && CurrentWorld.GetFirstPersonObject().Equals(this))
@@ -46,7 +46,7 @@ namespace KWEngine2Test.Objects.Main
                     runs = true;
                 }
                 MoveFPSCamera(ms);
-                MoveAndStrafeFirstPerson(forward, strafe, 0.1f * deltaTimeFactor);
+                MoveAndStrafeFirstPerson(forward, strafe, 0.1f * KWEngine.DeltaTimeFactor);
                 FPSEyeOffset = 5;
                 if (ks[Key.Q])
                 {
@@ -68,27 +68,27 @@ namespace KWEngine2Test.Objects.Main
 
                 if (ks[Key.A])
                 {
-                    MoveAlongVector(strafe, 0.1f * deltaTimeFactor);
+                    MoveAlongVector(strafe, 0.1f * KWEngine.DeltaTimeFactor);
                     runs = true;
                 }
                 if (ks[Key.D])
                 {
-                    MoveAlongVector(strafe, -0.1f * deltaTimeFactor);
+                    MoveAlongVector(strafe, -0.1f * KWEngine.DeltaTimeFactor);
                     runs = true;
                 }
                 if (ks[Key.W])
                 {
-                    MoveAlongVector(cameraLookAt, 0.1f * deltaTimeFactor);
+                    MoveAlongVector(cameraLookAt, 0.1f * KWEngine.DeltaTimeFactor);
                     runs = true;
                 }
                 if (ks[Key.S])
                 {
-                    MoveAlongVector(cameraLookAt, -0.1f * deltaTimeFactor);
+                    MoveAlongVector(cameraLookAt, -0.1f * KWEngine.DeltaTimeFactor);
                     runs = true;
                 }
 
                 if (ks[Key.T])
-                    MoveOffset(0, 0.2f * deltaTimeFactor, 0);
+                    MoveOffset(0, 0.2f * KWEngine.DeltaTimeFactor, 0);
                 
                 if (ks[Key.Q])
                 {
@@ -120,7 +120,7 @@ namespace KWEngine2Test.Objects.Main
             }
             */
 
-            MoveOffset(0, -0.1f * deltaTimeFactor, 0);
+            MoveOffset(0, -0.1f * KWEngine.DeltaTimeFactor, 0);
             List<Intersection> intersections = GetIntersections();
             foreach(Intersection i in intersections)
             {
@@ -135,7 +135,7 @@ namespace KWEngine2Test.Objects.Main
             }
 
             AdjustFlashlight();
-            AdjustAnimation(runs, deltaTimeFactor);
+            AdjustAnimation(runs, KWEngine.DeltaTimeFactor);
 
             Vector3 camPos = this.Position + new Vector3(50, _height, 50);
             camPos.Y = _height;
@@ -167,7 +167,7 @@ namespace KWEngine2Test.Objects.Main
                     Vector3 source = middle + lookAtRot * 0.8f;
                     
                     _flashlight.SetPosition(source);
-                    if (_flashlight.Type == LightType.Directional || _flashlight.Type == LightType.DirectionalShadow)
+                    if (_flashlight.Type == LightType.Directional)
                     {
                         lookAt.Y = lookAt.Y - 0.02f;
                         _flashlight.SetTarget(middle + lookAt * 2f);
@@ -180,7 +180,7 @@ namespace KWEngine2Test.Objects.Main
                     middle.Y += Scale.Y / 3f;
                     Vector3 source = middle + lookAt * 0.7f;
                     _flashlight.SetPosition(source);
-                    if (_flashlight.Type == LightType.Directional || _flashlight.Type == LightType.DirectionalShadow)
+                    if (_flashlight.Type == LightType.Directional)
                     {
                         lookAt.Y = lookAt.Y - 0.075f;
                         _flashlight.SetTarget(middle + lookAt * 0.8f);

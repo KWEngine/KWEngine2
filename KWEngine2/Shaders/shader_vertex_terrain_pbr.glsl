@@ -1,4 +1,4 @@
-﻿#version 430
+﻿#version 450
 
 in		vec3 aPosition;
 in		vec2 aTexture;
@@ -11,15 +11,23 @@ out		vec3 vNormal;
 out		vec2 vTexture;
 out		vec2 vTextureNoRepetitions;
 out		mat3 vTBN;
-out		vec4 vShadowCoord;
-out		vec4 vShadowCoord2;
+out		vec4 vShadowCoord[3];
+
+uniform vec2 uTextureTransform;
 
 uniform mat4 uMVP;
 uniform mat4 uNormalMatrix;
 uniform mat4 uModelMatrix;
-uniform mat4 uMVPShadowMap;
-uniform mat4 uMVPShadowMap2;
-uniform vec2 uTextureTransform;
+uniform mat4 uMVPShadowMap[3];
+
+uniform int uLightCount;
+
+const mat4 biasMatrix = mat4(
+	0.5, 0.0, 0.0, 0.0,
+    0.0, 0.5, 0.0, 0.0,
+	0.0, 0.0, 0.5, 0.0,
+	0.5, 0.5, 0.5, 1.0
+);
 
 void main()
 {
@@ -45,8 +53,10 @@ void main()
 	vTexture = aTexture * uTextureTransform;
 	vTextureNoRepetitions = aTexture;
 	vPosition = (uModelMatrix * totalLocalPos).xyz;
-	vShadowCoord = uMVPShadowMap * totalLocalPos;
-	vShadowCoord2 = uMVPShadowMap2 * totalLocalPos;
+	for(int i = 0; i < uLightCount; i++)
+	{
+		vShadowCoord[i] = (biasMatrix * uMVPShadowMap[i] * uModelMatrix) * totalLocalPos;
+	}
 	vTBN = mat3(vTangent.xyz, vBiTangent.xyz, vNormal.xyz);
 	
 	gl_Position = uMVP * totalLocalPos;

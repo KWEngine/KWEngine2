@@ -29,7 +29,7 @@ namespace KWEngine2Test.Objects.SpaceInvaders
             _health -= amount;
         }
 
-        public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState ks, MouseState ms)
         {
             if(_health <= 0)
             {
