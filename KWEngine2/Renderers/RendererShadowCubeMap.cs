@@ -94,7 +94,7 @@ namespace KWEngine2.Renderers
                         g.ModelMatrixForRenderPass[index] = g._modelMatrix;
                     }
 
-                    if (mesh.Material.Opacity <= 0 || !isInsideFrustum)
+                    if (mesh.Material.Opacity <= 0)
                     {
                         continue;
                     }

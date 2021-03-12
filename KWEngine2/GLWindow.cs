@@ -108,15 +108,16 @@ namespace KWEngine2
         /// <param name="vSync">VSync aktivieren</param>
         /// <param name="multithreading">Multithreading aktivieren (Standard: false)</param>
         /// <param name="textureAnisotropy">Level der anisotropischen Texturfilterung [1 bis 16, Standard: 1 (aus)]</param>
-        protected GLWindow(int width, int height, GameWindowFlags flag, int antialiasing = 0, bool vSync = true, bool multithreading = false, int textureAnisotropy = 1)
+        /// <param name="shadowMapSize">Größe der Shadow Map (Standard: 1024)</param>
+        protected GLWindow(int width, int height, GameWindowFlags flag, int antialiasing = 0, bool vSync = true, bool multithreading = false, int textureAnisotropy = 1, int shadowMapSize = 1024)
             : base(width, height, GraphicsMode.Default, "KWEngine2 - C# 3D Gaming", flag == GameWindowFlags.Default ? GameWindowFlags.FixedWindow : flag, DisplayDevice.Default, 4, 5, GraphicsContextFlags.Debug, null, !multithreading)
         {
             _multithreaded = multithreading;
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             Width = width;
             Height = height;
-
-            KWEngine.ShadowMapSize = textureSizeShadowMap;
+            CurrentWindow = this;
+            KWEngine.ShadowMapSize = shadowMapSize;
 
             _bloomwidth = HelperTexture.RoundDownToPowerOf2(width);
             if (_bloomwidth > 1024)
@@ -156,7 +157,7 @@ namespace KWEngine2
                 DeltaTime.movAveragePeriod = 5f; // #frames involved in average calc (suggested values 5-100)
                 DeltaTime.smoothFactor = 0.02f; // adjusting ratio (suggested values 0.01-0.5)
             }
-            CurrentWindow = this;
+            
             _vSync = vSync;
             VSync = vSync ? VSyncMode.On : VSyncMode.Off;
             BasicInit();
