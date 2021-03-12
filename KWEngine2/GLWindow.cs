@@ -90,7 +90,7 @@ namespace KWEngine2
         /// <param name="width">Breite des Fensters</param>
         /// <param name="height">Höhe des Fensters</param>
         protected GLWindow(int width, int height)
-           : this(width, height, GameWindowFlags.Default, 0, true, false)
+           : this(width, height, GameWindowFlags.FixedWindow, 0, true, false)
         {
 
         }
@@ -115,6 +115,8 @@ namespace KWEngine2
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             Width = width;
             Height = height;
+
+            KWEngine.ShadowMapSize = textureSizeShadowMap;
 
             _bloomwidth = HelperTexture.RoundDownToPowerOf2(width);
             if (_bloomwidth > 1024)

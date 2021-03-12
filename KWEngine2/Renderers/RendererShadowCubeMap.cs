@@ -16,6 +16,9 @@ namespace KWEngine2.Renderers
     internal class RendererShadowCubeMap : Renderer
     {
         private Matrix4 _identityMatrix = Matrix4.Identity;
+
+        private int mUniform_ViewProjectionMatrix = -1;
+
         public override void Initialize()
         {
             Name = "ShadowCubeMap";
@@ -67,7 +70,6 @@ namespace KWEngine2.Renderers
         {
             if (g == null || !g.HasModel)
                 return;
-            bool isInsideFrustum = frustum.SphereVsFrustum(g.GetCenterPointForAllHitboxes(), g.GetMaxDiameter() / 2);
             
             lock (g)
             {

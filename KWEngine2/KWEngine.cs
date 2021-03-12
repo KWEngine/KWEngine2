@@ -611,7 +611,7 @@ namespace KWEngine2
             {
                 return _shadowMapSize;
             }
-            set
+            internal set
             {
                 if (value >= 256 && value <= 4096)
                 {
