@@ -54,11 +54,11 @@ uniform int uUseTextureSkybox;
 uniform vec4 uLightsPositions[10];
 uniform vec4 uLightsTargets[10];
 uniform vec4 uLightsColors[10];
-uniform vec2 uLightsMeta[10];
+uniform vec3 uLightsMeta[10];
 uniform int uLightCount;
 uniform int uLightAffection;
 uniform vec4 uSunAmbient;
-//uniform float uFarPlane;
+uniform float uFarPlane;
 
 uniform int uSpecularReflectionFactor;
 

@@ -127,8 +127,6 @@ namespace KWEngine2.Renderers
 
             mUniform_SpecularReflectionFactor = GL.GetUniformLocation(mProgramId, "uSpecularReflectionFactor");
 
-            mUniform_FarPlane = GL.GetUniformLocation(mProgramId, "uFarPlane");
-
             GL.ValidateProgram(mProgramId);
             HelperGL.CheckGLErrors();
         }
@@ -161,7 +159,7 @@ namespace KWEngine2.Renderers
                 GL.Uniform4(mUniform_LightsColors, KWEngine.MAX_LIGHTS, lightColors);
                 GL.Uniform4(mUniform_LightsTargets, KWEngine.MAX_LIGHTS, lightTargets);
                 GL.Uniform4(mUniform_LightsPositions, KWEngine.MAX_LIGHTS, lightPositions);
-                GL.Uniform2(mUniform_LightsMeta, KWEngine.MAX_LIGHTS, lightmeta);
+                GL.Uniform3(mUniform_LightsMeta, KWEngine.MAX_LIGHTS, lightmeta);
 
                 // Sun
                 GL.Uniform4(mUniform_SunAmbient, g.CurrentWorld._ambientLight);

@@ -48,13 +48,13 @@ uniform sampler2D uTexture2D;
 uniform int uUseTextureSkybox;
 
 uniform vec4 uLightsPositions[10];
-uniform vec4 uLightsTargets[10];
+uniform vec4 uLightsTargets[10]; // w: point = 0, directional = 1, sun = -1
 uniform vec4 uLightsColors[10];
-uniform vec2 uLightsMeta[10];
+uniform vec3 uLightsMeta[10]; // 
 uniform int uLightCount;
 uniform int uLightAffection;
 uniform vec4 uSunAmbient;
-//uniform float uFarPlane;
+uniform float uFarPlane;
 
 uniform int uSpecularReflectionFactor;
 
@@ -105,6 +105,24 @@ float calculateDarkening(float cosTheta, int index)
 	darkening /= 5.0;
 	return max(darkening, 0.0);
 }
+
+float calculateDarkeningCubeMap(float cosTheta, int index) // TODO: Index might be > 2!!!
+{
+	float bias = uLightsMeta[index].x * sqrt ( 1.0f - cosTheta * cosTheta   ) / cosTheta;
+	bias = clamp(bias, 0.0, 0.01);
+
+    // get vector between fragment position and light position
+    vec3 fragToLight = vPosition - uLightsPositions[index].xyz;
+    // use the light to fragment vector to sample from the depth map    
+    float closestDepth = texture(uTextureShadowMapCubeMap[index], fragToLight).r;
+    // it is currently in linear range between [0,1]. Re-transform back to original value
+    closestDepth *= uLightsMeta[index].z;
+    // now get current linear depth as the length between the fragment and light position
+    float currentDepth = length(fragToLight);
+    // now test for shadows
+    float shadow = currentDepth -  bias > closestDepth ? 0.0 : 1.0;
+    return shadow;
+}  
 
 vec3 getSpecularComponent(vec3 theNormal, vec3 fragmentToLight, float roughnessInverted, float distanceFactor, int i, vec3 fragmentToCamera)
 {
@@ -219,7 +237,16 @@ void main()
 			if(uLightsMeta[i].y > 0.0)
 			{
 				float dotLightSurfaceVNormal = max(dot(vNormal, fragmentToCurrentLightNormalized), 0.0);
-				darkeningCurrentLight = calculateDarkening(dotLightSurfaceVNormal, i);
+				if(uLightsTargets[i].w == 0.0) // if it is point light:
+				{
+					darkeningCurrentLight = calculateDarkeningCubeMap(dotLightSurfaceVNormal, i);
+				}
+				else // directional or sun:
+				{
+					
+					darkeningCurrentLight = calculateDarkening(dotLightSurfaceVNormal, i);
+				}
+				
 			}
 
 

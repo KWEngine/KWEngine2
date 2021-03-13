@@ -1,26 +1,22 @@
 ﻿#version 430
+layout (triangles) in;
+layout (triangle_strip, max_vertices=18) out;
 
-in		vec3 aPosition;
-in		ivec3 aBoneIds;
-in		vec3 aBoneWeights;
+uniform mat4 uShadowMatrices[6];
 
-uniform int uUseAnimations;
-uniform mat4 uMVP;
-uniform mat4 uBoneTransforms[96];
+out vec4 gPosition; // gPosition from GS (output per emitvertex)
 
 void main()
 {
-	mat4 BoneTransform = mat4(0.0);
-	if(uUseAnimations > 0)
-	{	
-		BoneTransform += uBoneTransforms[aBoneIds[0]] * aBoneWeights[0];
-		BoneTransform += uBoneTransforms[aBoneIds[1]] * aBoneWeights[1];
-		BoneTransform += uBoneTransforms[aBoneIds[2]] * aBoneWeights[2];
-	}
-	else
-	{
-		BoneTransform = mat4(1.0);
-	}
-	vec4 totalLocalPos = BoneTransform * vec4(aPosition, 1.0);
-	gl_Position = uMVP * totalLocalPos;
-}
+    for(int face = 0; face < 6; ++face)
+    {
+        gl_Layer = face; // built-in variable that specifies to which face we render.
+        for(int i = 0; i < 3; ++i) // for each triangle vertex
+        {
+            gPosition = gl_in[i].gl_Position;
+            gl_Position = uShadowMatrices[face] * gPosition;
+            EmitVertex();
+        }    
+        EndPrimitive();
+    }
+}  

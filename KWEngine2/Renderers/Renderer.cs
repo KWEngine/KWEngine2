@@ -39,7 +39,6 @@ namespace KWEngine2.Renderers
         protected int mUniform_BoneTransforms = -1;
 
         protected int mUniform_Opacity = -1;
-        protected int mUniform_FarPlane = -1;
 
         protected int mUniform_SunPosition = -1;
         protected int mUniform_SunDirection = -1;
@@ -328,11 +327,6 @@ namespace KWEngine2.Renderers
         public int GetUniformHandleTextureUseLightmap()
         {
             return mUniform_TextureUseLightMap;
-        }
-
-        public int GetUniformHandleFarPlane()
-        {
-            return mUniform_FarPlane;
         }
     }
 }

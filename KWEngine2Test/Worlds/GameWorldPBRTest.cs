@@ -94,7 +94,7 @@ namespace KWEngine2Test.Worlds
             //SetSunTarget(0, 0, 0);
             //SetSunAmbientFactor(0.5f);
             //SetSunColor(1, 1, 1, 0.5f);
-            SetAmbientLight(1, 1, 1, 0.25f);
+            SetAmbientLight(1, 1, 1, 0.5f);
 
             SetCameraPosition(0, 25, 50);
             SetCameraTarget(0, 0, 0);
@@ -113,11 +113,11 @@ namespace KWEngine2Test.Worlds
             
            
 
-            LightObject l1 = new LightObject(LightType.Directional, true);
+            LightObject l1 = new LightObject(LightType.Point, true);
             l1.SetPosition(0, 10, 0);
-            l1.SetTarget(-5, 0, -5);
+            //l1.SetTarget(-5, 0, -5);
             l1.SetColor(1, 0, 0, 1);
-            //AddLightObject(l1);
+            AddLightObject(l1);
 
             
             LightObject l2 = new LightObject(LightType.Directional, true);
@@ -224,6 +224,11 @@ namespace KWEngine2Test.Worlds
             floor2.SetPosition(5, 0, 5);
             floor2.SetRoughness(0.9f);
             floor2.SetTexture(@".\textures\sand_normal.jpg", TextureType.Normal);
+            floor2.SetTextureTerrainBlendMapping(
+                @".\textures\blendmap.png",
+                @".\textures\metal022_1K_Color.jpg",
+                @".\textures\bg_greenmountains.png",
+                @".\textures\metalplates006_1k_color.jpg");
             AddGameObject(floor2);
         }
     }

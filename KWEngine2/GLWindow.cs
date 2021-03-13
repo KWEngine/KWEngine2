@@ -53,7 +53,7 @@ namespace KWEngine2
         internal static float[] LightColors = new float[KWEngine.MAX_LIGHTS * 4];
         internal static float[] LightTargets = new float[KWEngine.MAX_LIGHTS * 4];
         internal static float[] LightPositions = new float[KWEngine.MAX_LIGHTS * 4];
-        internal static float[] LightMeta = new float[KWEngine.MAX_LIGHTS * 2];
+        internal static float[] LightMeta = new float[KWEngine.MAX_LIGHTS * 3];
 
         internal HelperFrustum Frustum = new HelperFrustum();
 //        internal HelperFrustum FrustumShadowMap = new HelperFrustum();
@@ -227,7 +227,7 @@ namespace KWEngine2
             GL.Enable(EnableCap.ProgramPointSize);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-            GL.GetInteger(GetPName.MaxCombinedTextureImageUnits, out int textureunits);
+            GL.GetInteger(GetPName.MaxTextureUnits, out int textureunits);
             //Console.WriteLine(textureunits);
 
             // Only needed for tesselation... maybe later?
@@ -356,9 +356,10 @@ namespace KWEngine2
                         GL.UseProgram(KWEngine.RendererShadowCubeMap.GetProgramId());
                         foreach (GameObject g in CurrentWorld._gameObjects)
                         {
-                            KWEngine.RendererShadowCubeMap.Draw(g, ref currentLight._viewProjectionMatrixShadow, currentLight._frustumShadowMap);
+                            KWEngine.RendererShadowCubeMap.Draw(g, currentLight.Position, currentLight.GetDistanceMultiplier(), currentLight.GetDistanceMultiplier() * currentLight.GetFrustumMultiplier(), ref currentLight._viewProjectionMatrixShadow);
                         }
                         GL.UseProgram(0);
+                        HelperGL.CheckGLErrors();
                     }
                     else
                     {

@@ -5,7 +5,7 @@ in		ivec3 aBoneIds;
 in		vec3 aBoneWeights;
 
 uniform int uUseAnimations;
-uniform mat4 uMVP;
+uniform mat4 uModelMatrix;
 uniform mat4 uBoneTransforms[96];
 
 void main()
@@ -22,5 +22,7 @@ void main()
 		BoneTransform = mat4(1.0);
 	}
 	vec4 totalLocalPos = BoneTransform * vec4(aPosition, 1.0);
-	gl_Position = uMVP * totalLocalPos;
+
+
+	gl_Position = uModelMatrix * totalLocalPos;
 }

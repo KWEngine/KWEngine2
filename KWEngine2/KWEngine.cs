@@ -482,7 +482,7 @@ namespace KWEngine2
             RendererStandard = new RendererStandard();
             RendererTerrain = new RendererTerrain();
             RendererShadow = new RendererShadow();
-            //RendererShadowCubeMap = new RendererShadowCubeMap();
+            RendererShadowCubeMap = new RendererShadowCubeMap();
             RendererBloom = new RendererBloom();
             RendererExplosion = new RendererExplosion();
             RendererBackground = new RendererBackground();
@@ -620,9 +620,9 @@ namespace KWEngine2
                 else
                 {
                     Debug.WriteLine("Cannot set shadow map to a size < 256 or > 4096. Resetting it to 1024.");
-                    _shadowMapSize = 2048;
+                    _shadowMapSize = 1024;
                 }
-                GLWindow.CurrentWindow.InitializeFramebuffers();
+                //GLWindow.CurrentWindow.InitializeFramebuffers();
 
             }
         }

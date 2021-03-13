@@ -5,6 +5,7 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -17,7 +18,7 @@ namespace KWEngine2.Renderers
     {
         private Matrix4 _identityMatrix = Matrix4.Identity;
 
-        private int mUniform_ViewProjectionMatrix = -1;
+        private int mUniform_LightPosition = -1;
 
         public override void Initialize()
         {
@@ -64,12 +65,20 @@ namespace KWEngine2.Renderers
             mUniform_ViewProjectionMatrices = GL.GetUniformLocation(mProgramId, "uShadowMatrices");
             mUniform_UseAnimations = GL.GetUniformLocation(mProgramId, "uUseAnimations");
             mUniform_BoneTransforms = GL.GetUniformLocation(mProgramId, "uBoneTransforms");
+            mUniform_LightPosition = GL.GetUniformLocation(mProgramId, "uLightPosition");
+            
         }
 
-        internal void Draw(GameObject g, ref Matrix4[] viewProjection, HelperFrustum frustum)
+        internal void Draw(GameObject g, Vector3 lightPosition, float distanceMultiplier, float farPlane, ref Matrix4[] viewProjection)
         {
             if (g == null || !g.HasModel)
                 return;
+
+            if((g.GetCenterPointForAllHitboxes() - lightPosition).LengthFast > farPlane)
+            {
+                //Debug.WriteLine("ignoring object for point light shadow map");
+                return;
+            }
             
             lock (g)
             {
