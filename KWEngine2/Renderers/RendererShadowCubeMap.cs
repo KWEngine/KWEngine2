@@ -19,6 +19,7 @@ namespace KWEngine2.Renderers
         private Matrix4 _identityMatrix = Matrix4.Identity;
 
         private int mUniform_LightPosition = -1;
+        private int mUniform_FarPlane = -1;
 
         public override void Initialize()
         {
@@ -66,6 +67,7 @@ namespace KWEngine2.Renderers
             mUniform_UseAnimations = GL.GetUniformLocation(mProgramId, "uUseAnimations");
             mUniform_BoneTransforms = GL.GetUniformLocation(mProgramId, "uBoneTransforms");
             mUniform_LightPosition = GL.GetUniformLocation(mProgramId, "uLightPosition");
+            mUniform_FarPlane = GL.GetUniformLocation(mProgramId, "uFarPlane");
             
         }
 
@@ -83,6 +85,10 @@ namespace KWEngine2.Renderers
             lock (g)
             {
                 int index = -1;
+                for (int i = 0; i < 6; i++)
+                {
+                    GL.UniformMatrix4(mUniform_ViewProjectionMatrices + i, false, ref viewProjection[i]);
+                }
                 foreach (string meshName in g.Model.Meshes.Keys)
                 {
                     index++;
@@ -125,13 +131,10 @@ namespace KWEngine2.Renderers
                         {
                             GL.Uniform1(mUniform_UseAnimations, 0);
                         }
-
-                        //TODO Matrix4.Mult(ref g.ModelMatrixForRenderPass[index], ref viewProjection, out _modelViewProjection);
+                        GL.Uniform3(mUniform_LightPosition, ref lightPosition);
+                        GL.Uniform1(mUniform_FarPlane, farPlane);
                         GL.UniformMatrix4(mUniform_ModelMatrix, false, ref g.ModelMatrixForRenderPass[index]);
-                        for(int i = 0; i < 6; i++)
-                        {
-                            GL.UniformMatrix4(mUniform_ViewProjectionMatrices + i, false, ref viewProjection[i]);
-                        }
+
                         GL.BindVertexArray(mesh.VAO);
                         GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
                         GL.DrawElements(mesh.Primitive, mesh.IndexCount, DrawElementsType.UnsignedInt, 0);

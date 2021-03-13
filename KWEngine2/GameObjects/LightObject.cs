@@ -303,25 +303,28 @@ namespace KWEngine2.GameObjects
         {
             if(IsShadowCaster)
             {
-                FOVShadow = HelperGL.Clamp(fov, 30, 179);
+                
                 if (KWEngine.CurrentWorld != null)
                 {
                     if (Type == LightType.Point)
                     {
                         FOVShadow = 90;
                         _projectionMatrixShadow = Matrix4.CreatePerspectiveFieldOfView(
-                            MathHelper.DegreesToRadians(FOVShadow / 2), 
-                            KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize, 
-                            0.1f, 
+                            MathHelper.DegreesToRadians(FOVShadow),
+                            KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize,
+                            0.1f,
                             _distanceMultiplier * _frustumMultiplier);
-                        
+
                     }
                     else
+                    {
+                        FOVShadow = HelperGL.Clamp(fov, 30, 179);
                         _projectionMatrixShadow = Matrix4.CreatePerspectiveFieldOfView(
-                            MathHelper.DegreesToRadians(FOVShadow / 2), 
-                            KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize, 
-                            0.1f, 
+                            MathHelper.DegreesToRadians(FOVShadow / 2),
+                            KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize,
+                            0.1f,
                             _distanceMultiplier * _frustumMultiplier);
+                    }
                     UpdateMatrices();
                 }
             }

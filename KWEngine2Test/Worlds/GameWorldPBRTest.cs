@@ -114,19 +114,21 @@ namespace KWEngine2Test.Worlds
            
 
             LightObject l1 = new LightObject(LightType.Point, true);
-            l1.SetPosition(0, 10, 0);
+            l1.SetPosition(-5, 10, -5);
+            l1.SetFOVShadowBiasCoefficient(0.2f);
             //l1.SetTarget(-5, 0, -5);
             l1.SetColor(1, 0, 0, 1);
             AddLightObject(l1);
 
             
+            /*
             LightObject l2 = new LightObject(LightType.Directional, true);
             l2.SetPosition(0, 10, -10);
             l2.SetTarget(-5, 0, -5);
             l2.SetColor(0, 1, 0, 1);
             l2.SetDistanceMultiplier(20);
-            //AddLightObject(l2);
-            
+            AddLightObject(l2);
+            */
 
 
             DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;

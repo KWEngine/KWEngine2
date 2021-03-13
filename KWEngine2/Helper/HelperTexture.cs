@@ -11,6 +11,69 @@ namespace KWEngine2.Helper
 {
     internal static class HelperTexture
     {
+        internal static void SaveDepthMapToBitmap(int texId)
+        {
+            Bitmap b = new Bitmap(KWEngine.ShadowMapSize, KWEngine.ShadowMapSize, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+            //BitmapData bmd = b.LockBits(new Rectangle(0, 0, KWEngine.ShadowMapSize, KWEngine.ShadowMapSize), ImageLockMode.WriteOnly, b.PixelFormat);
+
+            float[] depthData = new float[KWEngine.ShadowMapSize * KWEngine.ShadowMapSize];
+            HelperGL.CheckGLErrors();
+            GL.BindTexture(TextureTarget.Texture2D, texId);
+            GL.GetTexImage(TextureTarget.Texture2D, 0, OpenTK.Graphics.OpenGL4.PixelFormat.DepthComponent, PixelType.Float, depthData);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            HelperGL.CheckGLErrors();
+
+            HelperGL.ScaleToRange(0, 255, depthData);
+            int x = 0, y = KWEngine.ShadowMapSize - 1;
+            for(int i = 0; i < depthData.Length; i++)
+            {
+                int rgb = (int)(depthData[i]);
+                b.SetPixel(x, y, Color.FromArgb(rgb, rgb, rgb));
+                int prevX = x;
+                x = (x + 1) % KWEngine.ShadowMapSize;
+                if(prevX > 0 && x == 0)
+                {
+                    y--;
+                }
+            }
+
+            
+            //b.UnlockBits(bmd);
+            b.Save("texture2d_depth.bmp", ImageFormat.Bmp);
+            b.Dispose();
+        }
+
+        internal static void SaveDepthCubeMapToBitmap(TextureTarget target, int texId)
+        {
+            Bitmap b = new Bitmap(KWEngine.ShadowMapSize, KWEngine.ShadowMapSize, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+            //BitmapData bmd = b.LockBits(new Rectangle(0, 0, KWEngine.ShadowMapSize, KWEngine.ShadowMapSize), ImageLockMode.WriteOnly, b.PixelFormat);
+
+            float[] depthData = new float[KWEngine.ShadowMapSize * KWEngine.ShadowMapSize];
+            HelperGL.CheckGLErrors();
+            GL.BindTexture(TextureTarget.TextureCubeMap, texId);
+            GL.GetTexImage(target, 0, OpenTK.Graphics.OpenGL4.PixelFormat.DepthComponent, PixelType.Float, depthData);
+            GL.BindTexture(TextureTarget.TextureCubeMap, 0);
+            HelperGL.CheckGLErrors();
+
+            HelperGL.ScaleToRange(0, 255, depthData);
+            int x = 0, y = KWEngine.ShadowMapSize - 1;
+            for (int i = 0; i < depthData.Length; i++)
+            {
+                int rgb = (int)(depthData[i]);
+                b.SetPixel(x, y, Color.FromArgb(rgb, rgb, rgb));
+                int prevX = x;
+                x = (x + 1) % KWEngine.ShadowMapSize;
+                if (prevX > 0 && x == 0)
+                {
+                    y--;
+                }
+            }
+            b.Save("cube_" + target.ToString() + ".bmp", ImageFormat.Bmp);
+            b.Dispose();
+        }
+
         public static int CreateEmptyCubemapTexture()
         {
             int texID = GL.GenTexture();

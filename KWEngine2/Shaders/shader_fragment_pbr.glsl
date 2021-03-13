@@ -106,22 +106,18 @@ float calculateDarkening(float cosTheta, int index)
 	return max(darkening, 0.0);
 }
 
-float calculateDarkeningCubeMap(float cosTheta, int index) // TODO: Index might be > 2!!!
+float debugDarkeningCubeMap(vec3 fragToLightNormalized, vec3 fragToLight, float cosTheta, int index)
 {
-	float bias = uLightsMeta[index].x * sqrt ( 1.0f - cosTheta * cosTheta   ) / cosTheta;
-	bias = clamp(bias, 0.0, 0.01);
+    return texture(uTextureShadowMapCubeMap[index], fragToLightNormalized).r;
+}
 
-    // get vector between fragment position and light position
-    vec3 fragToLight = vPosition - uLightsPositions[index].xyz;
-    // use the light to fragment vector to sample from the depth map    
-    float closestDepth = texture(uTextureShadowMapCubeMap[index], fragToLight).r;
-    // it is currently in linear range between [0,1]. Re-transform back to original value
-    closestDepth *= uLightsMeta[index].z;
-    // now get current linear depth as the length between the fragment and light position
+float calculateDarkeningCubeMap(vec3 fragToLightNormalized, vec3 fragToLight, float cosTheta, int index) // TODO: Index might be > 2!!!
+{
+	float bias = uLightsMeta[index].x * sqrt (1.0f - cosTheta * cosTheta) / cosTheta;
+	bias = clamp(bias, 0.0, 0.5);
+    float closestDepth = texture(uTextureShadowMapCubeMap[index], fragToLightNormalized).r * uLightsMeta[index].z;
     float currentDepth = length(fragToLight);
-    // now test for shadows
-    float shadow = currentDepth -  bias > closestDepth ? 0.0 : 1.0;
-    return shadow;
+    return currentDepth - bias > closestDepth  ? 0.0 : 1.0;
 }  
 
 vec3 getSpecularComponent(vec3 theNormal, vec3 fragmentToLight, float roughnessInverted, float distanceFactor, int i, vec3 fragmentToCamera)
@@ -155,7 +151,7 @@ void main()
 	}
 	albedo *= uTintColor;
 
-	float test = texture(uTextureShadowMapCubeMap[0], albedo).r;
+	//float test = texture(uTextureShadowMapCubeMap[0], albedo).r;
 
 	vec3 fragmentToCamera = normalize(uCameraPos - vPosition);
 
@@ -234,29 +230,29 @@ void main()
 
 			// Shadow mapping:
 			float darkeningCurrentLight = 1.0;
-			if(uLightsMeta[i].y > 0.0)
+			if(uLightsMeta[i].y > 0.0) // y = shadow caster? 1 : 0
 			{
 				float dotLightSurfaceVNormal = max(dot(vNormal, fragmentToCurrentLightNormalized), 0.0);
 				if(uLightsTargets[i].w == 0.0) // if it is point light:
 				{
-					darkeningCurrentLight = calculateDarkeningCubeMap(dotLightSurfaceVNormal, i);
+					darkeningCurrentLight = calculateDarkeningCubeMap(-fragmentToCurrentLightNormalized, -fragmentToCurrentLightNotNormalized, dotLightSurfaceVNormal, i);
 				}
 				else // directional or sun:
 				{
-					
 					darkeningCurrentLight = calculateDarkening(dotLightSurfaceVNormal, i);
 				}
-				
 			}
 
 
 			// optional: spot light cone
 			float differenceLightDirectionAndFragmentDirection = 1.0;
+			
 			if(uLightsTargets[i].w > 0.0)
 			{
 				vec3 lightDirection = normalize(uLightsTargets[i].xyz - lightPos);
 				differenceLightDirectionAndFragmentDirection = max(dot(lightDirection, -fragmentToCurrentLightNormalized), 0.0);
 			}
+			
 
 			// light intensity:
 			float dotNormalCurrentLight = max(dot(theNormal, fragmentToCurrentLightNormalized), 0.0);
@@ -294,9 +290,13 @@ void main()
 	// Add reflection from skybox:
 	rgbFragment += reflection;
 	
-	float dotOutline = max(1.0 - 4.0 * pow(abs(dot(uCameraDirection, vNormal)), 2.0), 0.0) * uOutline.w * test;
+	float dotOutline = max(1.0 - 4.0 * pow(abs(dot(uCameraDirection, vNormal)), 2.0), 0.0) * uOutline.w;
 	color.xyz = rgbFragment + uOutline.xyz * dotOutline * 0.9;
-	color.w = uOpacity;
+
+	//vec3 testNotNormalized = vPosition - uLightsPositions[0].xyz;
+	//vec3 testNormalized = normalize(testNotNormalized);
+	//color.xyz = vec3(debugDarkeningCubeMap(testNormalized, testNotNormalized, 0.0, 0));
+	//color.w = uOpacity;
 
 	vec3 addedBloom = vec3(max(rgbFragment.x - 1.0, 0.0), max(rgbFragment.y - 1.0, 0.0), max(rgbFragment.z - 1.0, 0.0));
 	addedBloom *= 0.1;

@@ -183,7 +183,6 @@ namespace KWEngine2.Renderers
                     GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
                     GL.BindTexture(TextureTarget.TextureCubeMap, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTexturesCubeMap[currentLight._framebufferIndex] : KWEngine.TextureDepthCubeMapEmpty);
                     GL.Uniform1(mUniform_TextureShadowMapCubeMap + lightIndex, textureIndex);
-                    HelperGL.CheckGLErrors();
 
                     GL.ActiveTexture(TextureUnit.Texture0 + textureIndex + 1);
                     GL.BindTexture(TextureTarget.Texture2D, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTextures[currentLight._framebufferIndex] : KWEngine.TextureDepthEmpty);

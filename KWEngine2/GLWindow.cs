@@ -324,7 +324,7 @@ namespace KWEngine2
                         }
                     }
                 }
-                
+                HelperGL.CheckGLErrors();
                 // ==================================================
                 // Do the shadow render pass for all lights:
                 // ==================================================
@@ -359,16 +359,28 @@ namespace KWEngine2
                             KWEngine.RendererShadowCubeMap.Draw(g, currentLight.Position, currentLight.GetDistanceMultiplier(), currentLight.GetDistanceMultiplier() * currentLight.GetFrustumMultiplier(), ref currentLight._viewProjectionMatrixShadow);
                         }
                         GL.UseProgram(0);
-                        HelperGL.CheckGLErrors();
+                        /*
+                        for(int layer = 0; layer < 6; layer++)
+                            HelperTexture.SaveDepthCubeMapToBitmap(
+                                TextureTarget.TextureCubeMapPositiveX + layer, 
+                                FramebuffersShadowTexturesCubeMap[currentLight._framebufferIndex]
+                                );
+                        Close();
+                        */
                     }
                     else
                     {
+                        HelperGL.CheckGLErrors();
                         GL.UseProgram(KWEngine.RendererShadow.GetProgramId());
                         foreach (GameObject g in CurrentWorld._gameObjects)
                         {
                             KWEngine.RendererShadow.Draw(g, ref currentLight._viewProjectionMatrixShadow[0], currentLight._frustumShadowMap);
                         }
                         GL.UseProgram(0);
+
+                        
+                        //HelperGL.CheckGLErrors();
+                        //Close();
                     }
                     
                 }
