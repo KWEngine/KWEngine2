@@ -122,7 +122,6 @@ namespace KWEngine2.Renderers
             mUniform_TextureTransform = GL.GetUniformLocation(mProgramId, "uTextureTransform");
 
             mUniform_TextureSkybox = GL.GetUniformLocation(mProgramId, "uTextureSkybox");
-            mUniform_Texture2D = GL.GetUniformLocation(mProgramId, "uTexture2D");
             mUniform_TextureIsSkybox = GL.GetUniformLocation(mProgramId, "uUseTextureSkybox");
             mUniform_TextureSky2D = GL.GetUniformLocation(mProgramId, "uTextureSky2D");
             mUniform_TextureSkyBoost = GL.GetUniformLocation(mProgramId, "uTextureSkyBoost");
