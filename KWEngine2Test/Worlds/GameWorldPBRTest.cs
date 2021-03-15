@@ -171,7 +171,8 @@ namespace KWEngine2Test.Worlds
             box2.SetPosition(0, 0.5f, -3);
             box2.SetScale(1);
             box2.IsShadowCaster = true;
-            box2.SetMetalness(0.9f);
+            //box2.SetMetalness(0.9f);
+            box2.Opacity = 0.1f;
             AddGameObject(box2);
 
             Cube box3 = new Cube();

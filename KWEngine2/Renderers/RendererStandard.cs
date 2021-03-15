@@ -168,7 +168,7 @@ namespace KWEngine2.Renderers
                 }
 
                 int index = 0;
-                for (int i = 0; i < g.Model.Meshes.Keys.Count; i++)// (string meshName in g.Model.Meshes.Keys)
+                for (int i = 0; i < g.Model.Meshes.Keys.Count; i++)
                 {
                     string meshName = g.Model.Meshes.Keys.ElementAt(i);
                     if (g.Model.IsKWCube6)
@@ -225,8 +225,6 @@ namespace KWEngine2.Renderers
                     {
                         GL.Uniform1(mUniform_UseAnimations, 0);
                     }
-
-                    
 
                     GL.Uniform1(mUniform_Roughness, meshMaterial.Roughness);
                     GL.Uniform1(mUniform_Metalness, meshMaterial.Metalness);

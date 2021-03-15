@@ -255,12 +255,12 @@ void main()
 			{
 				if(uLightsTargets[i].w == 0.0) // if it is point light:
 				{
-					darkeningCurrentLight = calculateDarkeningCubeMap(i);
+					darkeningCurrentLight = clamp(calculateDarkeningCubeMap(i) + (1.0 - uOpacity), 0.0, 1.0);
 				}
 				else // directional or sun:
 				{
 					float dotLightSurfaceVNormal = max(dot(vNormal, fragmentToCurrentLightNormalized), 0.0);
-					darkeningCurrentLight = calculateDarkening(dotLightSurfaceVNormal, i);
+					darkeningCurrentLight = clamp(calculateDarkening(dotLightSurfaceVNormal, i) + (1.0 - uOpacity), 0.0, 1.0);
 				}
 			}
 
@@ -302,8 +302,8 @@ void main()
 	}
 
 	// read pure texture and tone down for ambient:
-	vec3 rgbFragment = albedo * (1.0 - metalness) + emissive;
-	rgbFragment *= colorComponentIntensityTotalFromLights + uSunAmbient.xyz * uSunAmbient.w;
+	vec3 rgbFragment = albedo * (1.0 - metalness);
+	rgbFragment *= colorComponentIntensityTotalFromLights + uSunAmbient.xyz * uSunAmbient.w + emissive;
 	rgbFragment += colorComponentSpecularTotalFromLights;
 
 	// Add reflection from skybox:

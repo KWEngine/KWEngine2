@@ -629,10 +629,20 @@ namespace KWEngine2
                         foreach (GameObject g in mInstancesRenderLast)
                         {
                             KWEngine.RendererStandard.Draw(g, ref viewProjection, Frustum, textureIndex);
-                            if (CurrentWorld.DebugShowHitboxes)
-                                KWEngine.RendererSimple.DrawHitbox(g, ref viewProjection);
                         }
                         GL.UseProgram(0);
+
+                        
+                        if (CurrentWorld.DebugShowHitboxes)
+                        {
+                            GL.UseProgram(KWEngine.RendererSimple.GetProgramId());
+                            foreach (GameObject g in mInstancesRenderLast)
+                            {
+                                KWEngine.RendererSimple.DrawHitbox(g, ref viewProjection);
+                            }
+                            GL.UseProgram(0);
+                        }
+                        
                         mInstancesRenderLast.Clear();
                     }
                     

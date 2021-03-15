@@ -150,7 +150,10 @@ void main()
 			albedo *= texture(uTextureLightmap, vTexture2).xyz;
 		}
 	}
-	albedo *= uTintColor;
+	else
+	{
+		albedo *= uTintColor;
+	}
 
 	vec3 fragmentToCamera = normalize(uCameraPos - vPosition);
 
@@ -243,12 +246,12 @@ void main()
 			{
 				if(uLightsTargets[i].w == 0.0) // if it is point light:
 				{
-					darkeningCurrentLight = calculateDarkeningCubeMap(i);
+					darkeningCurrentLight = clamp(calculateDarkeningCubeMap(i) + (1.0 - uOpacity), 0.0, 1.0);
 				}
 				else // directional or sun:
 				{
 					float dotLightSurfaceVNormal = max(dot(vNormal, fragmentToCurrentLightNormalized), 0.0);
-					darkeningCurrentLight = calculateDarkening(dotLightSurfaceVNormal, i);
+					darkeningCurrentLight = clamp(calculateDarkening(dotLightSurfaceVNormal, i) + (1.0 - uOpacity), 0.0, 1.0);
 				}
 			}
 
@@ -290,8 +293,8 @@ void main()
 	}
 
 	// read pure texture and tone down for ambient:
-	vec3 rgbFragment = albedo * (1.0 - metalness) + emissive;
-	rgbFragment *= colorComponentIntensityTotalFromLights + uSunAmbient.xyz * uSunAmbient.w;
+	vec3 rgbFragment = albedo * (1.0 - metalness);
+	rgbFragment *= colorComponentIntensityTotalFromLights + uSunAmbient.xyz * uSunAmbient.w + emissive;
 	rgbFragment += colorComponentSpecularTotalFromLights;
 
 	// Add reflection from skybox:
@@ -299,6 +302,7 @@ void main()
 	
 	float dotOutline = max(1.0 - 4.0 * pow(abs(dot(uCameraDirection, vNormal)), 2.0), 0.0) * uOutline.w;
 	color.xyz = rgbFragment + uOutline.xyz * dotOutline * 0.9;
+	color.w = uOpacity;
 
 	vec3 addedBloom = vec3(max(rgbFragment.x - 1.0, 0.0), max(rgbFragment.y - 1.0, 0.0), max(rgbFragment.z - 1.0, 0.0));
 	addedBloom *= 0.1;
