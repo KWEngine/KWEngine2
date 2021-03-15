@@ -45,6 +45,7 @@ uniform vec3 uCameraDirection;
 
 uniform samplerCube uTextureSkybox;
 uniform sampler2D uTextureSky2D;
+
 uniform int uUseTextureSkybox;
 uniform float uTextureSkyBoost;
 

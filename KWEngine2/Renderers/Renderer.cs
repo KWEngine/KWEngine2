@@ -36,6 +36,7 @@ namespace KWEngine2.Renderers
         protected int mUniform_Texture = -1;
         protected int mUniform_TextureSkybox = -1;
         protected int mUniform_TextureSky2D = -1;
+
         protected int mUniform_UseAnimations = -1;
         protected int mUniform_BoneTransforms = -1;
 

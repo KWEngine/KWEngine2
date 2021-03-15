@@ -122,6 +122,7 @@ namespace KWEngine2.Renderers
             mUniform_TextureTransform = GL.GetUniformLocation(mProgramId, "uTextureTransform");
 
             mUniform_TextureSkybox = GL.GetUniformLocation(mProgramId, "uTextureSkybox");
+            mUniform_Texture2D = GL.GetUniformLocation(mProgramId, "uTexture2D");
             mUniform_TextureIsSkybox = GL.GetUniformLocation(mProgramId, "uUseTextureSkybox");
             mUniform_TextureSky2D = GL.GetUniformLocation(mProgramId, "uTextureSky2D");
             mUniform_TextureSkyBoost = GL.GetUniformLocation(mProgramId, "uTextureSkyBoost");
@@ -157,8 +158,6 @@ namespace KWEngine2.Renderers
                     GL.Uniform3(mUniform_uCameraPos, g.CurrentWorld.GetFirstPersonObject().Position.X, g.CurrentWorld.GetFirstPersonObject().Position.Y + g.CurrentWorld.GetFirstPersonObject().FPSEyeOffset, g.CurrentWorld.GetFirstPersonObject().Position.Z);
                     GL.Uniform3(mUniform_uCameraDirection, HelperCamera.GetLookAtVector());
                 }
-
-                
 
                 if (g.ColorEmissive.W > 0)
                 {
