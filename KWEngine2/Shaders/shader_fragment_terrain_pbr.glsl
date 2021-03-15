@@ -183,8 +183,6 @@ void main()
 		emissive = uEmissiveColor.xyz;
 	}
 
-
-
 	// Metalness / Reflections:
 	vec3 refl = vec3(0.22 * uSunAmbient.xyz * uSunAmbient.w * uTextureSkyBoost);
 	vec3 metalnessTextureLookup = vec3(0);
@@ -200,7 +198,6 @@ void main()
 		coordinates.y = -coordinates.y;
 		refl = texture(uTextureSky2D, coordinates).xyz * (uSunAmbient.xyz * uSunAmbient.w * uTextureSkyBoost);
 	}
-
 
 	vec3 reflection = refl;
 	vec3 metalness = vec3(uMetalness);
@@ -255,12 +252,12 @@ void main()
 			{
 				if(uLightsTargets[i].w == 0.0) // if it is point light:
 				{
-					darkeningCurrentLight = clamp(calculateDarkeningCubeMap(i) + (1.0 - uOpacity), 0.0, 1.0);
+					darkeningCurrentLight = calculateDarkeningCubeMap(i);
 				}
 				else // directional or sun:
 				{
 					float dotLightSurfaceVNormal = max(dot(vNormal, fragmentToCurrentLightNormalized), 0.0);
-					darkeningCurrentLight = clamp(calculateDarkening(dotLightSurfaceVNormal, i) + (1.0 - uOpacity), 0.0, 1.0);
+					darkeningCurrentLight = calculateDarkening(dotLightSurfaceVNormal, i);
 				}
 			}
 

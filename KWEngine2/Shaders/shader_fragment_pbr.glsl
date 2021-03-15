@@ -246,12 +246,12 @@ void main()
 			{
 				if(uLightsTargets[i].w == 0.0) // if it is point light:
 				{
-					darkeningCurrentLight = clamp(calculateDarkeningCubeMap(i) + (1.0 - uOpacity), 0.0, 1.0);
+					darkeningCurrentLight = calculateDarkeningCubeMap(i), 0.0, 1.0;
 				}
 				else // directional or sun:
 				{
 					float dotLightSurfaceVNormal = max(dot(vNormal, fragmentToCurrentLightNormalized), 0.0);
-					darkeningCurrentLight = clamp(calculateDarkening(dotLightSurfaceVNormal, i) + (1.0 - uOpacity), 0.0, 1.0);
+					darkeningCurrentLight = calculateDarkening(dotLightSurfaceVNormal, i);
 				}
 			}
 
