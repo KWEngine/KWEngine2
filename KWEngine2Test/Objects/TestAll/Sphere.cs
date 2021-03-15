@@ -1,4 +1,5 @@
-﻿using KWEngine2.GameObjects;
+﻿using KWEngine2;
+using KWEngine2.GameObjects;
 using KWEngine2.Helper;
 using OpenTK.Input;
 using System;
@@ -11,9 +12,9 @@ namespace KWEngine2Test.Objects.TestAll
 {
     class Sphere : GameObject
     {
-        public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState ks, MouseState ms)
         {
-            AddRotationY(1 * deltaTimeFactor, true);
+            AddRotationY(1 * KWEngine.DeltaTimeFactor, true);
         }
     }
 }

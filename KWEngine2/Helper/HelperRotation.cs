@@ -141,7 +141,8 @@ namespace KWEngine2.Helper
                 }
                 else
                 {
-                    throw new Exception("CurrentWorld is not set. Cannot rotate around a camera axis that does not exist.");
+                    HelperGL.ShowErrorAndQuit("HelperRotation::CalculateRotationAroundPointOnAxis()", "CurrentWorld is not set. Cannot rotate around a camera axis that does not exist.");
+                    return Vector3.Zero;
                 }
                 
             }

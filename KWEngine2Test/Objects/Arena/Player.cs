@@ -1,4 +1,5 @@
-﻿using KWEngine2.Collision;
+﻿using KWEngine2;
+using KWEngine2.Collision;
 using KWEngine2.GameObjects;
 using KWEngine2.Helper;
 using OpenTK;
@@ -22,7 +23,7 @@ namespace KWEngine2Test.Objects.Arena
         private float _heightAtJumpStart = 0;
         private bool _jumpButtonPressed = false;
 
-        public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState ks, MouseState ms)
         {
             if (!CurrentWindow.Focused)
                 return;
@@ -59,7 +60,7 @@ namespace KWEngine2Test.Objects.Arena
                     forward -= 1;
                 }
                 
-                MoveAndStrafeFirstPerson(forward, strafe, _movementSpeed * deltaTimeFactor);
+                MoveAndStrafeFirstPerson(forward, strafe, _movementSpeed * KWEngine.DeltaTimeFactor);
             }
 
             // Jump controls:
@@ -81,7 +82,7 @@ namespace KWEngine2Test.Objects.Arena
             // Jump behaviour:
             if(_phase == Phase.Jump)
             {
-                _airTime += (deltaTimeFactor * 16.666667f) / 1000f;
+                _airTime += (KWEngine.DeltaTimeFactor * 16.666667f) / 1000f;
                 float gain = -14f * (float)Math.Pow(_airTime - 0.4f, 2) + 2.25f;
                 SetPositionY(_heightAtJumpStart + gain);
                 if (gain <= _lastGain)
@@ -97,13 +98,13 @@ namespace KWEngine2Test.Objects.Arena
             }
             else if(_phase == Phase.Fall)
             {
-                _airTime += (deltaTimeFactor * 16.666667f) / 1000f;
+                _airTime += (KWEngine.DeltaTimeFactor * 16.666667f) / 1000f;
                 float gain = 14f * (float)Math.Pow(_airTime, 2);
                 SetPositionY(_heightAtJumpStart - gain);
             }
             else if(_phase == Phase.Stand)
             {
-                MoveOffset(0, -_movementSpeed * 0.1f * deltaTimeFactor, 0);
+                MoveOffset(0, -_movementSpeed * 0.1f * KWEngine.DeltaTimeFactor, 0);
             }
           
 

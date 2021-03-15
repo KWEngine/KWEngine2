@@ -47,15 +47,16 @@ namespace KWEngine2
         internal Matrix4 _modelViewProjectionMatrixBloom = Matrix4.Identity;
         internal Matrix4 _modelViewProjectionMatrixBloomMerge = Matrix4.Identity;
         internal Matrix4 _projectionMatrix = Matrix4.Identity;
-        internal Matrix4 _projectionMatrixShadow = Matrix4.Identity;
+        //internal Matrix4 _projectionMatrixShadow = Matrix4.Identity;
         internal Matrix4 _viewProjectionMatrixHUD = Matrix4.Identity;
 
         internal static float[] LightColors = new float[KWEngine.MAX_LIGHTS * 4];
         internal static float[] LightTargets = new float[KWEngine.MAX_LIGHTS * 4];
         internal static float[] LightPositions = new float[KWEngine.MAX_LIGHTS * 4];
+        internal static float[] LightMeta = new float[KWEngine.MAX_LIGHTS * 3];
 
         internal HelperFrustum Frustum = new HelperFrustum();
-        internal HelperFrustum FrustumShadowMap = new HelperFrustum();
+//        internal HelperFrustum FrustumShadowMap = new HelperFrustum();
 
         internal System.Drawing.Rectangle _windowRect;
         internal System.Drawing.Point _mousePoint = new System.Drawing.Point(0, 0);
@@ -89,7 +90,7 @@ namespace KWEngine2
         /// <param name="width">Breite des Fensters</param>
         /// <param name="height">Höhe des Fensters</param>
         protected GLWindow(int width, int height)
-           : this(width, height, GameWindowFlags.Default, 0, true, false)
+           : this(width, height, GameWindowFlags.FixedWindow, 0, true, false)
         {
 
         }
@@ -107,13 +108,16 @@ namespace KWEngine2
         /// <param name="vSync">VSync aktivieren</param>
         /// <param name="multithreading">Multithreading aktivieren (Standard: false)</param>
         /// <param name="textureAnisotropy">Level der anisotropischen Texturfilterung [1 bis 16, Standard: 1 (aus)]</param>
-        protected GLWindow(int width, int height, GameWindowFlags flag, int antialiasing = 0, bool vSync = true, bool multithreading = false, int textureAnisotropy = 1)
-            : base(width, height, GraphicsMode.Default, "KWEngine2 - C# 3D Gaming", flag == GameWindowFlags.Default ? GameWindowFlags.FixedWindow : flag, DisplayDevice.Default, 4, 5, GraphicsContextFlags.ForwardCompatible, null, !multithreading)
+        /// <param name="shadowMapSize">Größe der Shadow Map (Standard: 1024)</param>
+        protected GLWindow(int width, int height, GameWindowFlags flag, int antialiasing = 0, bool vSync = true, bool multithreading = false, int textureAnisotropy = 1, int shadowMapSize = 1024)
+            : base(width, height, GraphicsMode.Default, "KWEngine2 - C# 3D Gaming", flag == GameWindowFlags.Default ? GameWindowFlags.FixedWindow : flag, DisplayDevice.Default, 4, 5, GraphicsContextFlags.Default, null, !multithreading)
         {
             _multithreaded = multithreading;
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             Width = width;
             Height = height;
+            CurrentWindow = this;
+            KWEngine.ShadowMapSize = shadowMapSize;
 
             _bloomwidth = HelperTexture.RoundDownToPowerOf2(width);
             if (_bloomwidth > 1024)
@@ -153,7 +157,7 @@ namespace KWEngine2
                 DeltaTime.movAveragePeriod = 5f; // #frames involved in average calc (suggested values 5-100)
                 DeltaTime.smoothFactor = 0.02f; // adjusting ratio (suggested values 0.01-0.5)
             }
-            CurrentWindow = this;
+            
             _vSync = vSync;
             VSync = vSync ? VSyncMode.On : VSyncMode.Off;
             BasicInit();
@@ -188,8 +192,13 @@ namespace KWEngine2
             KWEngine.TextureBlack = HelperTexture.LoadTextureInternal("black.png");
             KWEngine.TextureWhite = HelperTexture.LoadTextureInternal("white.png");
             KWEngine.TextureAlpha = HelperTexture.LoadTextureInternal("alpha.png");
+            HelperGL.CheckGLErrors();
+
             KWEngine.TextureDepthEmpty = HelperTexture.CreateEmptyDepthTexture();
+            KWEngine.TextureDepthCubeMapEmpty = HelperTexture.CreateEmptyCubemapDepthTexture();
             KWEngine.TextureCubemapEmpty = HelperTexture.CreateEmptyCubemapTexture();
+            HelperGL.CheckGLErrors();
+
 
             KWEngine.InitializeShaders();
             KWEngine.InitializeModels();
@@ -199,6 +208,7 @@ namespace KWEngine2
             KWEngine.InitializeFont("anonymous3.dds", 2);
             KWEngine.InitializeFont("anonymous4.dds", 3);
             _bloomQuad = KWEngine.KWRect;
+            HelperGL.CheckGLErrors();
 
 
         }
@@ -227,15 +237,25 @@ namespace KWEngine2
         /// <param name="manual">true, wenn manuell herbeigeführt</param>
         protected override void Dispose(bool manual)
         {
+            if (CurrentWorld != null)
+                CurrentWorld.Dispose();
             GLAudioEngine.SoundStopAll();
             GLAudioEngine.Dispose();
 
             base.Dispose(manual);
+        }
 
-
+        internal void ForceClose()
+        {
+            if (CurrentWorld != null)
+            {
+                CurrentWorld.Dispose();
+            }
+            Close();
         }
 
         private List<GameObject> mInstancesRenderLast = new List<GameObject>();
+        private List<GameObject> mInstancesTerrain = new List<GameObject>();
 
         /// <summary>
         /// EventHandler für den Render-Thread
@@ -272,23 +292,17 @@ namespace KWEngine2
             if (CurrentWorld != null && CurrentWorld._prepared)
             {
                 mInstancesRenderLast.Clear();
+                mInstancesTerrain.Clear();
 
-                int shadowLight = -1;
-                lock (CurrentWorld._lightObjects)
+                // ==================================================
+                // Generate VIEW and PROJECTION for main render pass!
+                // ==================================================
+                Matrix4 viewProjection;
+                if (CurrentWorld.DebugShadowLight != null && CurrentWorld.DebugShadowLight.CurrentWorld != null)
                 {
-                    LightObject.PrepareLightsForRenderPass(CurrentWorld._lightObjects, ref LightColors, ref LightTargets, ref LightPositions, ref CurrentWorld._lightcount, ref shadowLight);
-                }
-                LightObject sLight = shadowLight >= 0 ? CurrentWorld._lightObjects.ElementAt(shadowLight) : null;
-                if (CurrentWorld.DebugShadowCaster)
-                {
-                    if (sLight != null)
-                    {
-                        _viewMatrix = sLight._shadowViewMatrix; // Matrix4.LookAt(sLight.Position, sLight.Target, KWEngine.WorldUp);
-                    }
-                    else
-                    {
-                        _viewMatrix = Matrix4.LookAt(CurrentWorld.GetSunPosition(), CurrentWorld.GetSunTarget(), KWEngine.WorldUp);
-                    }
+                    _viewMatrix = Matrix4.LookAt(CurrentWorld.DebugShadowLight.Position, CurrentWorld.DebugShadowLight.Target, KWEngine.WorldUp);
+                    viewProjection = _viewMatrix * _projectionMatrix;
+                    Frustum.CalculateFrustum(_projectionMatrix, _viewMatrix);
                 }
                 else
                 {
@@ -296,138 +310,344 @@ namespace KWEngine2
                         _viewMatrix = HelperCamera.GetViewMatrix(CurrentWorld.GetFirstPersonObject().Position);
                     else
                         _viewMatrix = Matrix4.LookAt(CurrentWorld.GetCameraPosition(), CurrentWorld.GetCameraTarget(), KWEngine.WorldUp);
-                }
-                Matrix4 viewProjection;
-                if (CurrentWorld.DebugShadowCaster)
-                {
-                    if (sLight != null)
-                    {
-                        viewProjection = _viewMatrix * sLight._projectionMatrixShadow2;
-                    }
-                    else
-                        viewProjection = _viewMatrix * _projectionMatrixShadow;
-                }
-                else
-                {
                     viewProjection = _viewMatrix * _projectionMatrix;
+                    Frustum.CalculateFrustum(_projectionMatrix, _viewMatrix);
                 }
-
-                Matrix4 viewProjectionShadow = CurrentWorld._viewMatrixShadow * _projectionMatrixShadow;
-                Frustum.CalculateFrustum(_projectionMatrix, _viewMatrix);
-                FrustumShadowMap.CalculateFrustum(_projectionMatrixShadow, CurrentWorld._viewMatrixShadow);
-
-                SwitchToBufferAndClear(FramebufferShadowMap);
-                GL.Viewport(0, 0, KWEngine.ShadowMapSize, KWEngine.ShadowMapSize);
-                GL.UseProgram(KWEngine.Renderers["Shadow"].GetProgramId());
-                lock (CurrentWorld._gameObjects)
-                {
-
-                    foreach (GameObject g in CurrentWorld._gameObjects)
-                    {
-                        g.ProcessCurrentAnimation();
-                        KWEngine.Renderers["Shadow"].Draw(g, ref viewProjectionShadow, FrustumShadowMap, true);
-                    }
-                }
-                GL.UseProgram(0);
-
-                if (sLight != null)
-                {
-                    SwitchToBufferAndClear(FramebufferShadowMap2);
-                    GL.Viewport(0, 0, KWEngine.ShadowMapSize, KWEngine.ShadowMapSize);
-                    GL.UseProgram(KWEngine.Renderers["Shadow"].GetProgramId());
-                    sLight._frustumShadowMap2.CalculateFrustum(sLight._projectionMatrixShadow2, sLight._shadowViewMatrix);
-                    lock (CurrentWorld._gameObjects)
-                    {
-                        foreach (GameObject g in CurrentWorld._gameObjects)
-                        {
-                            KWEngine.Renderers["Shadow"].Draw(g, ref sLight._viewProjectionMatrixShadow2, sLight._frustumShadowMap2, false);
-                        }
-                    }
-                    GL.UseProgram(0);
-
-                }
-
-
-                SwitchToBufferAndClear(FramebufferMainMultisample);
-                GL.Viewport(ClientRectangle);
 
                 
+
+                // ==================================================
+                // Generate light arrays for main render pass!
+                // ==================================================
+                lock (CurrentWorld._lightObjects)
+                {
+                    //TODO: add light type and ids for arrays!
+                    CurrentWorld._lightObjects.Sort();
+                    LightObject.PrepareLightsForRenderPass(CurrentWorld._lightObjects, ref LightColors, ref LightTargets, ref LightPositions, ref LightMeta, ref CurrentWorld._lightcount);
+                }
+
+                // ==================================================
+                // Prepare model matrices for render pass:
+                // ==================================================
+                foreach (GameObject g in CurrentWorld._gameObjects)
+                {
+                    for (int index = 0; index < g.Model.Meshes.Count; index++)
+                    {
+                        GeoMesh mesh = g.Model.Meshes.Values.ElementAt(index);
+                        bool useMeshTransform = mesh.BoneNames.Count == 0 || !(g.AnimationID >= 0 && g.Model.Animations != null && g.Model.Animations.Count > 0);
+                        if (useMeshTransform)
+                        {
+                            Matrix4.Mult(ref mesh.Transform, ref g._modelMatrix, out g.ModelMatrixForRenderPass[g.Model.IsKWCube6 ? 0 : index]);
+                        }
+                        else
+                        {
+                            g.ModelMatrixForRenderPass[g.Model.IsKWCube6 ? 0 : index] = g._modelMatrix;
+                        }
+                    }
+                }
+                HelperGL.CheckGLErrors();
+                // ==================================================
+                // Do the shadow render pass for all lights:
+                // ==================================================
+                for (int i = 0; i < CurrentWorld._lightObjects.Count; i++)
+                {
+                    LightObject currentLight = CurrentWorld._lightObjects[i];
+                    if(!currentLight.IsShadowCaster)
+                    {
+                        continue;
+                    }
+
+                    int fbId = -1;
+                    if(currentLight.Type == LightType.Point)
+                    {
+                        fbId = FramebuffersShadowCubeMap[currentLight._framebufferIndex];
+                    }
+                    else
+                    {
+                        fbId = FramebuffersShadow[currentLight._framebufferIndex];
+                    }
+                    if(fbId < 0)
+                    {
+                        HelperGL.ShowErrorAndQuit("GLWindow::OnRenderFrame()", "Internal error: frame buffer index for light is -1");
+                        return;
+                    }
+                    SwitchToBufferAndClear(fbId);
+                    GL.Viewport(0, 0, KWEngine.ShadowMapSize, KWEngine.ShadowMapSize);
+                    if(currentLight.Type == LightType.Point)
+                    {
+                        GL.UseProgram(KWEngine.RendererShadowCubeMap.GetProgramId());
+                        foreach (GameObject g in CurrentWorld._gameObjects)
+                        {
+                            KWEngine.RendererShadowCubeMap.Draw(g, currentLight.Position, currentLight.GetDistanceMultiplier(), currentLight.GetDistanceMultiplier() * currentLight.GetFrustumMultiplier(), ref currentLight._viewProjectionMatrixShadow);
+                        }
+                        GL.UseProgram(0);
+                    }
+                    else
+                    {
+                        GL.UseProgram(KWEngine.RendererShadow.GetProgramId());
+                        foreach (GameObject g in CurrentWorld._gameObjects)
+                        {
+                            KWEngine.RendererShadow.Draw(g, ref currentLight._viewProjectionMatrixShadow[0], currentLight._frustumShadowMap);
+                        }
+                        GL.UseProgram(0);
+                    }
+                }
+
+                // ==================================================
+                // Do the MAIN RENDER PASS:
+                // ==================================================
+                SwitchToBufferAndClear(FramebufferMainMultisample);
+                GL.Viewport(ClientRectangle);
 
                 if(CurrentWorld.DebugShowCoordinateSystemGrid != GridType.None)
                 {
                     KWEngine.RendererSimple.DrawGrid(CurrentWorld.DebugShowCoordinateSystemGrid, ref viewProjection);
                 }
 
-                Matrix4 viewProjectionShadowBiased = viewProjectionShadow * HelperMatrix.BiasedMatrixForShadowMapping;
-                Matrix4 viewProjectionShadowBiased2 = sLight == null ? Matrix4.Identity : sLight._viewProjectionMatrixShadow2 * HelperMatrix.BiasedMatrixForShadowMapping;
-
                 lock (CurrentWorld._gameObjects)
                 {
+                    GL.UseProgram(KWEngine.RendererStandard.GetProgramId());
+
+                    // How many lights are there?
+                    GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleLightCount(), CurrentWorld._lightcount);
+                    GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleLightsColors(), KWEngine.MAX_LIGHTS, LightColors);
+                    GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleLightsTargets(), KWEngine.MAX_LIGHTS, LightTargets);
+                    GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleLightsPositions(), KWEngine.MAX_LIGHTS, LightPositions);
+                    GL.Uniform3(KWEngine.RendererStandard.GetUniformHandleLightsMeta(), KWEngine.MAX_LIGHTS, LightMeta);
+
+                    // Ambient color and intensity:
+                    GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleSunAmbient(), CurrentWorld._ambientLight);
+
+                    List<LightObject> lights = CurrentWorld._lightObjects;
+                    int numLights = lights.Count;
+                    int textureIndex = 0;
+                    for (int lightIndex = 0; lightIndex < KWEngine.MAX_SHADOWMAPS; textureIndex += 2, lightIndex++)
+                    {
+                        LightObject currentLight = null;
+                        if (lightIndex < numLights)
+                            currentLight = lights[lightIndex];
+
+                        // POINT LIGHT:
+                        GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                        GL.BindTexture(TextureTarget.TextureCubeMap, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTexturesCubeMap[currentLight._framebufferIndex] : KWEngine.TextureDepthCubeMapEmpty);
+                        GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureShadowMapCubeMap() + lightIndex, textureIndex);
+
+                        GL.ActiveTexture(TextureUnit.Texture0 + textureIndex + 1);
+                        GL.BindTexture(TextureTarget.Texture2D, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTextures[currentLight._framebufferIndex] : KWEngine.TextureDepthEmpty);
+                        GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureShadowMap() + lightIndex, textureIndex + 1);
+                        if (currentLight != null)
+                            GL.UniformMatrix4(KWEngine.RendererStandard.GetUniformHandleVPShadowMap() + lightIndex, false, ref currentLight._viewProjectionMatrixShadow[0]);
+                        else
+                            GL.UniformMatrix4(KWEngine.RendererStandard.GetUniformHandleVPShadowMap() + lightIndex, false, ref KWEngine.Identity);
+                    }
+
+                    // Upload skybox for metal reflections:
+                    GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                    GL.BindTexture(TextureTarget.TextureCubeMap, CurrentWorld._textureSkybox > 0 ? CurrentWorld._textureSkybox : KWEngine.TextureCubemapEmpty);
+                    GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureSkybox(), textureIndex);
+                    textureIndex++;
+
+                    // Upload 2d sky for metal reflections:
+                    GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                    GL.BindTexture(TextureTarget.Texture2D, CurrentWorld._textureBackground > 0 ? CurrentWorld._textureBackground : KWEngine.TextureBlack);
+                    GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureSky2D(), textureIndex);
+                    textureIndex++;
+
+                    GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureIsSkybox(), CurrentWorld._textureSkybox > 0 ? 1 : CurrentWorld._textureBackground > 0 ? -1 : 0);
+                    GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureSkyBoost(), CurrentWorld._textureBackgroundMultiplier);
+
+
                     foreach (GameObject g in CurrentWorld._gameObjects)
                     {
                         g._collisionCandidates.Clear(); // clear collision list for this objects
-                        if (g.CurrentWorld.IsFirstPersonMode && g.CurrentWorld.GetFirstPersonObject().Equals(g))
-                            continue;
+
                         if (g.Model.IsTerrain)
                         {
-                            KWEngine.Renderers["Terrain"].Draw(g, ref viewProjection, ref viewProjectionShadowBiased, ref viewProjectionShadowBiased2, Frustum, ref LightColors, ref LightTargets, ref LightPositions, CurrentWorld._lightcount, ref shadowLight);
+                            mInstancesTerrain.Add(g);
+                            continue;
+                        }
+
+                        if (g.CurrentWorld.IsFirstPersonMode && g.CurrentWorld.GetFirstPersonObject().Equals(g))
+                            continue;
+                        
+                        bool opacityFound = false;
+                        foreach (GeoMesh mesh in g.Model.Meshes.Values)
+                        {
+                            if (mesh.Material.Opacity < 1f)
+                            {
+                                opacityFound = true;
+                                break;
+                            }
+                        }
+                        if (opacityFound || g.Opacity < 1f)
+                        {
+                            mInstancesRenderLast.Add(g);
+                            continue;
                         }
                         else
                         {
-                            bool opacityFound = false;
-                            foreach (GeoMesh mesh in g.Model.Meshes.Values)
-                            {
-                                if (mesh.Material.Opacity < 1f)
-                                {
-                                    opacityFound = true;
-                                    break;
-                                }
-                            }
-                            if (opacityFound || g.Opacity < 1f)
-                            {
-                                mInstancesRenderLast.Add(g);
-                                continue;
-                            }
-                            else
-                            {
-                                KWEngine.Renderers["Standard"].Draw(g, ref viewProjection, ref viewProjectionShadowBiased, ref viewProjectionShadowBiased2, Frustum, ref LightColors, ref LightTargets, ref LightPositions, CurrentWorld._lightcount, ref shadowLight);
-                                if (CurrentWorld.DebugShowHitboxes)
-                                    KWEngine.RendererSimple.DrawHitbox(g, ref viewProjection);
-                            }
+                            KWEngine.RendererStandard.Draw(g, ref viewProjection, Frustum, textureIndex);
                         }
+                    }
+                    GL.BindTexture(TextureTarget.Texture2D, 0);
+                    GL.UseProgram(0);
+
+                    if (CurrentWorld.DebugShowHitboxes)
+                    {
+                        GL.UseProgram(KWEngine.RendererSimple.GetProgramId());
+                        foreach (GameObject g in CurrentWorld._gameObjects)
+                        {
+                            KWEngine.RendererSimple.DrawHitbox(g, ref viewProjection);
+                        }
+                        GL.UseProgram(0);
+                    }
+
+                    if (mInstancesTerrain.Count > 0)
+                    {
+                        GL.UseProgram(KWEngine.RendererTerrain.GetProgramId());
+
+                        // How many lights are there?
+                        GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleLightCount(), CurrentWorld._lightcount);
+                        GL.Uniform4(KWEngine.RendererTerrain.GetUniformHandleLightsColors(), KWEngine.MAX_LIGHTS, LightColors);
+                        GL.Uniform4(KWEngine.RendererTerrain.GetUniformHandleLightsTargets(), KWEngine.MAX_LIGHTS, LightTargets);
+                        GL.Uniform4(KWEngine.RendererTerrain.GetUniformHandleLightsPositions(), KWEngine.MAX_LIGHTS, LightPositions);
+                        GL.Uniform3(KWEngine.RendererTerrain.GetUniformHandleLightsMeta(), KWEngine.MAX_LIGHTS, LightMeta);
+
+                        // Ambient color and intensity:
+                        GL.Uniform4(KWEngine.RendererTerrain.GetUniformHandleSunAmbient(), CurrentWorld._ambientLight);
+
+                        textureIndex = 0;
+                        for (int lightIndex = 0; lightIndex < KWEngine.MAX_SHADOWMAPS; textureIndex += 2, lightIndex++)
+                        {
+                            LightObject currentLight = null;
+                            if (lightIndex < numLights)
+                                currentLight = lights[lightIndex];
+
+                            // POINT LIGHT:
+                            GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                            GL.BindTexture(TextureTarget.TextureCubeMap, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTexturesCubeMap[currentLight._framebufferIndex] : KWEngine.TextureDepthCubeMapEmpty);
+                            GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleTextureShadowMapCubeMap() + lightIndex, textureIndex);
+
+                            GL.ActiveTexture(TextureUnit.Texture0 + textureIndex + 1);
+                            GL.BindTexture(TextureTarget.Texture2D, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTextures[currentLight._framebufferIndex] : KWEngine.TextureDepthEmpty);
+                            GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleTextureShadowMap() + lightIndex, textureIndex + 1);
+                            if (currentLight != null)
+                                GL.UniformMatrix4(KWEngine.RendererTerrain.GetUniformHandleVPShadowMap() + lightIndex, false, ref currentLight._viewProjectionMatrixShadow[0]);
+                            else
+                                GL.UniformMatrix4(KWEngine.RendererTerrain.GetUniformHandleVPShadowMap() + lightIndex, false, ref KWEngine.Identity);
+                        }
+
+                        // Upload skybox for metal reflections:
+                        GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                        GL.BindTexture(TextureTarget.TextureCubeMap, CurrentWorld._textureSkybox > 0 ? CurrentWorld._textureSkybox : KWEngine.TextureCubemapEmpty);
+                        GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleTextureSkybox(), textureIndex);
+                        textureIndex++;
+
+                        // Upload 2d sky for metal reflections:
+                        GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                        GL.BindTexture(TextureTarget.Texture2D, CurrentWorld._textureBackground > 0 ? CurrentWorld._textureBackground : KWEngine.TextureBlack);
+                        GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleTextureSky2D(), textureIndex);
+                        textureIndex++;
+
+                        GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleTextureIsSkybox(), CurrentWorld._textureSkybox > 0 ? 1 : CurrentWorld._textureBackground > 0 ? -1 : 0);
+                        GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleTextureSkyBoost(), CurrentWorld._textureBackgroundMultiplier);
+
+                        foreach (GameObject g in mInstancesTerrain)
+                        {
+                            KWEngine.RendererTerrain.Draw(g, ref viewProjection, Frustum, textureIndex);
+                        }
+                        GL.BindTexture(TextureTarget.Texture2D, 0);
+                        GL.UseProgram(0);
+                        mInstancesTerrain.Clear();
                     }
 
                     // Background rendering:
                     if (CurrentWorld._textureBackground > 0)
                     {
-
-                        KWEngine.Renderers["Background"].Draw(_dummy, ref _modelViewProjectionMatrixBackground);
+                        KWEngine.RendererBackground.Draw(ref _modelViewProjectionMatrixBackground);
                     }
                     else if (CurrentWorld._textureSkybox > 0)
                     {
-                        KWEngine.Renderers["Skybox"].Draw(_dummy, ref _projectionMatrix);
+                        KWEngine.RendererSkybox.Draw(ref _projectionMatrix);
                     }
 
-                    mInstancesRenderLast.Sort((x, y) => x == null ? (y == null ? 0 : -1) : (y == null ? 1 : y.DistanceToCamera.CompareTo(x.DistanceToCamera)));
-                    foreach (GameObject g in mInstancesRenderLast)
+
+                    // =========================
+                    // RENDER TRANSPARENT STUFF:
+                    // =========================
+                    if (mInstancesRenderLast.Count > 0)
                     {
-                        KWEngine.Renderers["Standard"].Draw(g, ref viewProjection, ref viewProjectionShadowBiased, ref viewProjectionShadowBiased2, Frustum, ref LightColors, ref LightTargets, ref LightPositions, CurrentWorld._lightcount, ref shadowLight);
-                        if (CurrentWorld.DebugShowHitboxes)
-                            KWEngine.RendererSimple.DrawHitbox(g, ref viewProjection);
+                        mInstancesRenderLast.Sort((x, y) => x == null ? (y == null ? 0 : -1) : (y == null ? 1 : y.DistanceToCamera.CompareTo(x.DistanceToCamera)));
+                        GL.UseProgram(KWEngine.RendererStandard.GetProgramId());
+
+                        // How many lights are there?
+                        GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleLightCount(), CurrentWorld._lightcount);
+                        GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleLightsColors(), KWEngine.MAX_LIGHTS, LightColors);
+                        GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleLightsTargets(), KWEngine.MAX_LIGHTS, LightTargets);
+                        GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleLightsPositions(), KWEngine.MAX_LIGHTS, LightPositions);
+                        GL.Uniform3(KWEngine.RendererStandard.GetUniformHandleLightsMeta(), KWEngine.MAX_LIGHTS, LightMeta);
+
+                        // Ambient color and intensity:
+                        GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleSunAmbient(), CurrentWorld._ambientLight);
+
+                        textureIndex = 0;
+                        for (int lightIndex = 0; lightIndex < KWEngine.MAX_SHADOWMAPS; textureIndex += 2, lightIndex++)
+                        {
+                            LightObject currentLight = null;
+                            if (lightIndex < numLights)
+                                currentLight = lights[lightIndex];
+
+                            // POINT LIGHT:
+                            GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                            GL.BindTexture(TextureTarget.TextureCubeMap, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTexturesCubeMap[currentLight._framebufferIndex] : KWEngine.TextureDepthCubeMapEmpty);
+                            GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureShadowMapCubeMap() + lightIndex, textureIndex);
+
+                            GL.ActiveTexture(TextureUnit.Texture0 + textureIndex + 1);
+                            GL.BindTexture(TextureTarget.Texture2D, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTextures[currentLight._framebufferIndex] : KWEngine.TextureDepthEmpty);
+                            GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureShadowMap() + lightIndex, textureIndex + 1);
+                            if (currentLight != null)
+                                GL.UniformMatrix4(KWEngine.RendererStandard.GetUniformHandleVPShadowMap() + lightIndex, false, ref currentLight._viewProjectionMatrixShadow[0]);
+                            else
+                                GL.UniformMatrix4(KWEngine.RendererStandard.GetUniformHandleVPShadowMap() + lightIndex, false, ref KWEngine.Identity);
+                        }
+
+                        // Upload skybox for metal reflections:
+                        GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                        GL.BindTexture(TextureTarget.TextureCubeMap, CurrentWorld._textureSkybox > 0 ? CurrentWorld._textureSkybox : KWEngine.TextureCubemapEmpty);
+                        GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureSkybox(), textureIndex);
+                        textureIndex++;
+
+                        // Upload 2d sky for metal reflections:
+                        GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                        GL.BindTexture(TextureTarget.Texture2D, CurrentWorld._textureBackground > 0 ? CurrentWorld._textureBackground : KWEngine.TextureBlack);
+                        GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureSky2D(), textureIndex);
+                        textureIndex++;
+
+                        GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureIsSkybox(), CurrentWorld._textureSkybox > 0 ? 1 : CurrentWorld._textureBackground > 0 ? -1 : 0);
+                        GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureSkyBoost(), CurrentWorld._textureBackgroundMultiplier);
+
+                        foreach (GameObject g in mInstancesRenderLast)
+                        {
+                            KWEngine.RendererStandard.Draw(g, ref viewProjection, Frustum, textureIndex);
+                            if (CurrentWorld.DebugShowHitboxes)
+                                KWEngine.RendererSimple.DrawHitbox(g, ref viewProjection);
+                        }
+                        GL.UseProgram(0);
+                        mInstancesRenderLast.Clear();
                     }
-                    mInstancesRenderLast.Clear();
+                    
                 }
-                GL.UseProgram(0);
+                
 
                 lock (CurrentWorld._explosionObjects)
                 {
                     if (CurrentWorld._explosionObjects.Count > 0)
                     {
-                        RendererExplosion r = (RendererExplosion)KWEngine.Renderers["Explosion"];
-                        GL.UseProgram(r.GetProgramId());
+                        
+                        GL.UseProgram(KWEngine.RendererExplosion.GetProgramId());
                         foreach (Explosion ex in CurrentWorld._explosionObjects)
                         {
-                            r.Draw(ex, ref viewProjection);
+                            KWEngine.RendererExplosion.Draw(ex, ref viewProjection);
                         }
                         GL.UseProgram(0);
                     }
@@ -436,9 +656,9 @@ namespace KWEngine2
                 lock (CurrentWorld._particleObjects)
                 {
                     GL.Enable(EnableCap.Blend);
-                    GL.UseProgram(KWEngine.Renderers["Particle"].GetProgramId());
+                    GL.UseProgram(KWEngine.RendererParticle.GetProgramId());
                     foreach (ParticleObject p in CurrentWorld.GetParticleObjects())
-                        KWEngine.Renderers["Particle"].Draw(p, ref viewProjection);
+                        KWEngine.RendererParticle.Draw(p, ref viewProjection);
                     GL.UseProgram(0);
                     GL.Disable(EnableCap.Blend);
                 }
@@ -447,8 +667,10 @@ namespace KWEngine2
                 GL.Disable(EnableCap.CullFace);
                 lock (CurrentWorld._hudObjects)
                 {
+                    GL.UseProgram(KWEngine.RendererHUD.GetProgramId());
                     foreach (HUDObject p in CurrentWorld._hudObjects)
-                        KWEngine.Renderers["HUD"].Draw(p, ref _viewProjectionMatrixHUD);
+                        KWEngine.RendererHUD.Draw(p, ref _viewProjectionMatrixHUD);
+                    GL.UseProgram(0);
                 }
                 GL.Disable(EnableCap.Blend);
                 GL.Enable(EnableCap.CullFace);
@@ -562,12 +784,12 @@ namespace KWEngine2
                             mInstancesLast.Add(g);
                             continue;
                         }
-                        g.Act(ks, ms, DeltaTime.GetDeltaTimeFactor());
+                        g.Act(ks, ms);
                         g.CheckBounds();
                     }
                     foreach (GameObject g in mInstancesLast)
                     {
-                        g.Act(ks, ms, DeltaTime.GetDeltaTimeFactor());
+                        g.Act(ks, ms);
                         g.CheckBounds();
                     }
                     mInstancesLast.Clear();
@@ -581,15 +803,8 @@ namespace KWEngine2
                         p.Act();
                     }
                 }
-                lock (CurrentWorld._lightObjects)
-                {
-                    foreach (LightObject l in CurrentWorld.GetLightObjects())
-                    {
-                        l.Act(ks, ms, DeltaTime.GetDeltaTimeFactor());
-                    }
-                }
 
-                CurrentWorld.Act(ks, ms, DeltaTime.GetDeltaTimeFactor());
+                CurrentWorld.Act(ks, ms);
 
                 CurrentWorld.AddRemoveObjects();
                 //CurrentWorld.SortByZ();
@@ -693,8 +908,6 @@ namespace KWEngine2
         internal void CalculateProjectionMatrix()
         {
             _projectionMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(CurrentWorld != null ? CurrentWorld.FOV / 2 : 45f), ClientSize.Width / (float)ClientSize.Height, 0.1f, CurrentWorld != null ? CurrentWorld.ZFar : 1000f);
-            _projectionMatrixShadow = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(CurrentWorld != null ? CurrentWorld.FOVShadow / 2 : 45f), KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize, 1f, CurrentWorld != null ? CurrentWorld.ZFar : 1000f);
-
 
             _modelViewProjectionMatrixBloom = Matrix4.CreateScale(ClientSize.Width / 2f, ClientSize.Height / 2f, 1) * Matrix4.LookAt(0, 0, 1, 0, 0, 0, 0, 1, 0) * Matrix4.CreateOrthographic(ClientSize.Width / 2f, ClientSize.Height / 2f, 0.1f, 100f);
             _modelViewProjectionMatrixBloomMerge = Matrix4.CreateScale(ClientSize.Width, ClientSize.Height, 1) * Matrix4.LookAt(0, 0, 1, 0, 0, 0, 0, 1, 0) * Matrix4.CreateOrthographic(ClientSize.Width, ClientSize.Height, 0.1f, 100f);
@@ -766,9 +979,7 @@ namespace KWEngine2
         {
             if (KWEngine.PostProcessQuality != PostProcessingQuality.Disabled)
             {
-                RendererBloom r = (RendererBloom)KWEngine.Renderers["Bloom"];
-                RendererMerge m = (RendererMerge)KWEngine.Renderers["Merge"];
-                GL.UseProgram(r.GetProgramId());
+                GL.UseProgram(KWEngine.RendererBloom.GetProgramId());
                 GL.Viewport(0, 0, _bloomwidth, _bloomheight);
                 int loopCount =
                     KWEngine.PostProcessQuality == PostProcessingQuality.High ? 6 :
@@ -793,7 +1004,7 @@ namespace KWEngine2
                         GL.BindFramebuffer(FramebufferTarget.Framebuffer, FramebufferBloom2);
                     }
 
-                    r.DrawBloom(
+                    KWEngine.RendererBloom.DrawBloom(
                         _bloomQuad,
                         ref _modelViewProjectionMatrixBloom,
                         i % 2 == 0,
@@ -802,24 +1013,25 @@ namespace KWEngine2
                 }
 
                 SwitchToBufferAndClear(0);
-                GL.UseProgram(m.GetProgramId());
+                GL.UseProgram(KWEngine.RendererMerge.GetProgramId());
                 GL.Viewport(0, 0, Width, Height);
-                m.DrawMerge(_bloomQuad, ref _modelViewProjectionMatrixBloomMerge, TextureMainFinal, TextureBloom2);
+                KWEngine.RendererMerge.DrawMerge(_bloomQuad, ref _modelViewProjectionMatrixBloomMerge, TextureMainFinal, TextureBloom2);
                 GL.UseProgram(0); // unload bloom shader program
             }
         }
 
         #region Framebuffers
 
-        internal int FramebufferShadowMap = -1;
-        internal int FramebufferShadowMap2 = -1;
+        internal int[] FramebuffersShadow = new int[KWEngine.MAX_SHADOWMAPS];
+        internal int[] FramebuffersShadowCubeMap = new int[KWEngine.MAX_SHADOWMAPS];
+        internal int[] FramebuffersShadowTextures = new int[KWEngine.MAX_SHADOWMAPS];
+        internal int[] FramebuffersShadowTexturesCubeMap = new int[KWEngine.MAX_SHADOWMAPS];
+
         internal int FramebufferBloom1 = -1;
         internal int FramebufferBloom2 = -1;
         internal int FramebufferMainMultisample = -1;
         internal int FramebufferMainFinal = -1;
 
-        internal int TextureShadowMap = -1;
-        internal int TextureShadowMap2 = -1;
         internal int TextureMain = -1;
         internal int TextureMainDepth = -1;
         internal int TextureBloom = -1;
@@ -828,9 +1040,22 @@ namespace KWEngine2
         internal int TextureMainFinal = -1;
         internal int TextureBloomFinal = -1;
 
-
-        internal void InitializeFramebuffers()
+        internal void InitializeFramebuffersLightsList()
         {
+            _freeShadowMapIds = new List<int>();
+            _freeShadowMapCubeMapIds = new List<int>();
+
+            for (int i = 0; i < KWEngine.MAX_SHADOWMAPS; i++)
+            {
+                _freeShadowMapIds.Add(i);
+                _freeShadowMapCubeMapIds.Add(i);
+            }
+        }
+
+        internal void InitializeFramebuffersLights()
+        {
+            InitializeFramebuffersLightsList();
+
             bool ok = false;
             while (!ok)
             {
@@ -838,16 +1063,57 @@ namespace KWEngine2
                 {
                     if (TextureMain >= 0)
                     {
-                        GL.DeleteTextures(9, new int[] { TextureMainDepth, TextureMain, TextureShadowMap, TextureShadowMap2, TextureBloom1, TextureBloom2, TextureMainFinal, TextureBloomFinal, TextureBloom });
-                        GL.DeleteFramebuffers(6, new int[] { FramebufferShadowMap, FramebufferShadowMap2, FramebufferBloom1, FramebufferBloom2, FramebufferMainMultisample, FramebufferMainFinal, });
+                        GL.DeleteFramebuffers(FramebuffersShadow.Length, FramebuffersShadow);
+                        GL.Flush();
+                        GL.Finish();
+                        GL.DeleteFramebuffers(FramebuffersShadowCubeMap.Length, FramebuffersShadowCubeMap);
+                        GL.Flush();
+                        GL.Finish();
+                        GL.DeleteTextures(FramebuffersShadowTextures.Length, FramebuffersShadowTextures);
+                        GL.Flush();
+                        GL.Finish();
+                        GL.DeleteTextures(FramebuffersShadowTexturesCubeMap.Length, FramebuffersShadowTexturesCubeMap);
+                        GL.Flush();
+                        GL.Finish();
 
                         Thread.Sleep(250);
+                    }
+                    HelperGL.CheckGLErrors();
+                    InitFramebuffersShadowMap();
+                    InitFramebuffersShadowMapCubeMap();
+                    HelperGL.CheckGLErrors();
+                }
+                catch (ArgumentOutOfRangeException ex)
+                {
+                    Debug.WriteLine("Error building framebuffers: " + ex.Message);
+                }
+                ok = true;
+            }
+        }
+
+        internal void InitializeFramebuffers()
+        {
+            HelperGL.CheckGLErrors();
+
+            bool ok = false;
+            while (!ok)
+            {
+                try
+                {
+                    if (TextureMain >= 0)
+                    {
+                        GL.DeleteFramebuffers(4, new int[] { FramebufferBloom1, FramebufferBloom2, FramebufferMainMultisample, FramebufferMainFinal });
+                        GL.Flush();
+                        GL.Finish();
+                        GL.DeleteTextures(7, new int[] { TextureMainDepth, TextureMain,  TextureBloom1, TextureBloom2, TextureMainFinal, TextureBloomFinal, TextureBloom });
+                        GL.Flush();
+                        GL.Finish();
+                        Thread.Sleep(100);
+                        
                     }
 
                     InitFramebufferOriginal();
                     InitFramebufferOriginalDownsampled();
-                    InitFramebufferShadowMap();
-                    InitFramebufferShadowMap2();
                     InitFramebufferBloom();
                 }
                 catch (ArgumentOutOfRangeException ex)
@@ -856,6 +1122,8 @@ namespace KWEngine2
                 }
                 ok = true;
             }
+
+            InitializeFramebuffersLights();
 
         }
 
@@ -884,81 +1152,151 @@ namespace KWEngine2
             }
         }
 
-        private void InitFramebufferShadowMap()
+        internal int[] GetFramebuffersShadowMap()
         {
-            int framebufferId;
-            int depthTexId;
+            return FramebuffersShadow;
+        }
 
-            framebufferId = GL.GenFramebuffer();
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, framebufferId);
+        internal int[] GetFramebuffersShadowMapCubeMap()
+        {
+            return FramebuffersShadowCubeMap;
+        }
 
-            depthTexId = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, depthTexId);
+        internal List<int> _freeShadowMapIds;
+        internal List<int> _freeShadowMapCubeMapIds;
 
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32,
-                KWEngine.ShadowMapSize, KWEngine.ShadowMapSize, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
-
-            GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, new int[] { (int)TextureCompareMode.CompareRefToTexture });
-            GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, new int[] { (int)DepthFunction.Lequal });
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBorderColor, new float[] { 1, 1, 1, 1 });
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (float)TextureParameterName.ClampToBorder);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (float)TextureParameterName.ClampToBorder);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (float)TextureParameterName.ClampToBorder);
-
-            GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, depthTexId, 0);
-            GL.DrawBuffer(DrawBufferMode.None);
-            GL.ReadBuffer(ReadBufferMode.None);
-
-            FramebufferErrorCode code = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
-            if (code != FramebufferErrorCode.FramebufferComplete)
+        internal void AddIdForShadowMap(int id, LightType type)
+        {
+            if(type == LightType.Point)
             {
-                throw new Exception("GL_FRAMEBUFFER_COMPLETE failed. Cannot use FrameBuffer object.");
+                if (_freeShadowMapCubeMapIds.Count < KWEngine.MAX_SHADOWMAPS)
+                    _freeShadowMapCubeMapIds.Add(id);
+                else
+                {
+                    HelperGL.ShowErrorAndQuit("GLWindow::AddIdForShadowMap()", "Internal error adding shadow map framebuffers to the framebuffer list.");
+                    return;
+                }
             }
             else
             {
-                FramebufferShadowMap = framebufferId;
-                TextureShadowMap = depthTexId;
+                if (_freeShadowMapIds.Count < KWEngine.MAX_SHADOWMAPS)
+                    _freeShadowMapIds.Add(id);
+                else
+                {
+                    HelperGL.ShowErrorAndQuit("GLWindow::AddIdForShadowMap()", "Internal error adding shadow map framebuffers to the framebuffer list.");
+                    return;
+                }
             }
         }
 
-        private void InitFramebufferShadowMap2()
+        internal int GetFreeIdForShadowMap(LightType type)
         {
-            int framebufferId;
-            int depthTexId;
-
-            framebufferId = GL.GenFramebuffer();
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, framebufferId);
-
-            depthTexId = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, depthTexId);
-
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32,
-                KWEngine.ShadowMapSize, KWEngine.ShadowMapSize, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
-
-            GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, new int[] { (int)TextureCompareMode.CompareRefToTexture });
-            GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, new int[] { (int)DepthFunction.Lequal });
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBorderColor, new float[] { 1, 1, 1, 1 });
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (float)TextureParameterName.ClampToBorder);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (float)TextureParameterName.ClampToBorder);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (float)TextureParameterName.ClampToBorder);
-
-            GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, depthTexId, 0);
-            GL.DrawBuffer(DrawBufferMode.None);
-            GL.ReadBuffer(ReadBufferMode.None);
-
-            FramebufferErrorCode code = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
-            if (code != FramebufferErrorCode.FramebufferComplete)
+            if(type == LightType.Point)
             {
-                throw new Exception("GL_FRAMEBUFFER_COMPLETE failed. Cannot use FrameBuffer object.");
+                if(_freeShadowMapCubeMapIds.Count > 0)
+                {
+                    int newId = _freeShadowMapCubeMapIds[0];
+                    _freeShadowMapCubeMapIds.RemoveAt(0);
+                    return newId;
+                }
+                else
+                {
+                    HelperGL.ShowErrorAndQuit("GLWindow::GetFreeIdForShadowMap()", "Shadow light count of " + KWEngine.MAX_SHADOWMAPS + " exceeded. Cannot create shadow light.");
+                    return -1;
+                }
+                
             }
             else
             {
-                FramebufferShadowMap2 = framebufferId;
-                TextureShadowMap2 = depthTexId;
+                if (_freeShadowMapIds.Count > 0)
+                {
+                    int newId = _freeShadowMapIds[0];
+                    _freeShadowMapIds.RemoveAt(0);
+                    return newId;
+                }
+                else
+                {
+                    HelperGL.ShowErrorAndQuit("GLWindow::GetFreeIdForShadowMap()", "Shadow light count of " + KWEngine.MAX_SHADOWMAPS + " exceeded. Cannot create shadow light.");
+                    return -1;
+                }
+            }
+        }
+
+
+
+        private void InitFramebuffersShadowMap()
+        {
+            for(int i = 0; i < FramebuffersShadow.Length; i++)
+            {
+                FramebuffersShadow[i] = GL.GenFramebuffer();
+                GL.BindFramebuffer(FramebufferTarget.Framebuffer, FramebuffersShadow[i]);
+
+                FramebuffersShadowTextures[i] = GL.GenTexture();
+                GL.BindTexture(TextureTarget.Texture2D, FramebuffersShadowTextures[i]);
+
+                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32,
+                    KWEngine.ShadowMapSize, KWEngine.ShadowMapSize, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
+
+                GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, new int[] { (int)TextureCompareMode.CompareRefToTexture });
+                GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, new int[] { (int)DepthFunction.Lequal });
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)TextureMinFilter.Nearest);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)TextureMinFilter.Nearest);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBorderColor, new float[] { 1, 1, 1, 1 });
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (float)TextureParameterName.ClampToBorder);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (float)TextureParameterName.ClampToBorder);
+
+                GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, FramebuffersShadowTextures[i], 0);
+                GL.DrawBuffer(DrawBufferMode.None);
+                GL.ReadBuffer(ReadBufferMode.None);
+
+                GL.BindTexture(TextureTarget.Texture2D, 0);
+
+                FramebufferErrorCode code = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
+                if (code != FramebufferErrorCode.FramebufferComplete)
+                {
+                    HelperGL.ShowErrorAndQuit("GLWindow::InitFramebuffersShadowMap()", "GL_FRAMEBUFFER_COMPLETE failed. Cannot use FrameBuffer object.");
+                    return;
+                }
+            }
+        }
+
+        private void InitFramebuffersShadowMapCubeMap()
+        {
+            for (int i = 0; i < FramebuffersShadow.Length; i++)
+            {
+                FramebuffersShadowCubeMap[i] = GL.GenFramebuffer();
+                GL.BindFramebuffer(FramebufferTarget.Framebuffer, FramebuffersShadowCubeMap[i]);
+
+                FramebuffersShadowTexturesCubeMap[i] = GL.GenTexture();
+                GL.BindTexture(TextureTarget.TextureCubeMap, FramebuffersShadowTexturesCubeMap[i]);
+
+                for (int j = 0; j < 6; j++)
+                {
+                    GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + j, 0, PixelInternalFormat.DepthComponent32,
+                        KWEngine.ShadowMapSize, KWEngine.ShadowMapSize, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
+                }
+
+                GL.TexParameterI(TextureTarget.TextureCubeMap, TextureParameterName.TextureCompareMode, new int[] { (int)TextureCompareMode.CompareRefToTexture });
+                GL.TexParameterI(TextureTarget.TextureCubeMap, TextureParameterName.TextureCompareFunc, new int[] { (int)DepthFunction.Lequal });
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (float)TextureMinFilter.Nearest);
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (float)TextureMinFilter.Nearest);
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureBorderColor, new float[] { 1, 1, 1, 1 });
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (float)TextureParameterName.ClampToBorder);
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (float)TextureParameterName.ClampToBorder);
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, (float)TextureParameterName.ClampToBorder);
+
+                GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, FramebuffersShadowTexturesCubeMap[i], 0);
+                GL.DrawBuffer(DrawBufferMode.None);
+                GL.ReadBuffer(ReadBufferMode.None);
+
+                GL.BindTexture(TextureTarget.Texture2D, 0);
+
+                FramebufferErrorCode code = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
+                if (code != FramebufferErrorCode.FramebufferComplete)
+                {
+                    HelperGL.ShowErrorAndQuit("GLWindow::InitFramebuffersShadowMapCubeMap()", "GL_FRAMEBUFFER_COMPLETE failed. Cannot use FrameBuffer object.");
+                    return;
+                }
             }
         }
 
@@ -1001,7 +1339,8 @@ namespace KWEngine2
             FramebufferErrorCode code = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
             if (code != FramebufferErrorCode.FramebufferComplete)
             {
-                throw new Exception("GL_FRAMEBUFFER_COMPLETE failed. Cannot use FrameBuffer object.");
+                HelperGL.ShowErrorAndQuit("GLWindow::InitFramebufferOriginalDownsampled()", "GL_FRAMEBUFFER_COMPLETE failed. Cannot use FrameBuffer object.");
+                return;
             }
             else
             {
@@ -1086,7 +1425,8 @@ namespace KWEngine2
             FramebufferErrorCode code = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
             if (code != FramebufferErrorCode.FramebufferComplete)
             {
-                throw new Exception("GL_FRAMEBUFFER_COMPLETE failed. Cannot use FrameBuffer object.");
+                HelperGL.ShowErrorAndQuit("GLWindow::InitFramebufferOriginal()", "GL_FRAMEBUFFER_COMPLETE failed. Cannot use FrameBuffer object.");
+                return;
             }
             else
             {
@@ -1125,7 +1465,8 @@ namespace KWEngine2
             FramebufferErrorCode code = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
             if (code != FramebufferErrorCode.FramebufferComplete)
             {
-                throw new Exception("GL_FRAMEBUFFER_COMPLETE failed. Cannot use FrameBuffer object.");
+                HelperGL.ShowErrorAndQuit("GLWindow::InitFramebufferBloom()", "GL_FRAMEBUFFER_COMPLETE failed. Cannot use FrameBuffer object.");
+                return;
             }
             else
             {
@@ -1154,7 +1495,8 @@ namespace KWEngine2
             code = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
             if (code != FramebufferErrorCode.FramebufferComplete)
             {
-                throw new Exception("GL_FRAMEBUFFER_COMPLETE failed. Cannot use FrameBuffer object.");
+                HelperGL.ShowErrorAndQuit("GLWindow::InitFramebufferBloom()", "GL_FRAMEBUFFER_COMPLETE failed. Cannot use FrameBuffer object.");
+                return;
             }
             else
             {

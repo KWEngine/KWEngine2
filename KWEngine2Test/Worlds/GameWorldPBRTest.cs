@@ -19,18 +19,18 @@ namespace KWEngine2Test.Worlds
         private HUDObject ho;
         private HUDObject ho2;
 
-        public override void Act(KeyboardState kb, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState kb, MouseState ms)
         {
             if (kb[Key.Escape])
             {
                 CurrentWindow.SetWorld(new GameWorldStart());
                 return;
             }
-            
+            /*
             if(kb[Key.U])
             {
                 float i = GetSunColor().W;
-                i -= 0.05f * deltaTimeFactor;
+                i -= 0.05f * KWEngine.DeltaTimeFactor;
                 i = HelperGL.Clamp(i, 0, 2);
                 SetSunColor(GetSunColor().X, GetSunColor().Y, GetSunColor().Z, i);
                 Console.WriteLine("SunIntensity: " + i);
@@ -38,7 +38,7 @@ namespace KWEngine2Test.Worlds
             else if (kb[Key.I])
             {
                 float i = GetSunColor().W;
-                i += 0.05f * deltaTimeFactor;
+                i += 0.05f * KWEngine.DeltaTimeFactor;
                 i = HelperGL.Clamp(i, 0, 2);
                 SetSunColor(GetSunColor().X, GetSunColor().Y, GetSunColor().Z, i);
                 Console.WriteLine("SunIntensity: " + i);
@@ -47,7 +47,7 @@ namespace KWEngine2Test.Worlds
             if (kb[Key.J])
             {
                 float i = SunAmbientFactor;
-                i -= 0.01f * deltaTimeFactor;
+                i -= 0.01f * KWEngine.DeltaTimeFactor;
                 i = HelperGL.Clamp(i, 0, 1);
                 SetSunAmbientFactor(i);
                 Console.WriteLine("Ambient: " + i);
@@ -55,13 +55,14 @@ namespace KWEngine2Test.Worlds
             else if (kb[Key.K])
             {
                 float i = SunAmbientFactor;
-                i += 0.01f * deltaTimeFactor;
+                i += 0.01f * KWEngine.DeltaTimeFactor;
                 i = HelperGL.Clamp(i, 0, 1);
                 SetSunAmbientFactor(i);
                 Console.WriteLine("Ambient: " + i);
             }
+            */
 
-            SpawnParticles();
+            //SpawnParticles();
         }
         
         private void SpawnParticles()
@@ -87,56 +88,113 @@ namespace KWEngine2Test.Worlds
             KWEngine.LoadModelFromFile("MatTest255", @".\models\gltftestcube255.glb");
 
             FOV = 45;
-            FOVShadow = 30f;
 
-            SetSunPosition(100, 100, 100);
-            SetSunTarget(0, 0, 0);
-            SetSunAmbientFactor(0.5f);
-            SetSunColor(1, 1, 1, 0.5f);
+            //SetSunPosition(100, 100, 100);
+            //SetSunTarget(0, 0, 0);
+            //SetSunAmbientFactor(0.5f);
+            //SetSunColor(1, 1, 1, 0.5f);
+            SetAmbientLight(1, 1, 1, 0.25f);
 
             SetCameraPosition(0, 25, 50);
             SetCameraTarget(0, 0, 0);
 
-            SetTextureSkybox(@".\textures\skybox1.jpg");
+            //SetTextureSkybox(@".\textures\skybox1.jpg");
+            SetTextureBackground(@".\textures\bg_greenmountains.png");
+            SetTextureBackgroundBrightnessMultiplier(4);
 
-            CreateMetalSphereTestObject();
-            CreateCubeTestObject();
-            CreateGLBTestObject();
-            CreateTerrainTestObject();
+            //CreateMetalSphereTestObject();
+            //CreateCubeTestObject();
+            //CreateGLBTestObject();
+            //CreateTerrainTestObject();
+
+            CreateRoomForLightTest();
 
 
             CreateFreeFloatPlayer();
 
-            
-
-            
-            PointLight p = new PointLight();
-            p.Type = LightType.Point;
-            p.SetPosition(-2, 2, 4);
-            p.SetColor(1, 0, 0, 1f);
-            p.SetDistanceMultiplier(3);
-            //AddLightObject(p);
-
-            DirectionalLight p2 = new DirectionalLight();
-            p2.Type = LightType.DirectionalShadow;
-            p2.SetPosition(-10, 5, -10);
-            p2.SetTarget(0, 2.5f, 0);
-            p2.SetColor(0, 1, 0, 10f);
-            p2.SetDistanceMultiplier(10);
-            //AddLightObject(p2);
 
             DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
             DebugShowCoordinateSystemGrid = GridType.GridXZ;
-            DebugShadowCaster = false;
         }
 
         private void CreateFreeFloatPlayer()
         {
             PlayerFloat pf = new PlayerFloat();
             pf.SetModel("KWCube");
-            pf.SetPosition(0, 5, 20);
+            pf.SetPosition(0, 5, 15);
             AddGameObject(pf);
             SetFirstPersonObject(pf, 180);
+        }
+
+        private void CreateRoomForLightTest()
+        {
+            SetAmbientLight(1, 1, 1, 0.25f);
+
+            Cube c1 = new Cube();
+            c1.SetModel("KWCube");
+            c1.SetScale(20, 10, 2);
+            c1.SetPosition(0, 5, -11);
+            c1.IsShadowCaster = true;
+            AddGameObject(c1);
+
+            Cube c2 = new Cube();
+            c2.SetModel("KWCube");
+            c2.SetScale(20, 2, 20);
+            c2.SetPosition(0, -1, 0);
+            c2.IsShadowCaster = true;
+            AddGameObject(c2);
+
+            Cube c3 = new Cube();
+            c3.SetModel("KWCube");
+            c3.SetScale(2, 10, 20);
+            c3.SetPosition(-11, 5, 0);
+            c3.IsShadowCaster = true;
+            AddGameObject(c3);
+
+            Cube c4 = new Cube();
+            c4.SetModel("KWCube");
+            c4.SetScale(2, 10, 20);
+            c4.SetPosition(+11, 5, 0);
+            c4.IsShadowCaster = true;
+            AddGameObject(c4);
+
+            // Testing Cubes and Spheres
+            Cube box1 = new Cube();
+            box1.SetModel("KWCube");
+            box1.SetPosition(-5, 1, 0);
+            box1.SetScale(2);
+            box1.IsShadowCaster = true;
+            AddGameObject(box1);
+
+            Cube box2 = new Cube();
+            box2.SetModel("KWCube");
+            box2.SetPosition(0, 0.5f, -3);
+            box2.SetScale(1);
+            box2.IsShadowCaster = true;
+            box2.SetMetalness(0.9f);
+            AddGameObject(box2);
+
+            Cube box3 = new Cube();
+            box3.SetModel("KWCube");
+            box3.SetPosition(0, 3, -7.5f);
+            box3.SetScale(3);
+            box3.IsShadowCaster = true;
+            AddGameObject(box3);
+
+            LightObject pointlightWithShadow = new LightObject(LightType.Point, true);
+            pointlightWithShadow.SetPosition(0, 5, 0);
+            pointlightWithShadow.SetDistanceMultiplier(20);
+            pointlightWithShadow.SetColor(1, 0, 0, 1);
+            AddLightObject(pointlightWithShadow);
+
+            LightObject sunlight = new LightObject(LightType.Sun, true);
+            sunlight.SetPosition(50, 50, 50);
+            sunlight.SetTarget(0, 0, 0);
+            sunlight.SetColor(1, 1, 0, 0.25f);
+            sunlight.SetFOVBiasCoefficient(0.0001f);
+            AddLightObject(sunlight);
+
+            //DebugShadowLight = sunlight;
         }
 
         private void CreateMetalSphereTestObject()
@@ -152,8 +210,16 @@ namespace KWEngine2Test.Worlds
             s.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
             AddGameObject(s);
 
+            Cube c = new Cube();
+            c.SetModel("KWCube");
+            c.SetScale(1);
+            c.IsShadowCaster = true;
+            c.SetPosition(-2.5f, 0.5f, -2.5f);
+            AddGameObject(c);
+
             CubeRoughnessTest floor = new CubeRoughnessTest();
             floor.SetModel("KWCube");
+            floor.Name = "Test";
             floor.SetPosition(-5, -0.5f, -5);
             floor.SetScale(10, 1, 10);
             floor.SetColor(1, 0, 0);
@@ -219,6 +285,11 @@ namespace KWEngine2Test.Worlds
             floor2.SetPosition(5, 0, 5);
             floor2.SetRoughness(0.9f);
             floor2.SetTexture(@".\textures\sand_normal.jpg", TextureType.Normal);
+            floor2.SetTextureTerrainBlendMapping(
+                @".\textures\blendmap.png",
+                @".\textures\metal022_1K_Color.jpg",
+                @".\textures\bg_greenmountains.png",
+                @".\textures\metalplates006_1k_color.jpg");
             AddGameObject(floor2);
         }
     }

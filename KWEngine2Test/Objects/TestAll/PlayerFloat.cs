@@ -15,7 +15,7 @@ namespace KWEngine2Test.Objects.TestAll
     {
         private float _speed = 0.1f;
 
-        public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState ks, MouseState ms)
         {
             // Basic controls:
             if (CurrentWorld.IsFirstPersonMode && CurrentWorld.GetFirstPersonObject().Equals(this))
@@ -41,15 +41,17 @@ namespace KWEngine2Test.Objects.TestAll
 
                 if (ks[Key.Q])
                 {
-                    MoveOffset(0, -_speed * deltaTimeFactor, 0);
+                    MoveOffset(0, -_speed * KWEngine.DeltaTimeFactor, 0);
                 }
                 if (ks[Key.E])
                 {
-                    MoveOffset(0, _speed * deltaTimeFactor, 0);
+                    MoveOffset(0, _speed * KWEngine.DeltaTimeFactor, 0);
                 }
 
-                MoveAndStrafeFirstPersonXYZ(forward, strafe, _speed * deltaTimeFactor);
+                MoveAndStrafeFirstPersonXYZ(forward, strafe, _speed * KWEngine.DeltaTimeFactor);
                 MoveFPSCamera(ms);
+
+                //Console.WriteLine(Position);
             }
         }
     }

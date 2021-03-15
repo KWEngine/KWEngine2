@@ -12,7 +12,7 @@ namespace KWEngine2Test.Worlds
         private HUDObject _button3 = null;
         private HUDObject _button4 = null;
 
-        public override void Act(KeyboardState kb, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState kb, MouseState ms)
         {
             if (kb[Key.Escape] && GetCurrentTimeInMilliseconds() > 500)
                 CurrentWindow.Close();

@@ -1,4 +1,5 @@
-﻿using KWEngine2.GameObjects;
+﻿using KWEngine2;
+using KWEngine2.GameObjects;
 using KWEngine2.Helper;
 using OpenTK.Input;
 using System;
@@ -13,17 +14,17 @@ namespace KWEngine2Test.Objects.TestAll
     {
         private float r = 1;
 
-        public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState ks, MouseState ms)
         {
             if (ks[Key.Left] && r > 0)
             {
-                r = r - 0.01f * deltaTimeFactor;
+                r = r - 0.01f * KWEngine.DeltaTimeFactor;
                 SetRoughness(r);
                 Console.WriteLine("Roughness: " + r);
             }
             else if (ks[Key.Right] && r < 1)
             {
-                r = r + 0.01f * deltaTimeFactor;
+                r = r + 0.01f * KWEngine.DeltaTimeFactor;
                 SetRoughness(r);
                 Console.WriteLine("Roughness: " + r);
             }

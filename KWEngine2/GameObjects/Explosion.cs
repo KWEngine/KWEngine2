@@ -300,9 +300,12 @@ namespace KWEngine2.GameObjects
         public Explosion(Vector3 position, int particleCount, float particleSize, float radius, float durationInSeconds, ExplosionType type, Vector4 glow, string texture = null)
         {
             _currentWorld = GLWindow.CurrentWindow.CurrentWorld;
-            
+
             if (_currentWorld == null)
-                throw new Exception("World is null. Cannot create Explosion in an empty world.");
+            {
+                HelperGL.ShowErrorAndQuit("Explosion::Explosion()", "World is null. Cannot create Explosion in an empty world.");
+                return;
+            }
 
             
             if (type == ExplosionType.Cube || type == ExplosionType.CubeRingY || type == ExplosionType.CubeRingZ)

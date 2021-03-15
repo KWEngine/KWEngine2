@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace KWEngine2.Helper
 {
-    internal class Sector
+    internal struct Sector
     {
         public float Left { get; private set; }
         public float Right { get; private set; }

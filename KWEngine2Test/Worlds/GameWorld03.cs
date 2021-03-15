@@ -15,7 +15,7 @@ namespace KWEngine2Test.Worlds
         private Player _p;
         private bool _test = false;
 
-        public override void Act(KeyboardState kb, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState kb, MouseState ms)
         {
             if (kb[Key.Escape])
             {
@@ -46,13 +46,13 @@ namespace KWEngine2Test.Worlds
      
         public override void Prepare()
         {
-            SunAmbientFactor = 0.9f;
+            
             KWEngine.LoadModelFromFile("Spaceship4", @".\Models\Spaceship\spaceship4.obj");
             KWEngine.LoadModelFromFile("Spaceship5", @".\Models\Spaceship\spaceship5.obj");
             KWEngine.LoadModelFromFile("Spaceship2", @".\Models\Spaceship\spaceship2.obj");
             KWEngine.LoadModelFromFile("Spaceship6", @".\Models\Spaceship\spaceship6.obj");
 
-            SoundPlay(@".\audio\dom.ogg", true, 0.4f);
+            //SoundPlay(@".\audio\dom.ogg", true, 0.4f);
 
             if (!_test)
             {
@@ -134,6 +134,7 @@ namespace KWEngine2Test.Worlds
 
             FOV = 90;
             SetTextureBackground(@".\textures\spacebackground.jpg", 2, 2);
+            SetAmbientLight(1, 1, 1, 1);
             KWEngine.DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
         }
 

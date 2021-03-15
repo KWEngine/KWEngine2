@@ -1,4 +1,5 @@
-﻿using KWEngine2.Helper;
+﻿using KWEngine2;
+using KWEngine2.Helper;
 using OpenTK;
 using OpenTK.Input;
 using System;
@@ -19,14 +20,14 @@ namespace KWEngine2Test.Objects.SpaceInvaders
             _timestampLastShot = _spawnTime + HelperRandom.GetRandomNumber(0, 1000);
         }
 
-        public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState ks, MouseState ms)
         {
 
             long now = GetCurrentTimeInMilliseconds();
 
             float z = (float)Math.Sin(_spawnTime + now / 75.0);
             //float y = -0.001f * (now * now * now) + 0.1f * (now * now);
-            MoveOffset(z * deltaTimeFactor * _movementSpeed, -_movementSpeed * deltaTimeFactor, 0);
+            MoveOffset(z * KWEngine.DeltaTimeFactor * _movementSpeed, -_movementSpeed * KWEngine.DeltaTimeFactor, 0);
 
             if(now - _timestampLastShot > 200)
             {
@@ -59,7 +60,7 @@ namespace KWEngine2Test.Objects.SpaceInvaders
             if (!IsInsideScreenSpace)
                 CurrentWorld.RemoveGameObject(this);
 
-            base.Act(ks, ms, deltaTimeFactor);
+            base.Act(ks, ms);
         }
     }
 }

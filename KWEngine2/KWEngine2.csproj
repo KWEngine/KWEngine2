@@ -139,9 +139,6 @@
     <Compile Include="Model\GeoMesh.cs" />
     <Compile Include="Model\GeoMeshHitbox.cs" />
     <Compile Include="Model\GeoModel.cs" />
-    <Compile Include="Model\GeoModelCube.cs" />
-    <Compile Include="Model\GeoModelCube1.cs" />
-    <Compile Include="Model\GeoModelCube6.cs" />
     <Compile Include="Model\GeoNode.cs" />
     <Compile Include="Model\GeoNodeAnimationChannel.cs" />
     <Compile Include="Model\GeoTerrain.cs" />
@@ -155,6 +152,7 @@
     <Compile Include="Renderers\RendererMerge.cs" />
     <Compile Include="Renderers\RendererHUD.cs" />
     <Compile Include="Renderers\RendererParticle.cs" />
+    <Compile Include="Renderers\RendererShadowCubeMap.cs" />
     <Compile Include="Renderers\RendererSkybox.cs" />
     <Compile Include="Renderers\RendererBloom.cs" />
     <Compile Include="Renderers\RendererBackground.cs" />
@@ -163,7 +161,6 @@
     <Compile Include="Renderers\RendererSimple.cs" />
     <Compile Include="Renderers\RendererStandard.cs" />
     <Compile Include="Renderers\RendererTerrain.cs" />
-    <Compile Include="Renderers\RendererOld.cs" />
     <Compile Include="World.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -228,6 +225,9 @@
     <EmbeddedResource Include="Shaders\shader_vertex_test.glsl" />
     <EmbeddedResource Include="Shaders\shader_fragment_terrain_pbr.glsl" />
     <EmbeddedResource Include="Shaders\shader_vertex_terrain_pbr.glsl" />
+    <EmbeddedResource Include="Shaders\shader_fragment_shadow_cube.glsl" />
+    <EmbeddedResource Include="Shaders\shader_vertex_shadow_cube.glsl" />
+    <EmbeddedResource Include="Shaders\shader_geometry_shadow_cube.glsl" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

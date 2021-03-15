@@ -1,4 +1,5 @@
-﻿using KWEngine2.GameObjects;
+﻿using KWEngine2;
+using KWEngine2.GameObjects;
 using OpenTK;
 using OpenTK.Input;
 using System;
@@ -14,10 +15,10 @@ namespace KWEngine2Test.Objects.Main
         private Vector4 _glow = new Vector4(1, 0, 0, 0);
         private float _intensity = 0;
         private bool _gain = true;
-        public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState ks, MouseState ms)
         {
             
-            _intensity = _gain ? _intensity + 0.02f * deltaTimeFactor : _intensity - 0.02f * deltaTimeFactor;
+            _intensity = _gain ? _intensity + 0.02f * KWEngine.DeltaTimeFactor : _intensity - 0.02f * KWEngine.DeltaTimeFactor;
             if(_intensity > 1f)
             {
                 _gain = false;

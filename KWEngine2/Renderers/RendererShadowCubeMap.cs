@@ -5,6 +5,7 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -13,21 +14,31 @@ using System.Threading.Tasks;
 
 namespace KWEngine2.Renderers
 {
-    internal class RendererShadow : Renderer
+    internal class RendererShadowCubeMap : Renderer
     {
         private Matrix4 _identityMatrix = Matrix4.Identity;
+
+        private int mUniform_LightPosition = -1;
+        private int mUniform_FarPlane = -1;
+
         public override void Initialize()
         {
-            Name = "Shadow";
+            Name = "ShadowCubeMap";
 
             mProgramId = GL.CreateProgram();
 
-            string resourceNameFragmentShader = "KWEngine2.Shaders.shader_fragment_shadow.glsl";
-            string resourceNameVertexShader = "KWEngine2.Shaders.shader_vertex_shadow.glsl";
+            string resourceNameFragmentShader = "KWEngine2.Shaders.shader_fragment_shadow_cube.glsl";
+            string resourceNameGeometryShader = "KWEngine2.Shaders.shader_geometry_shadow_cube.glsl";
+            string resourceNameVertexShader = "KWEngine2.Shaders.shader_vertex_shadow_cube.glsl";
             Assembly assembly = Assembly.GetExecutingAssembly();
             using (Stream s = assembly.GetManifestResourceStream(resourceNameVertexShader))
             {
                 mShaderVertexId = LoadShader(s, ShaderType.VertexShader, mProgramId);
+            }
+
+            using (Stream s = assembly.GetManifestResourceStream(resourceNameGeometryShader))
+            {
+                mShaderGeometryId = LoadShader(s, ShaderType.GeometryShader, mProgramId);
             }
 
             using (Stream s = assembly.GetManifestResourceStream(resourceNameFragmentShader))
@@ -35,7 +46,7 @@ namespace KWEngine2.Renderers
                 mShaderFragmentId = LoadShader(s, ShaderType.FragmentShader, mProgramId);
             }
 
-            if (mShaderFragmentId >= 0 && mShaderVertexId >= 0)
+            if (mShaderFragmentId >= 0 && mShaderVertexId >= 0 && mShaderGeometryId >= 0)
             {
                 GL.BindAttribLocation(mProgramId, 0, "aPosition");
                 GL.BindAttribLocation(mProgramId, 6, "aBoneIds");
@@ -51,29 +62,59 @@ namespace KWEngine2.Renderers
             mAttribute_vjoints = GL.GetAttribLocation(mProgramId, "aBoneIds");
             mAttribute_vweights = GL.GetAttribLocation(mProgramId, "aBoneWeights");
 
-            mUniform_MVP = GL.GetUniformLocation(mProgramId, "uMVP");
+            mUniform_ModelMatrix = GL.GetUniformLocation(mProgramId, "uModelMatrix");
+            mUniform_ViewProjectionMatrices = GL.GetUniformLocation(mProgramId, "uShadowMatrices");
             mUniform_UseAnimations = GL.GetUniformLocation(mProgramId, "uUseAnimations");
             mUniform_BoneTransforms = GL.GetUniformLocation(mProgramId, "uBoneTransforms");
+            mUniform_LightPosition = GL.GetUniformLocation(mProgramId, "uLightPosition");
+            mUniform_FarPlane = GL.GetUniformLocation(mProgramId, "uFarPlane");
+            
         }
 
-        internal void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum)
+        internal void Draw(GameObject g, Vector3 lightPosition, float distanceMultiplier, float farPlane, ref Matrix4[] viewProjection)
         {
             if (g == null || !g.HasModel)
                 return;
-            bool isInsideFrustum = frustum.SphereVsFrustum(g.GetCenterPointForAllHitboxes(), g.GetMaxDiameter() / 2);
+
+            if((g.GetCenterPointForAllHitboxes() - lightPosition).LengthFast > farPlane)
+            {
+                //Debug.WriteLine("ignoring object for point light shadow map");
+                return;
+            }
             
             lock (g)
             {
                 int index = -1;
+                for (int i = 0; i < 6; i++)
+                {
+                    GL.UniformMatrix4(mUniform_ViewProjectionMatrices + i, false, ref viewProjection[i]);
+                }
                 foreach (string meshName in g.Model.Meshes.Keys)
                 {
                     index++;
+                    if(g.Model.IsKWCube6)
+                    {
+                        index = 0;
+                    }
                     GeoMesh mesh = g.Model.Meshes[meshName];
                     bool useMeshTransform = mesh.BoneNames.Count == 0 || !(g.AnimationID >= 0 && g.Model.Animations != null && g.Model.Animations.Count > 0);
-                    if (mesh.Material.Opacity <= 0 || !isInsideFrustum)
+                    
+
+                    if (useMeshTransform)
+                    {
+                        Matrix4.Mult(ref mesh.Transform, ref g._modelMatrix, out g.ModelMatrixForRenderPass[index]);
+                    }
+                    else
+                    {
+                        g.ModelMatrixForRenderPass[index] = g._modelMatrix;
+                    }
+
+                    if (mesh.Material.Opacity <= 0)
                     {
                         continue;
                     }
+
+                    
 
                     if (g.IsShadowCaster && g.Opacity > 0f)
                     {
@@ -90,9 +131,10 @@ namespace KWEngine2.Renderers
                         {
                             GL.Uniform1(mUniform_UseAnimations, 0);
                         }
+                        GL.Uniform3(mUniform_LightPosition, ref lightPosition);
+                        GL.Uniform1(mUniform_FarPlane, farPlane);
+                        GL.UniformMatrix4(mUniform_ModelMatrix, false, ref g.ModelMatrixForRenderPass[index]);
 
-                        Matrix4.Mult(ref g.ModelMatrixForRenderPass[g.Model.IsKWCube6 ? 0 : index], ref viewProjection, out _modelViewProjection);
-                        GL.UniformMatrix4(mUniform_MVP, false, ref _modelViewProjection);
                         GL.BindVertexArray(mesh.VAO);
                         GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
                         GL.DrawElements(mesh.Primitive, mesh.IndexCount, DrawElementsType.UnsignedInt, 0);

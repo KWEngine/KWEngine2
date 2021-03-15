@@ -17,7 +17,6 @@
     <Members>
       <Field Name="_bloomRadius" Hidden="true" />
       <Field Name="_broadPhaseToleranceWidth" Hidden="true" />
-      <Field Name="_shadowmapbiascoefficient" Hidden="true" />
       <Field Name="_shadowMapSize" Hidden="true" />
       <Field Name="_worldUp" Hidden="true" />
       <Field Name="Collection" Hidden="true" />
@@ -49,15 +48,27 @@
       <Field Name="KWRect" Hidden="true" />
       <Field Name="KWSkull" Hidden="true" />
       <Field Name="KWStar" Hidden="true" />
+      <Field Name="Matrix4Dummy" Hidden="true" />
       <Property Name="Models" Hidden="true" />
       <Field Name="ParticleDictionary" Hidden="true" />
-      <Property Name="Renderers" Hidden="true" />
+      <Field Name="RendererBackground" Hidden="true" />
+      <Field Name="RendererBloom" Hidden="true" />
+      <Field Name="RendererExplosion" Hidden="true" />
+      <Field Name="RendererHUD" Hidden="true" />
+      <Field Name="RendererMerge" Hidden="true" />
+      <Field Name="RendererParticle" Hidden="true" />
+      <Field Name="RendererShadow" Hidden="true" />
+      <Field Name="RendererShadowCubeMap" Hidden="true" />
       <Field Name="RendererSimple" Hidden="true" />
+      <Field Name="RendererSkybox" Hidden="true" />
+      <Field Name="RendererStandard" Hidden="true" />
+      <Field Name="RendererTerrain" Hidden="true" />
       <Property Name="SweepAndPruneToleranceWidth" Hidden="true" />
       <Field Name="TextureAlpha" Hidden="true" />
       <Field Name="TextureBlack" Hidden="true" />
       <Field Name="TextureCubemapEmpty" Hidden="true" />
       <Field Name="TextureDefault" Hidden="true" />
+      <Field Name="TextureDepthCubeMapEmpty" Hidden="true" />
       <Field Name="TextureDepthEmpty" Hidden="true" />
       <Field Name="TextureWhite" Hidden="true" />
       <Field Name="TimeElapsed" Hidden="true" />
@@ -66,7 +77,7 @@
       <Compartment Name="Nested Types" Collapsed="false" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>ARMIZBjFAKGAYKAQoCDAARCAUCAEABASKcjYSlUAmAA=</HashCode>
+      <HashCode>ARNpZBzBAKGA4KAQoGDAARGAUCAEgBASKchcSlUimAA=</HashCode>
       <FileName>KWEngine.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -78,6 +89,8 @@
       <Field Name="_bloomQuad" Hidden="true" />
       <Field Name="_bloomwidth" Hidden="true" />
       <Field Name="_dummy" Hidden="true" />
+      <Field Name="_freeShadowMapCubeMapIds" Hidden="true" />
+      <Field Name="_freeShadowMapIds" Hidden="true" />
       <Field Name="_fsaa" Hidden="true" />
       <Field Name="_modelViewProjectionMatrixBackground" Hidden="true" />
       <Field Name="_modelViewProjectionMatrixBloom" Hidden="true" />
@@ -86,38 +99,47 @@
       <Field Name="_mousePointFPS" Hidden="true" />
       <Field Name="_multithreaded" Hidden="true" />
       <Field Name="_projectionMatrix" Hidden="true" />
-      <Field Name="_projectionMatrixShadow" Hidden="true" />
       <Field Name="_viewMatrix" Hidden="true" />
       <Field Name="_viewProjectionMatrixHUD" Hidden="true" />
       <Field Name="_vSync" Hidden="true" />
       <Field Name="_windowRect" Hidden="true" />
+      <Method Name="AddIdForShadowMap" Hidden="true" />
       <Method Name="ApplyBloom" Hidden="true" />
       <Method Name="BasicInit" Hidden="true" />
       <Field Name="bloomHeight" Hidden="true" />
       <Field Name="bloomWidth" Hidden="true" />
       <Method Name="CalculateProjectionMatrix" Hidden="true" />
       <Method Name="DownsampleFramebuffer" Hidden="true" />
+      <Method Name="ForceClose" Hidden="true" />
       <Field Name="FramebufferBloom1" Hidden="true" />
       <Field Name="FramebufferBloom2" Hidden="true" />
       <Field Name="FramebufferMainFinal" Hidden="true" />
       <Field Name="FramebufferMainMultisample" Hidden="true" />
-      <Field Name="FramebufferShadowMap" Hidden="true" />
-      <Field Name="FramebufferShadowMap2" Hidden="true" />
+      <Field Name="FramebuffersShadow" Hidden="true" />
+      <Field Name="FramebuffersShadowCubeMap" Hidden="true" />
+      <Field Name="FramebuffersShadowTextures" Hidden="true" />
+      <Field Name="FramebuffersShadowTexturesCubeMap" Hidden="true" />
       <Field Name="frameCounter" Hidden="true" />
       <Field Name="frameData" Hidden="true" />
       <Field Name="Frustum" Hidden="true" />
-      <Field Name="FrustumShadowMap" Hidden="true" />
+      <Method Name="GetFramebuffersShadowMap" Hidden="true" />
+      <Method Name="GetFramebuffersShadowMapCubeMap" Hidden="true" />
+      <Method Name="GetFreeIdForShadowMap" Hidden="true" />
       <Method Name="InitFramebufferBloom" Hidden="true" />
       <Method Name="InitFramebufferOriginal" Hidden="true" />
       <Method Name="InitFramebufferOriginalDownsampled" Hidden="true" />
-      <Method Name="InitFramebufferShadowMap" Hidden="true" />
-      <Method Name="InitFramebufferShadowMap2" Hidden="true" />
+      <Method Name="InitFramebuffersShadowMap" Hidden="true" />
+      <Method Name="InitFramebuffersShadowMapCubeMap" Hidden="true" />
       <Method Name="InitializeFramebuffers" Hidden="true" />
+      <Method Name="InitializeFramebuffersLights" Hidden="true" />
+      <Method Name="InitializeFramebuffersLightsList" Hidden="true" />
       <Field Name="LightColors" Hidden="true" />
+      <Field Name="LightMeta" Hidden="true" />
       <Field Name="LightPositions" Hidden="true" />
       <Field Name="LightTargets" Hidden="true" />
       <Field Name="mInstancesLast" Hidden="true" />
       <Field Name="mInstancesRenderLast" Hidden="true" />
+      <Field Name="mInstancesTerrain" Hidden="true" />
       <Method Name="SetWorldInternal" Hidden="true" />
       <Method Name="StartGarbageCollection" Hidden="true" />
       <Method Name="SwitchToBufferAndClear" Hidden="true" />
@@ -128,27 +150,26 @@
       <Field Name="TextureMain" Hidden="true" />
       <Field Name="TextureMainDepth" Hidden="true" />
       <Field Name="TextureMainFinal" Hidden="true" />
-      <Field Name="TextureShadowMap" Hidden="true" />
-      <Field Name="TextureShadowMap2" Hidden="true" />
       <Method Name="UpdateWindowRect" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>ECaBQQSBgiAgkYQASAiCERAiiAxKYWDACUBpERABlwo=</HashCode>
+      <HashCode>ECSBQQSAgCAgk4QQSACAFRAiyAxCYODQiUBpEREBtw4=</HashCode>
       <FileName>GLWindow.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="KWEngine2.World">
     <Position X="8.5" Y="3" Width="2.75" />
     <Members>
+      <Field Name="_ambientLight" Hidden="true" />
       <Field Name="_cameraLookAt" Hidden="true" />
       <Field Name="_cameraPosition" Hidden="true" />
       <Field Name="_cameraTarget" Hidden="true" />
+      <Field Name="_debugShadowLight" Hidden="true" />
       <Field Name="_explosionObjects" Hidden="true" />
       <Field Name="_explosionObjectsTBA" Hidden="true" />
       <Field Name="_explosionObjectsTBR" Hidden="true" />
       <Field Name="_firstPersonObject" Hidden="true" />
       <Field Name="_fov" Hidden="true" />
-      <Field Name="_fovShadow" Hidden="true" />
       <Field Name="_gameObjects" Hidden="true" />
       <Field Name="_gameObjectsTBA" Hidden="true" />
       <Field Name="_gameObjectsTBR" Hidden="true" />
@@ -164,11 +185,6 @@
       <Field Name="_particleObjectsTBR" Hidden="true" />
       <Field Name="_prepared" Hidden="true" />
       <Field Name="_skyboxRotation" Hidden="true" />
-      <Field Name="_sunAmbient" Hidden="true" />
-      <Field Name="_sunColor" Hidden="true" />
-      <Field Name="_sunDirectionInverted" Hidden="true" />
-      <Field Name="_sunPosition" Hidden="true" />
-      <Field Name="_sunTarget" Hidden="true" />
       <Field Name="_sweepTestAxisIndex" Hidden="true" />
       <Field Name="_textureBackground" Hidden="true" />
       <Field Name="_textureBackgroundClip" Hidden="true" />
@@ -191,7 +207,7 @@
       <Method Name="UpdateCameraLookAtVector" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>BIDgWFqCIDiBSgJIAWWSAAhDaA4XqzI0KRLPElDubsY=</HashCode>
+      <HashCode>BoDiGFqCIDiRSgJAAUGSAAhB6A4XizI0KRLNElBOSsQ=</HashCode>
       <FileName>World.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -259,7 +275,7 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="KWEngine2.GameObjects.Explosion">
-    <Position X="8.5" Y="15.75" Width="2.75" />
+    <Position X="8.5" Y="14.25" Width="2.75" />
     <Members>
       <Field Name="_algorithm" Hidden="true" />
       <Field Name="_amount" Hidden="true" />
@@ -315,27 +331,36 @@
     </TypeIdentifier>
   </Class>
   <Class Name="KWEngine2.GameObjects.LightObject">
-    <Position X="2.5" Y="8" Width="2.75" />
+    <Position X="2.5" Y="8.25" Width="2.75" />
     <Members>
-      <Field Name="_frustumShadowMap2" Hidden="true" />
+      <Field Name="_distanceMultiplier" Hidden="true" />
+      <Field Name="_framebufferIndex" Hidden="true" />
+      <Field Name="_frustumMultiplier" Hidden="true" />
+      <Field Name="_frustumShadowMap" Hidden="true" />
+      <Field Name="_isShadowCaster" Hidden="true" />
       <Field Name="_position" Hidden="true" />
-      <Field Name="_projectionMatrixShadow2" Hidden="true" />
-      <Field Name="_shadowViewMatrix" Hidden="true" />
+      <Field Name="_projectionMatrixShadow" Hidden="true" />
       <Field Name="_target" Hidden="true" />
       <Field Name="_type" Hidden="true" />
-      <Field Name="_viewProjectionMatrixShadow2" Hidden="true" />
+      <Field Name="_viewMatrixShadow" Hidden="true" />
+      <Field Name="_viewProjectionMatrixShadow" Hidden="true" />
+      <Method Name="ApplyFramebuffer" Hidden="true" />
       <Property Name="Color" Hidden="true" />
-      <Property Name="FOVShadow2" Hidden="true" />
+      <Property Name="FOVShadow" Hidden="true" />
+      <Method Name="GetDistanceMultiplier" Hidden="true" />
+      <Method Name="GetFrustumMultiplier" Hidden="true" />
+      <Property Name="IsShadowCaster" Hidden="true" />
       <Method Name="PrepareLightsForRenderPass" Hidden="true" />
-      <Method Name="SetFOVShadowPrivate" Hidden="true" />
+      <Method Name="RemoveFramebuffer" Hidden="true" />
       <Field Name="ShadowMapBiasCoefficient" Hidden="true" />
       <Method Name="UpdateMatrices" Hidden="true" />
       <Property Name="World" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>CAAAAAABAhCAAAQgAAAAESSgUAAACgAACRgQgAAABkI=</HashCode>
+      <HashCode>CAAAAAAAAjAgUAYoIAAAASSgQAQAAhAAARkAgQAAJAM=</HashCode>
       <FileName>GameObjects\LightObject.cs</FileName>
     </TypeIdentifier>
+    <Lollipop Position="0.2" />
   </Class>
   <Class Name="KWEngine2.GameObjects.ParticleObject">
     <Position X="5.5" Y="10.25" Width="2.75" />

@@ -8,6 +8,7 @@ using OpenTK;
 using OpenTK.Input;
 using KWEngine2Test.Objects.Arena;
 using KWEngine2.Helper;
+using KWEngine2.GameObjects;
 
 namespace KWEngine2Test.Worlds
 {
@@ -15,7 +16,7 @@ namespace KWEngine2Test.Worlds
     {
         private Player _player = new Player();
 
-        public override void Act(KeyboardState kb, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState kb, MouseState ms)
         {
             if (kb[Key.Escape])
             {
@@ -27,10 +28,7 @@ namespace KWEngine2Test.Worlds
         public override void Prepare()
         {
             FOV = 90;
-            SetSunPosition(200, 200, 50);
-            SetSunColor(1, 0.75f, 0.5f, 0.7f);
-            SetSunAmbientFactor(0.2f);
-            KWEngine.ShadowMapCoefficient = 0.00075f;
+            
            
             
             KWEngine.LoadModelFromFile("ArenaOuter", @".\Models\ArenaOuter\ArenaOuter.fbx");
@@ -91,6 +89,12 @@ namespace KWEngine2Test.Worlds
             SetTextureSkybox(@".\textures\skybox1.jpg");
             DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
 
+            LightObject sun = new LightObject(LightType.Sun, true);
+            sun.SetPosition(200, 200, 50);
+            sun.SetColor(1, 0.75f, 0.5f, 0.7f);
+            AddLightObject(sun);
+            SetAmbientLight(1, 0.75f, 0.5f, 0.3f);
+            SetTextureBackgroundBrightnessMultiplier(3);
         }
     }
 }

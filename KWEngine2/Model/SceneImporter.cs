@@ -60,7 +60,8 @@ namespace KWEngine2.Model
                 {
                     if (type == FileType.Invalid)
                     {
-                        throw new Exception("Model file has invalid type.");
+                        HelperGL.ShowErrorAndQuit("SceneImporter::LoadModel()", "Invalid model type.");
+                        return null;
                     }
                     string resourceName;
                     Assembly assembly;
@@ -118,11 +119,15 @@ namespace KWEngine2.Model
                     }
                     else
                     {
-                        throw new Exception("Could not load model: only OBJ, DAE, FBX and X are supported (GLTF support coming soon).");
+                        HelperGL.ShowErrorAndQuit("SceneImporter::LoadModel()", "Invalid model type.");
+                        return null;
                     }
                 }
                 if (scene == null)
-                    throw new Exception("Could not load or find model: " + filename);
+                {
+                    HelperGL.ShowErrorAndQuit("SceneImporter::LoadModel()", "Could not load or find model: " + filename);
+                    return null;
+                }
 
                 GeoModel model = ProcessScene(scene, am == AssemblyMode.File ? filename.ToLower().Trim() : filename, am);
                 return model;
@@ -297,7 +302,8 @@ namespace KWEngine2.Model
             }
             if(model.BoneNames.Count > KWEngine.MAX_BONES)
             {
-                throw new Exception("Model has more than " + KWEngine.MAX_BONES + " bones. Cannot import model.");
+                HelperGL.ShowErrorAndQuit("SceneImporter::LoadModel()", "Model has more than " + KWEngine.MAX_BONES + " bones. Cannot import model.");
+                return;
             }
         }
 
@@ -839,7 +845,8 @@ namespace KWEngine2.Model
 
                 if (mesh.PrimitiveType != PrimitiveType.Triangle)
                 {
-                    throw new Exception("Model's primitive type is not set to 'triangles'. Cannot import model.");
+                    HelperGL.ShowErrorAndQuit("SceneImporter::LoadModel()", "Model's primitive type is not set to 'triangles'. Cannot import model.");
+                    return;
                 }
                 
                 if (isNewMesh)
@@ -919,10 +926,10 @@ namespace KWEngine2.Model
                             int weightIndexToBeSet = geoMesh.Vertices[vw.VertexID].WeightSet;
                             if (weightIndexToBeSet >= KWEngine.MAX_BONE_WEIGHTS)
                             {
-                                throw new Exception("Model's bones have more than three weights per vertex. Cannot import model.");
+                                HelperGL.ShowErrorAndQuit("SceneImporter::LoadModel()", "Model's bones have more than three weights per vertex. Cannot import model.");
+                                return;
                             }
 
-                            //Debug.WriteLine("Setting Vertex " + vw.VertexID + " with BoneID " + i + " and Weight: " + vw.Weight + " to Slot #" + weightIndexToBeSet);
                             geoMesh.Vertices[vw.VertexID].Weights[weightIndexToBeSet] = vw.Weight;
                             geoMesh.Vertices[vw.VertexID].BoneIDs[weightIndexToBeSet] = (uint)i;
                             geoMesh.Vertices[vw.VertexID].WeightSet++;

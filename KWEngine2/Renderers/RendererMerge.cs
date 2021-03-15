@@ -48,15 +48,11 @@ namespace KWEngine2.Renderers
             using (Stream s = assembly.GetManifestResourceStream(resourceNameVertexShader))
             {
                 mShaderVertexId = LoadShader(s, ShaderType.VertexShader, mProgramId);
-                //Console.WriteLine(GL.GetShaderInfoLog(mShaderVertexId));
             }
             using (Stream s = assembly.GetManifestResourceStream(resourceNameFragmentShader))
             {
                 mShaderFragmentId = LoadShader(s, ShaderType.FragmentShader, mProgramId);
-                //Console.WriteLine(GL.GetShaderInfoLog(mShaderFragmentId));
             }
-
-
 
             if (mShaderFragmentId >= 0 && mShaderVertexId >= 0)
             {
@@ -78,36 +74,6 @@ namespace KWEngine2.Renderers
             mUniform_MVP = GL.GetUniformLocation(mProgramId, "uMVP");
             mUniform_TextureScene = GL.GetUniformLocation(mProgramId, "uTextureScene");
             mUniform_TextureBloom = GL.GetUniformLocation(mProgramId, "uTextureBloom");
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(ParticleObject po, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(HUDObject ho, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, ref Matrix4 viewProjectionShadow, ref Matrix4 viewProjectionShadow2, HelperFrustum frustum, ref float[] lightColors, ref float[] lightTargets, ref float[] lightPositions, int lightCount, ref int lightShadow)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum, bool isSun)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -120,7 +120,9 @@ namespace KWEngine2.GameObjects
             if (_type == ParticleType.LoopSmoke1 || _type == ParticleType.LoopSmoke2 || _type == ParticleType.LoopSmoke3)
                 _durationInMS = durationInSeconds > 0 ? (int)(durationInSeconds * 1000) : 5000;
             else
-                throw new Exception("Duration may only be set for loop particles.");
+            {
+                HelperGL.ShowErrorAndQuit("ParticleObject::SetDuration()", "Duration may only be set for loop particles.");
+            }
         }
 
         /// <summary>

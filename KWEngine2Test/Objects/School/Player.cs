@@ -28,7 +28,7 @@ namespace KWEngine2Test.Objects.School
         private float _momentum = 0;
         private float _gravity = 0.02f;
 
-        public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState ks, MouseState ms)
         {
             if (!CurrentWindow.Focused)
                 return;
@@ -55,7 +55,7 @@ namespace KWEngine2Test.Objects.School
                     forward -= 1;
                 }
 
-                MoveAndStrafeFirstPerson(forward, strafe, _movementSpeed * deltaTimeFactor);
+                MoveAndStrafeFirstPerson(forward, strafe, _movementSpeed * KWEngine.DeltaTimeFactor);
             }
 
             if (_state == PlayerState.OnFloor && ms.RightButton == ButtonState.Pressed && !_jumpButtonPressed)

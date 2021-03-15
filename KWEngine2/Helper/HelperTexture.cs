@@ -11,6 +11,69 @@ namespace KWEngine2.Helper
 {
     internal static class HelperTexture
     {
+        internal static void SaveDepthMapToBitmap(int texId)
+        {
+            Bitmap b = new Bitmap(KWEngine.ShadowMapSize, KWEngine.ShadowMapSize, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+            //BitmapData bmd = b.LockBits(new Rectangle(0, 0, KWEngine.ShadowMapSize, KWEngine.ShadowMapSize), ImageLockMode.WriteOnly, b.PixelFormat);
+
+            float[] depthData = new float[KWEngine.ShadowMapSize * KWEngine.ShadowMapSize];
+            HelperGL.CheckGLErrors();
+            GL.BindTexture(TextureTarget.Texture2D, texId);
+            GL.GetTexImage(TextureTarget.Texture2D, 0, OpenTK.Graphics.OpenGL4.PixelFormat.DepthComponent, PixelType.Float, depthData);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            HelperGL.CheckGLErrors();
+
+            HelperGL.ScaleToRange(0, 255, depthData);
+            int x = 0, y = KWEngine.ShadowMapSize - 1;
+            for(int i = 0; i < depthData.Length; i++)
+            {
+                int rgb = (int)(depthData[i]);
+                b.SetPixel(x, y, Color.FromArgb(rgb, rgb, rgb));
+                int prevX = x;
+                x = (x + 1) % KWEngine.ShadowMapSize;
+                if(prevX > 0 && x == 0)
+                {
+                    y--;
+                }
+            }
+
+            
+            //b.UnlockBits(bmd);
+            b.Save("texture2d_depth.bmp", ImageFormat.Bmp);
+            b.Dispose();
+        }
+
+        internal static void SaveDepthCubeMapToBitmap(TextureTarget target, int texId)
+        {
+            Bitmap b = new Bitmap(KWEngine.ShadowMapSize, KWEngine.ShadowMapSize, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+            //BitmapData bmd = b.LockBits(new Rectangle(0, 0, KWEngine.ShadowMapSize, KWEngine.ShadowMapSize), ImageLockMode.WriteOnly, b.PixelFormat);
+
+            float[] depthData = new float[KWEngine.ShadowMapSize * KWEngine.ShadowMapSize];
+            HelperGL.CheckGLErrors();
+            GL.BindTexture(TextureTarget.TextureCubeMap, texId);
+            GL.GetTexImage(target, 0, OpenTK.Graphics.OpenGL4.PixelFormat.DepthComponent, PixelType.Float, depthData);
+            GL.BindTexture(TextureTarget.TextureCubeMap, 0);
+            HelperGL.CheckGLErrors();
+
+            HelperGL.ScaleToRange(0, 255, depthData);
+            int x = 0, y = KWEngine.ShadowMapSize - 1;
+            for (int i = 0; i < depthData.Length; i++)
+            {
+                int rgb = (int)(depthData[i]);
+                b.SetPixel(x, y, Color.FromArgb(rgb, rgb, rgb));
+                int prevX = x;
+                x = (x + 1) % KWEngine.ShadowMapSize;
+                if (prevX > 0 && x == 0)
+                {
+                    y--;
+                }
+            }
+            b.Save("cube_" + target.ToString() + ".bmp", ImageFormat.Bmp);
+            b.Dispose();
+        }
+
         public static int CreateEmptyCubemapTexture()
         {
             int texID = GL.GenTexture();
@@ -24,8 +87,32 @@ namespace KWEngine2.Helper
             GL.TexImage2D(TextureTarget.TextureCubeMapPositiveZ, 0, PixelInternalFormat.Rgb, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgr, PixelType.UnsignedByte, pxColor);
             GL.TexImage2D(TextureTarget.TextureCubeMapNegativeZ, 0, PixelInternalFormat.Rgb, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgr, PixelType.UnsignedByte, pxColor);
 
-            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+
+            GL.BindTexture(TextureTarget.TextureCubeMap, 0);
+
+            return texID;
+        }
+
+        public static int CreateEmptyCubemapDepthTexture()
+        {
+            int texID = GL.GenTexture();
+            GL.BindTexture(TextureTarget.TextureCubeMap, texID);
+            float[] pxColor = new float[] { 1 };
+
+            GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX, 0, PixelInternalFormat.DepthComponent32, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.DepthComponent, PixelType.Float, pxColor);
+            GL.TexImage2D(TextureTarget.TextureCubeMapNegativeX, 0, PixelInternalFormat.DepthComponent32, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.DepthComponent, PixelType.Float, pxColor);
+            GL.TexImage2D(TextureTarget.TextureCubeMapPositiveY, 0, PixelInternalFormat.DepthComponent32, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.DepthComponent, PixelType.Float, pxColor);
+            GL.TexImage2D(TextureTarget.TextureCubeMapNegativeY, 0, PixelInternalFormat.DepthComponent32, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.DepthComponent, PixelType.Float, pxColor);
+            GL.TexImage2D(TextureTarget.TextureCubeMapPositiveZ, 0, PixelInternalFormat.DepthComponent32, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.DepthComponent, PixelType.Float, pxColor);
+            GL.TexImage2D(TextureTarget.TextureCubeMapNegativeZ, 0, PixelInternalFormat.DepthComponent32, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.DepthComponent, PixelType.Float, pxColor);
+
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
             GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
             GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
             GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
@@ -40,7 +127,8 @@ namespace KWEngine2.Helper
             int texID = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, texID);
 
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32, 1, 1, 0, OpenTK.Graphics.OpenGL4.PixelFormat.DepthComponent, PixelType.Float, new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32, 1, 1, 0, 
+                OpenTK.Graphics.OpenGL4.PixelFormat.DepthComponent, PixelType.Float, new float[] { 1, 1 });
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
@@ -165,7 +253,8 @@ namespace KWEngine2.Helper
                 Bitmap image = new Bitmap(s);
                 if (image == null)
                 {
-                    throw new Exception("File " + resourceName + " is not a valid image file.");
+                    HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureFromAssembly()", "File " + resourceName + " is not a valid image file.");
+                    return -1;
                 }
                 texID = GL.GenTexture();
                 GL.BindTexture(TextureTarget.Texture2D, texID);
@@ -217,7 +306,8 @@ namespace KWEngine2.Helper
                 Bitmap image = new Bitmap(filename);
                 if (image == null)
                 {
-                    throw new Exception("File " + filename + " is not a valid image file.");
+                    HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureForModelExternal()", "File " + filename + " is not a valid image file.");
+                    return -1;
                 }
                 texID =  GL.GenTexture();
                 GL.BindTexture(TextureTarget.Texture2D, texID);
@@ -249,7 +339,8 @@ namespace KWEngine2.Helper
             }
             catch (Exception ex)
             {
-                throw new Exception("Could not load image file " + filename + "! Make sure to copy it to the correct output directory. " + "[" + ex.Message + "]");
+                HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureForModelExternal()", "Could not load image file " + filename + "! Make sure to copy it to the correct output directory. " + "[" + ex.Message + "]");
+                return -1;
             }
             return texID;
         }
@@ -264,7 +355,8 @@ namespace KWEngine2.Helper
                     Bitmap image = new Bitmap(ms);
                     if (image == null)
                     {
-                        throw new Exception("Image data inside GLB file corrupted. No valid image data found.");
+                        HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureForModelGLB()", "Could not load image file from GLB!");
+                        return -1;
                     }
                     texID = GL.GenTexture();
                     GL.BindTexture(TextureTarget.Texture2D, texID);
@@ -296,7 +388,8 @@ namespace KWEngine2.Helper
             }
             catch (Exception ex)
             {
-                throw new Exception("Could not load image file inside GLB. [" + ex.Message + "]");
+                HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureForModelGLB()", "Could not load image file! Make sure to copy it to the correct output directory. " + "[" + ex.Message + "]");
+                return -1;
             }
             return texID;
         }
@@ -313,7 +406,8 @@ namespace KWEngine2.Helper
                     Bitmap image = new Bitmap(s);
                     if (image == null)
                     {
-                        throw new Exception("File " + filename + " is not a valid image file.");
+                        HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureForModelInternal()", "Could not load image file! Make sure to copy it to the correct output directory.");
+                        return -1;
                     }
                     texID = GL.GenTexture();
                     GL.BindTexture(TextureTarget.Texture2D, texID);
@@ -346,7 +440,8 @@ namespace KWEngine2.Helper
             }
             catch (Exception)
             {
-                throw new Exception("Could not load image file from assembly: " + filename);
+                HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureForModel()", "Could not load image file from assembly: " + filename);
+                return -1;
             }
             return texID;
         }
@@ -453,7 +548,10 @@ namespace KWEngine2.Helper
         {
             Assembly a = Assembly.GetEntryAssembly();
             if (!filename.ToLower().EndsWith("jpg") && !filename.ToLower().EndsWith("jpeg") && !filename.ToLower().EndsWith("png"))
-                throw new Exception("Only JPG and PNG files are supported.");
+            {
+                HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureSkybox()", "Only JPG and PNG files are supported.");
+                return -1;
+            }
 
             if (!KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(filename))
             {

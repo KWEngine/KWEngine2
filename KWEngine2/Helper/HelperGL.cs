@@ -3,6 +3,7 @@ using OpenTK.Graphics.OpenGL4;
 using System;
 using System.Diagnostics;
 using System.Windows.Forms;
+using System.Linq;
 
 namespace KWEngine2.Helper
 {
@@ -11,6 +12,29 @@ namespace KWEngine2.Helper
     /// </summary>
     public static class HelperGL
     {
+        internal static void ShowErrorAndQuit(string caption, string errormessage)
+        {
+            MessageBox.Show(errormessage, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            KWEngine.CurrentWindow.ForceClose();
+        }
+
+        /// <summary>
+        /// Skaliert die Werte innerhalb eines float-Arrays, so dass sie in den durch lowerBound und upperBound angegebenen Bereich passen
+        /// </summary>
+        /// <param name="lowerBound">Untergrenze</param>
+        /// <param name="upperBound">Obergrenze</param>
+        /// <param name="array">Werte (Achtung: Werden in-place manipuliert!)</param>
+        public static void ScaleToRange(int lowerBound, int upperBound, float[] array)
+        {
+            float max = array.Max();
+            float min = array.Min();
+            if(min < max)
+                for (int i = 0; i < array.Length; i++)
+                {
+                    array[i] = (upperBound - lowerBound) * ((array[i] - min) / (max - min)) + lowerBound;
+                }
+        }
+
         /// <summary>
         /// Beschneidet Werte
         /// </summary>

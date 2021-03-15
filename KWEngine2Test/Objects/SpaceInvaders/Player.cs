@@ -17,19 +17,19 @@ namespace KWEngine2Test.Objects.SpaceInvaders
         private long _timestampLastShot = 0;
         private long _cooldown = 100;
 
-        public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState ks, MouseState ms)
         {
             Vector3 mousePoint = GetMouseIntersectionPoint(ms, Plane.Z);
             TurnTowardsXY(mousePoint);
 
             if(ks[Key.A] && Position.X > -17)
-                MoveOffset(-_movementSpeed * deltaTimeFactor, 0, 0);
+                MoveOffset(-_movementSpeed * KWEngine.DeltaTimeFactor, 0, 0);
             if (ks[Key.D] && Position.X < 17)
-                MoveOffset(+_movementSpeed * deltaTimeFactor, 0, 0);
+                MoveOffset(+_movementSpeed * KWEngine.DeltaTimeFactor, 0, 0);
             if (ks[Key.W] && Position.Y < 10)
-                MoveOffset(0, +_movementSpeed * deltaTimeFactor, 0);
+                MoveOffset(0, +_movementSpeed * KWEngine.DeltaTimeFactor, 0);
             if (ks[Key.S] && Position.Y > -10)
-                MoveOffset(0, -_movementSpeed * deltaTimeFactor, 0);
+                MoveOffset(0, -_movementSpeed * KWEngine.DeltaTimeFactor, 0);
 
             if (ms.LeftButton == ButtonState.Pressed || ks[Key.Space])
             {

@@ -11,7 +11,7 @@ namespace KWEngine2Test.Objects.TestAll
 {
     class Cube : GameObject
     {
-        public override void Act(KeyboardState ks, MouseState ms, float deltaTimeFactor)
+        public override void Act(KeyboardState ks, MouseState ms)
         {
             
         }

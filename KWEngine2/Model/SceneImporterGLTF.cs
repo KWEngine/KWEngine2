@@ -18,11 +18,14 @@ namespace KWEngine2.Model
             Gltf scene = Interface.LoadModel(filename);
             if(scene.Scenes.Length != 1)
             {
-                throw new Exception("Cannot load gltf files with less or more than one scene. Please remodel!");
+                HelperGL.ShowErrorAndQuit("SceneImporterGLTF::LoadModel()", "Cannot load gltf files with less or more than one scene. Please remodel!");
+                return null;
+                
             }
             if (scene.Skins != null && scene.Skins.Length > 1)
             {
-                throw new Exception("Cannot load gltf files with more than one skeletal armature. Please remodel!");
+                HelperGL.ShowErrorAndQuit("SceneImporterGLTF::LoadModel()", "Cannot load gltf files with more than one skeletal armature. Please remodel!");
+                return null;
             }
 
             GeoModel model = ProcessScene(scene, filename.ToLower().Trim());
@@ -216,7 +219,8 @@ namespace KWEngine2.Model
             
             if (model.BoneNames.Count > KWEngine.MAX_BONES)
             {
-                throw new Exception("Model has more than " + KWEngine.MAX_BONES + " bones. Cannot import model.");
+                HelperGL.ShowErrorAndQuit("SceneImporterGLTF::LoadModel()", "Model has more than " + KWEngine.MAX_BONES + " bones. Cannot import model.");
+                return;
             }
 
         }
@@ -595,7 +599,8 @@ namespace KWEngine2.Model
             filename = null;
             if(i.MimeType != glTFLoader.Schema.Image.MimeTypeEnum.image_jpeg && i.MimeType != glTFLoader.Schema.Image.MimeTypeEnum.image_png)
             {
-                throw new Exception("Invalid texture format detected. Only JPG and PNG are allowed.");
+                HelperGL.ShowErrorAndQuit("SceneImporterGLTF::LoadModel()", "Invalid texture format detected. Only JPG and PNG are allowed.");
+                return null;
             }
             byte[] data = null;
             if (i.BufferView != null)
@@ -617,7 +622,8 @@ namespace KWEngine2.Model
                         }
                         else
                         {
-                            throw new Exception("GLTF byte stride attribute not supported yet.");
+                            HelperGL.ShowErrorAndQuit("SceneImporterGLTF::LoadModel()", "GLTF byte stride attribute not supported yet.");
+                            return null;
                         }
 
                     }
@@ -695,9 +701,9 @@ namespace KWEngine2.Model
                     }
                     else
                     {
-                        throw new Exception("GLTF byte stride attribute not supported yet.");
+                        HelperGL.ShowErrorAndQuit("SceneImporterGLTF::LoadModel()", "GLTF byte stride attribute not supported yet.");
+                        return null;
                     }
-
                 }
             }
             else
@@ -708,7 +714,10 @@ namespace KWEngine2.Model
                     if (bufferViewStride == 0)
                         data = GetDataFromBase64Stream(a, bufferViewLength, accessorOffset + bufferViewOffset, buffer.Uri);
                     else
-                        throw new Exception("GLTF byte stride attribute not supported yet.");
+                    {
+                        HelperGL.ShowErrorAndQuit("SceneImporterGLTF::LoadModel()", "GLTF byte stride attribute not supported yet.");
+                        return null;
+                    }
                 }
                 else
                 {
@@ -722,7 +731,8 @@ namespace KWEngine2.Model
                         }
                         else
                         {
-                            throw new Exception("GLTF byte stride attribute not supported yet.");
+                            HelperGL.ShowErrorAndQuit("SceneImporterGLTF::LoadModel()", "GLTF byte stride attribute not supported yet.");
+                            return null;
                         }
                     }
                 }
@@ -742,7 +752,8 @@ namespace KWEngine2.Model
             }
             else
             {
-                throw new Exception("no valid base64 string found in gltf file. Please remodel.");
+                HelperGL.ShowErrorAndQuit("SceneImporterGLTF::LoadModel()", "no valid base64 string found in gltf file. Please remodel.");
+                return null;
             }
             return data;
         }
@@ -760,7 +771,8 @@ namespace KWEngine2.Model
             }
             else
             {
-                throw new Exception("no valid base64 string found in gltf file. Please remodel.");
+                HelperGL.ShowErrorAndQuit("SceneImporterGLTF::LoadModel()", "no valid base64 string found in gltf file. Please remodel.");
+                return null;
             }
             return data;
         }
@@ -1103,7 +1115,8 @@ namespace KWEngine2.Model
                     }
                     else
                     {
-                        throw new Exception("GLTF byte stride attribute not supported yet.");
+                        HelperGL.ShowErrorAndQuit("SceneImporterGLTF::LoadModel()", "GLTF byte stride attribute not supported yet.");
+                        return null;
                     }
                     
                 }
@@ -1128,7 +1141,8 @@ namespace KWEngine2.Model
                 }
                 else
                 {
-                    throw new Exception("Unable to generate model vertex indices. Please remodel.");
+                    HelperGL.ShowErrorAndQuit("SceneImporterGLTF::LoadModel()", "Unable to generate model vertex indices. Please remodel.");
+                    return null;
                 }
             }
 
@@ -1187,7 +1201,8 @@ namespace KWEngine2.Model
                 mesh = scene.Meshes[m];
                 if (mesh.Primitives[0].Mode != MeshPrimitive.ModeEnum.TRIANGLES)
                 {
-                    throw new Exception("Model's primitive type is not set to 'triangles'. Cannot import model.");
+                    HelperGL.ShowErrorAndQuit("SceneImporterGLTF::LoadModel()", "Model's primitive type is not set to 'triangles'. Cannot import model.");
+                    return;
                 }
                 Matrix4 parentTransform = Matrix4.Identity;
                 bool transformFound = false;

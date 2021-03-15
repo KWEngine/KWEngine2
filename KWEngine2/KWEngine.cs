@@ -205,6 +205,10 @@ namespace KWEngine2
         /// Anzahl der Lichter pro Welt
         /// </summary>
         public const int MAX_LIGHTS = 10;
+        /// <summary>
+        /// Anzahl der Schattenlichter pro Welt (anteilig an MAX_LIGHTS)
+        /// </summary>
+        public const int MAX_SHADOWMAPS = 3;
         internal static Matrix4 Identity = Matrix4.Identity;
         private static Vector3 _worldUp = new Vector3(0, 1, 0);
 
@@ -215,7 +219,8 @@ namespace KWEngine2
         /// <summary>
         /// Radius des Glow-Effekts (Standard: 1, Minimum: 0.001)
         /// </summary>
-        public static float GlowRadius {
+        public static float GlowRadius
+        {
             get
             {
                 return _bloomRadius;
@@ -226,12 +231,15 @@ namespace KWEngine2
             }
         }
 
+        internal static Matrix4 Matrix4Dummy = Matrix4.Identity;
+
         internal static int TextureDefault = -1;
         internal static int TextureBlack = -1;
         internal static int TextureWhite = -1;
         internal static int TextureAlpha = -1;
         internal static int TextureCubemapEmpty = -1;
         internal static int TextureDepthEmpty = -1;
+        internal static int TextureDepthCubeMapEmpty = -1;
         internal static float TimeElapsed = 0;
 
         internal static float _broadPhaseToleranceWidth = 1f;
@@ -307,10 +315,10 @@ namespace KWEngine2
             FontTextureArray[index] = textureId;
         }
 
-        
 
 
-        internal static Dictionary<string, Renderer> Renderers { get; set; } = new Dictionary<string, Renderer>();
+
+        //internal static Dictionary<string, Renderer> Renderers { get; set; } = new Dictionary<string, Renderer>();
         internal static Dictionary<string, GeoModel> Models { get; set; } = new Dictionary<string, GeoModel>();
 
         /// <summary>
@@ -330,7 +338,18 @@ namespace KWEngine2
         internal static GeoModel KWSkull;
         internal static GeoModel KWDollar;
         internal static RendererSimple RendererSimple;
-        //internal static RendererStandardPBR RendererPBR;
+        internal static RendererStandard RendererStandard;
+        internal static RendererShadow RendererShadow;
+        internal static RendererShadowCubeMap RendererShadowCubeMap;
+        internal static RendererBloom RendererBloom;
+        internal static RendererExplosion RendererExplosion;
+        internal static RendererBackground RendererBackground;
+        internal static RendererSkybox RendererSkybox;
+        internal static RendererParticle RendererParticle;
+        internal static RendererTerrain RendererTerrain;
+        internal static RendererHUD RendererHUD;
+        internal static RendererMerge RendererMerge;
+
         internal static float CSScale = 4.5f;
         internal static Matrix4 CoordinateSystemMatrix = Matrix4.CreateScale(CSScale);
         internal static Matrix4 CoordinateSystemMatrixX = Matrix4.CreateScale(CSScale);
@@ -463,26 +482,25 @@ namespace KWEngine2
 
         internal static void InitializeShaders()
         {
-            //Renderers.Add("Standard", new RendererStandard());
-            Renderers.Add("Standard", new RendererStandard());
-            Renderers.Add("Shadow", new RendererShadow());
-            Renderers.Add("Bloom", new RendererBloom());
-            Renderers.Add("Explosion", new RendererExplosion());
-            Renderers.Add("Background", new RendererBackground());
-            Renderers.Add("Skybox", new RendererSkybox());
-            Renderers.Add("Particle", new RendererParticle());
-            Renderers.Add("Terrain", new RendererTerrain());
-            Renderers.Add("HUD", new RendererHUD());
-            Renderers.Add("Merge", new RendererMerge());
+            RendererStandard = new RendererStandard();
+            RendererTerrain = new RendererTerrain();
+            RendererShadow = new RendererShadow();
+            RendererShadowCubeMap = new RendererShadowCubeMap();
+            RendererBloom = new RendererBloom();
+            RendererExplosion = new RendererExplosion();
+            RendererBackground = new RendererBackground();
+            RendererSkybox = new RendererSkybox();
+            RendererParticle = new RendererParticle();
+            RendererHUD = new RendererHUD();
+            RendererMerge = new RendererMerge();
 
             RendererSimple = new RendererSimple();
-            //RendererPBR = new RendererStandardPBR();
         }
 
         internal static void InitializeParticles()
         {
             int tex;
-            
+
             // Bursts:
             tex = HelperTexture.LoadTextureCompressedNoMipMap("fire01.dds");
             ParticleDictionary.Add(ParticleType.BurstFire1, new ParticleInfo(tex, 8, 64));
@@ -560,54 +578,28 @@ namespace KWEngine2
             return m;
         }
 
-        private static float _shadowmapbiascoefficient = 0.001f;
-
+        private static int _shadowMapSize = 1024;
         /// <summary>
-        /// Koeffizient der Schattenberechnung (Standard: 0.001f)
+        /// Größe der Shadow Map (Erlaubt: 256 bis 4096, Standardwert: 1024)
         /// </summary>
-        public static float ShadowMapCoefficient
-        {
-            get
-            {
-                return _shadowmapbiascoefficient;
-            }
-            set
-            {
-                if(value > 1 || value < -1)
-                {
-                    Debug.WriteLine("Shadow map coefficient may range from -1 to +1. Reset to 0.001!");
-                    _shadowmapbiascoefficient = 0.001f;
-                }
-                else
-                {
-                    _shadowmapbiascoefficient = value;
-                }
-
-            }
-        }
-
-        private static int _shadowMapSize = 2048;
-        /// <summary>
-        /// Größe der Shadow Map (Standard: 2048)
-        /// </summary>
-        public static int ShadowMapSize 
+        public static int ShadowMapSize
         {
             get
             {
                 return _shadowMapSize;
             }
-            set
+            internal set
             {
-                if(value >= 512 && value <= 8192)
+                if (value >= 256 && value <= 4096)
                 {
-                    _shadowMapSize = HelperTexture.RoundUpToPowerOf2(value);
+                    _shadowMapSize = HelperTexture.RoundDownToPowerOf2(value);
                 }
                 else
                 {
-                    Debug.WriteLine("Cannot set shadow map to a size < 512 or > 8192. Resetting it to 2048.");
-                    _shadowMapSize = 2048;
+                    Debug.WriteLine("Cannot set shadow map to a size < 256 or > 4096. Resetting it to 1024.");
+                    _shadowMapSize = 1024;
                 }
-                GLWindow.CurrentWindow.InitializeFramebuffers();
+                //GLWindow.CurrentWindow.InitializeFramebuffers();
 
             }
         }
@@ -615,7 +607,7 @@ namespace KWEngine2
         /// <summary>
         /// Aktuelle Welt
         /// </summary>
-        public static World CurrentWorld 
+        public static World CurrentWorld
         {
             get
             {
@@ -648,8 +640,10 @@ namespace KWEngine2
         /// <param name="isFile">false, wenn die Texturen Teil der EXE sind (Eingebettete Ressource)</param>
         public static void BuildTerrainModel(string name, string heightmap, string texture, float width, float height, float depth, float texRepeatX = 1, float texRepeatZ = 1, bool isFile = true)
         {
-            if (Models.ContainsKey(name)){
-                throw new Exception("There already is a model with that name. Please choose a different name.");
+            if (Models.ContainsKey(name))
+            {
+                HelperGL.ShowErrorAndQuit("KWEngine::BuildTerrainModel()", "There already is a model with that name. Please choose a different name.");
+                return;
             }
             GeoModel terrainModel = new GeoModel();
             terrainModel.Name = name;
@@ -691,7 +685,7 @@ namespace KWEngine2
             {
                 int texId = isFile ? HelperTexture.LoadTextureForModelExternal(texture) : HelperTexture.LoadTextureForModelInternal(texture);
                 texDiffuse.OpenGLID = texId > 0 ? texId : KWEngine.TextureDefault;
-                
+
                 if (dictFound && texId > 0)
                 {
                     texDict.Add(texture, texDiffuse.OpenGLID);
@@ -714,16 +708,18 @@ namespace KWEngine2
         /// <param name="callerName"></param>
         public static void LoadModelFromAssembly(string name, string path, bool flipTextureCoordinates = true, [CallerMemberName] string callerName = "")
         {
-            if(callerName != "Prepare")
+            if (callerName != "Prepare")
             {
-                throw new Exception("Models may only be loaded in the world's Prepare() method.");
+                HelperGL.ShowErrorAndQuit("KWEngine::LoadModelFromAssembly()", "This method may only be called from the Prepare() method.");
+                return;
             }
 
             if (KWEngine.Models.ContainsKey(name.Trim()))
             {
-                throw new Exception("A model with the name " + name + " already exists.");
+                HelperGL.ShowErrorAndQuit("KWEngine::LoadModelFromAssembly()", "Model name already exists.");
+                return;
             }
-            
+
             GeoModel m = SceneImporter.LoadModel(path, flipTextureCoordinates, SceneImporter.AssemblyMode.User);
             name = name.Trim();
             m.Name = name;
@@ -743,12 +739,14 @@ namespace KWEngine2
         {
             if (callerName != "Prepare")
             {
-                throw new Exception("Models may only be loaded in the world's Prepare() method.");
+                HelperGL.ShowErrorAndQuit("KWEngine::LoadModelFromFile()", "This method may only be called from the Prepare() method.");
+                return; 
             }
 
             if (KWEngine.Models.ContainsKey(name.Trim()))
             {
-                throw new Exception("A model with the name " + name + " already exists.");
+                HelperGL.ShowErrorAndQuit("KWEngine::LoadModelFromFile()", "Model name already exists.");
+                return;
             }
             GeoModel m = SceneImporter.LoadModel(filename, true, SceneImporter.AssemblyMode.File);
             name = name.Trim();

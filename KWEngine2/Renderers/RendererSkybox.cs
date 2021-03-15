@@ -27,13 +27,11 @@ namespace KWEngine2.Renderers
             using (Stream s = assembly.GetManifestResourceStream(resourceNameVertexShader))
             {
                 mShaderVertexId = LoadShader(s, ShaderType.VertexShader, mProgramId);
-                //Console.WriteLine(GL.GetShaderInfoLog(mShaderVertexId));
             }
 
             using (Stream s = assembly.GetManifestResourceStream(resourceNameFragmentShader))
             {
                 mShaderFragmentId = LoadShader(s, ShaderType.FragmentShader, mProgramId);
-                //Console.WriteLine(GL.GetShaderInfoLog(mShaderFragmentId));
             }
 
             if (mShaderFragmentId >= 0 && mShaderVertexId >= 0)
@@ -57,12 +55,7 @@ namespace KWEngine2.Renderers
             mUniform_TintColor = GL.GetUniformLocation(mProgramId, "uTintColor");
         }
 
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection)
+        internal void Draw(ref Matrix4 viewProjection)
         {
 
             if (KWEngine.CurrentWorld.IsFirstPersonMode)
@@ -89,8 +82,7 @@ namespace KWEngine2.Renderers
             GL.BindTexture(TextureTarget.TextureCubeMap, KWEngine.CurrentWorld._textureSkybox);
             GL.Uniform1(mUniform_Texture, 0);
 
-            float ambient = KWEngine.CurrentWorld.GetSunColor().W + KWEngine.CurrentWorld.SunAmbientFactor;
-            Vector4 skyColor = new Vector4(KWEngine.CurrentWorld.GetSunColor().X, KWEngine.CurrentWorld.GetSunColor().Y, KWEngine.CurrentWorld.GetSunColor().Z, ambient * KWEngine.CurrentWorld._textureBackgroundMultiplier);
+            Vector4 skyColor = new Vector4(KWEngine.CurrentWorld._ambientLight.Xyz, KWEngine.CurrentWorld._ambientLight.W * KWEngine.CurrentWorld._textureBackgroundMultiplier);
             GL.Uniform4(mUniform_TintColor, ref skyColor);
 
             GeoMesh mesh = KWEngine.Models["KWCube"].Meshes.Values.ElementAt(0);
@@ -103,26 +95,6 @@ namespace KWEngine2.Renderers
             GL.UseProgram(0);
             GL.DepthFunc(DepthFunction.Less);
             GL.FrontFace(FrontFaceDirection.Ccw);
-        }
-
-        internal override void Draw(ParticleObject po, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(HUDObject ho, ref Matrix4 viewProjection)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, ref Matrix4 viewProjectionShadow, ref Matrix4 viewProjectionShadow2, HelperFrustum frustum, ref float[] lightColors, ref float[] lightTargets, ref float[] lightPositions, int lightCount, ref int lightShadow)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum, bool isSun)
-        {
-            throw new NotImplementedException();
         }
     }
 }
