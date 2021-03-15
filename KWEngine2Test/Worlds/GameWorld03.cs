@@ -46,7 +46,7 @@ namespace KWEngine2Test.Worlds
      
         public override void Prepare()
         {
-            //SunAmbientFactor = 0.9f;
+            
             KWEngine.LoadModelFromFile("Spaceship4", @".\Models\Spaceship\spaceship4.obj");
             KWEngine.LoadModelFromFile("Spaceship5", @".\Models\Spaceship\spaceship5.obj");
             KWEngine.LoadModelFromFile("Spaceship2", @".\Models\Spaceship\spaceship2.obj");
@@ -134,6 +134,7 @@ namespace KWEngine2Test.Worlds
 
             FOV = 90;
             SetTextureBackground(@".\textures\spacebackground.jpg", 2, 2);
+            SetAmbientLight(1, 1, 1, 1);
             KWEngine.DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
         }
 

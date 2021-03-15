@@ -61,7 +61,8 @@ namespace KWEngine2.Helper
             }
             else
             {
-                throw new Exception("No first person object available.");
+                HelperGL.ShowErrorAndQuit("HelperCamera::GetViewMatrix()", "No first person object available.");
+                return Matrix3.Identity;
             }
         }
 

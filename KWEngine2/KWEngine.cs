@@ -205,6 +205,9 @@ namespace KWEngine2
         /// Anzahl der Lichter pro Welt
         /// </summary>
         public const int MAX_LIGHTS = 10;
+        /// <summary>
+        /// Anzahl der Schattenlichter pro Welt (anteilig an MAX_LIGHTS)
+        /// </summary>
         public const int MAX_SHADOWMAPS = 3;
         internal static Matrix4 Identity = Matrix4.Identity;
         private static Vector3 _worldUp = new Vector3(0, 1, 0);
@@ -575,32 +578,6 @@ namespace KWEngine2
             return m;
         }
 
-        private static float _shadowmapbiascoefficient = 0.001f;
-
-        /// <summary>
-        /// Koeffizient der Schattenberechnung (Standard: 0.001f)
-        /// </summary>
-        public static float ShadowMapCoefficient
-        {
-            get
-            {
-                return _shadowmapbiascoefficient;
-            }
-            set
-            {
-                if (value > 1 || value < -1)
-                {
-                    Debug.WriteLine("Shadow map coefficient may range from -1 to +1. Reset to 0.001!");
-                    _shadowmapbiascoefficient = 0.001f;
-                }
-                else
-                {
-                    _shadowmapbiascoefficient = value;
-                }
-
-            }
-        }
-
         private static int _shadowMapSize = 1024;
         /// <summary>
         /// Größe der Shadow Map (Erlaubt: 256 bis 4096, Standardwert: 1024)
@@ -665,7 +642,8 @@ namespace KWEngine2
         {
             if (Models.ContainsKey(name))
             {
-                throw new Exception("There already is a model with that name. Please choose a different name.");
+                HelperGL.ShowErrorAndQuit("KWEngine::BuildTerrainModel()", "There already is a model with that name. Please choose a different name.");
+                return;
             }
             GeoModel terrainModel = new GeoModel();
             terrainModel.Name = name;
@@ -732,12 +710,14 @@ namespace KWEngine2
         {
             if (callerName != "Prepare")
             {
-                throw new Exception("Models may only be loaded in the world's Prepare() method.");
+                HelperGL.ShowErrorAndQuit("KWEngine::LoadModelFromAssembly()", "This method may only be called from the Prepare() method.");
+                return;
             }
 
             if (KWEngine.Models.ContainsKey(name.Trim()))
             {
-                throw new Exception("A model with the name " + name + " already exists.");
+                HelperGL.ShowErrorAndQuit("KWEngine::LoadModelFromAssembly()", "Model name already exists.");
+                return;
             }
 
             GeoModel m = SceneImporter.LoadModel(path, flipTextureCoordinates, SceneImporter.AssemblyMode.User);
@@ -759,12 +739,14 @@ namespace KWEngine2
         {
             if (callerName != "Prepare")
             {
-                throw new Exception("Models may only be loaded in the world's Prepare() method.");
+                HelperGL.ShowErrorAndQuit("KWEngine::LoadModelFromFile()", "This method may only be called from the Prepare() method.");
+                return; 
             }
 
             if (KWEngine.Models.ContainsKey(name.Trim()))
             {
-                throw new Exception("A model with the name " + name + " already exists.");
+                HelperGL.ShowErrorAndQuit("KWEngine::LoadModelFromFile()", "Model name already exists.");
+                return;
             }
             GeoModel m = SceneImporter.LoadModel(filename, true, SceneImporter.AssemblyMode.File);
             name = name.Trim();

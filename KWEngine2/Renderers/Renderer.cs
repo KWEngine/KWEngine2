@@ -35,6 +35,7 @@ namespace KWEngine2.Renderers
         protected int mUniform_ModelMatrix = -1;
         protected int mUniform_Texture = -1;
         protected int mUniform_TextureSkybox = -1;
+        protected int mUniform_TextureSky2D = -1;
         protected int mUniform_UseAnimations = -1;
         protected int mUniform_BoneTransforms = -1;
 
@@ -89,6 +90,7 @@ namespace KWEngine2.Renderers
         protected int mUniform_TextureHUDIsText = -1;
 
         protected int mUniform_SpecularReflectionFactor = -1;
+        protected int mUniform_TextureSkyBoost = -1;
 
         public Renderer()
         {
@@ -208,7 +210,10 @@ namespace KWEngine2.Renderers
         {
             return mUniform_TextureShadowMap;
         }
-
+        public int GetUniformHandleTextureShadowMapCubeMap()
+        {
+            return mUniform_TextureShadowMapCubeMap;
+        }
         public int GetUniformHandleTextureScene()
         {
 
@@ -284,6 +289,11 @@ namespace KWEngine2.Renderers
             return mUniform_LightsTargets;
         }
 
+        public int GetUniformHandleLightsMeta()
+        {
+            return mUniform_LightsMeta;
+        }
+
         public int GetUniformHandleLightCount()
         {
             return mUniform_LightCount;
@@ -327,6 +337,16 @@ namespace KWEngine2.Renderers
         public int GetUniformHandleTextureUseLightmap()
         {
             return mUniform_TextureUseLightMap;
+        }
+
+        public int GetUniformHandleTextureSky2D()
+        {
+            return mUniform_TextureSky2D;
+        }
+
+        public int GetUniformHandleTextureSkyBoost()
+        {
+            return mUniform_TextureSkyBoost;
         }
     }
 }

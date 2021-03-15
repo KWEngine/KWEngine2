@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using KWEngine2.Helper;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
@@ -27,9 +28,9 @@ namespace KWEngine2.GameObjects
     /// <summary>
     /// Lichtklasse
     /// </summary>
-    public sealed class LightObject
+    public sealed class LightObject : IComparable
     {
-        private int _frustumMultiplier = 2;
+        private int _frustumMultiplier = 5;
 
         /// <summary>
         /// Name
@@ -53,7 +54,7 @@ namespace KWEngine2.GameObjects
                 _isShadowCaster = value;
                 if(value == true)
                 {
-                    ApplyFramebuffer();
+                    
                     UpdateMatrices();
                 }
                 else
@@ -65,22 +66,17 @@ namespace KWEngine2.GameObjects
             }
         }
 
-        private void ApplyFramebuffer()
+        internal void ApplyFramebuffer()
         {
             _framebufferIndex = KWEngine.CurrentWindow.GetFreeIdForShadowMap(this.Type);
-            
         }
 
         internal void RemoveFramebuffer()
         {
-            if(_framebufferIndex >= 0 && _framebufferIndex < KWEngine.MAX_SHADOWMAPS)
+            if (_framebufferIndex >= 0 && _framebufferIndex < KWEngine.MAX_SHADOWMAPS)
             {
                 KWEngine.CurrentWindow.AddIdForShadowMap(_framebufferIndex, this.Type);
                 _framebufferIndex = -1;
-            }
-            else
-            {
-                throw new Exception("Internal error occured: cannot remove light framebuffer for shadow mapping.");
             }
         }
 
@@ -104,8 +100,8 @@ namespace KWEngine2.GameObjects
         /// </summary>
         public Vector4 Color { get; internal set; }
         internal World World { get; set; }
-        internal float FOVShadow { get; set; } = 60f;
-        internal float ShadowMapBiasCoefficient = 0.005f;
+        internal float FOVShadow { get; set; } = 90f;
+        internal float ShadowMapBiasCoefficient = 0.0005f;
         internal LightType _type = LightType.Point;
 
         /// <summary>
@@ -209,7 +205,10 @@ namespace KWEngine2.GameObjects
             Type = type;
             _distanceMultiplier = 10;
             IsShadowCaster = isShadowCaster;
-            SetFOVShadow(179);
+            if (type == LightType.Sun)
+                SetFOV(45);
+            else
+                SetFOV(120);
         }
 
 
@@ -220,13 +219,19 @@ namespace KWEngine2.GameObjects
         /// <param name="multiplier">Multiplikator (Standard: 10)</param>
         public void SetDistanceMultiplier(float multiplier)
         {
+            if(Type == LightType.Sun)
+            {
+                HelperGL.ShowErrorAndQuit("LightObject::SetDistanceMultiplier()", "Cannot set distance for sun light because sun light is always max distance!");
+                return;
+                
+            }
             if (multiplier > 0)
             {
                 _distanceMultiplier = multiplier;
             }
             else
                 _distanceMultiplier = 10;
-            SetFOVShadow(FOVShadow);
+            SetFOV(FOVShadow);
         }
 
         /// <summary>
@@ -275,7 +280,10 @@ namespace KWEngine2.GameObjects
         public void SetTarget(float x, float y, float z)
         {
             if (Type == LightType.Point)
-                throw new Exception("Light instance is not of type 'Directional' or 'Sun'.");
+            {
+                HelperGL.ShowErrorAndQuit("LightObject::SetTarget()", "Light instance is not of type 'Directional' or 'Sun'.");
+                return;
+            }
             Target = new Vector3(x, y, z);
         }
 
@@ -286,7 +294,10 @@ namespace KWEngine2.GameObjects
         public void SetTarget(Vector3 target)
         {
             if (Type == LightType.Point)
-                throw new Exception("Light instance is not of type 'Directional' or 'Sun'.");
+            {
+                HelperGL.ShowErrorAndQuit("LightObject::SetTarget()", "Light instance is not of type 'Directional' or 'Sun'.");
+                return;
+            }
             Target = target;
         }
 
@@ -298,8 +309,8 @@ namespace KWEngine2.GameObjects
         /// <summary>
         /// Setzt das Field of View (in Grad) für das schattenwerfende Licht
         /// </summary>
-        /// <param name="fov">Blickfeld nach links und rechts in Grad (Minimum: 30, Maximum: 180)</param>
-        public void SetFOVShadow(float fov)
+        /// <param name="fov">Blickfeld nach links und rechts in Grad (Minimum: 10, Maximum: 180)</param>
+        public void SetFOV(float fov)
         {
             if(IsShadowCaster)
             {
@@ -318,12 +329,12 @@ namespace KWEngine2.GameObjects
                     }
                     else
                     {
-                        FOVShadow = HelperGL.Clamp(fov, 30, 179);
+                        FOVShadow = HelperGL.Clamp(fov, 10, 179);
                         _projectionMatrixShadow = Matrix4.CreatePerspectiveFieldOfView(
                             MathHelper.DegreesToRadians(FOVShadow / 2),
                             KWEngine.ShadowMapSize / (float)KWEngine.ShadowMapSize,
                             0.1f,
-                            _distanceMultiplier * _frustumMultiplier);
+                            Type == LightType.Sun ? KWEngine.CurrentWorld.ZFar : _distanceMultiplier * _frustumMultiplier);
                     }
                     UpdateMatrices();
                 }
@@ -333,14 +344,16 @@ namespace KWEngine2.GameObjects
         /// <summary>
         /// Setzt den Koeffizienten für die Berechnung der Schatten der LightObject-Instanz
         /// </summary>
-        /// <param name="bias">Biaswert (Standard: 0.005f; Bereich: 0.00001f bis 1f)</param>
-        public void SetFOVShadowBiasCoefficient(float bias = 0.005f)
+        /// <param name="bias">Biaswert (Standard: 0.0005f; Bereich: -1 bis +1)</param>
+        public void SetFOVBiasCoefficient(float bias = 0.0005f)
         {
             if (!IsShadowCaster)
-                throw new Exception("Setting FOV for Light is available for directional shadow casting lights only.");
+            {
+                HelperGL.ShowErrorAndQuit("LightObject::SetFOVBiasCoefficient()", "Setting FOV is available for shadow casting lights only.");
+            }
             else
             {
-                ShadowMapBiasCoefficient = HelperGL.Clamp(bias, 0.00001f, 1);
+                ShadowMapBiasCoefficient = HelperGL.Clamp(bias, -1, 1);
             }
         }
 
@@ -349,13 +362,31 @@ namespace KWEngine2.GameObjects
             int countTemp = 0;
             IEnumerator<LightObject> enumerator = lights.GetEnumerator();
             enumerator.Reset();
+
+            Vector3 viewDirection;
+            Vector3 camPosition;
+            if (KWEngine.CurrentWorld.IsFirstPersonMode)
+            {
+                viewDirection = HelperCamera.GetLookAtVector();
+                camPosition = KWEngine.CurrentWorld.GetFirstPersonObject().Position;
+            }
+            else
+            {
+                viewDirection = KWEngine.CurrentWorld.GetCameraLookAtVector();
+                camPosition = KWEngine.CurrentWorld.GetCameraPosition();
+            }
+
             for (int i = 0, threecounter = 0, arraycounter = 0; i < lights.Count; i++)
             {
-
+                bool isInFrustum = true;
                 enumerator.MoveNext();
                 LightObject l = enumerator.Current;
-                bool isInFrustum =
-                    KWEngine.CurrentWindow.Frustum.SphereVsFrustum(l.Position, l._distanceMultiplier * l._frustumMultiplier);
+                
+                Vector3 cameraToLight = Vector3.NormalizeFast(l.Position - camPosition);
+                float dotProductViewAndLight = Vector3.Dot(viewDirection, cameraToLight);
+
+                if (dotProductViewAndLight < -0.25f && (camPosition - l.Position).LengthFast > (l.Type != LightType.Sun ? l._distanceMultiplier : (KWEngine.CurrentWorld.ZFar * 2))) 
+                    isInFrustum = false;
 
                 if (isInFrustum)
                 {
@@ -369,15 +400,15 @@ namespace KWEngine2.GameObjects
                     targets[arraycounter + 2] = l.Target.Z;
                     if(l.Type == LightType.Point)
                     {
-                        targets[arraycounter + 3] = 0;
+                        targets[arraycounter + 3] = 0; // Point
                     }
                     else if(l.Type== LightType.Directional)
                     {
-                        targets[arraycounter + 3] = 1;
+                        targets[arraycounter + 3] = 1; // Directional
                     }
                     else
                     {
-                        targets[arraycounter + 3] = -1;
+                        targets[arraycounter + 3] = -1; // Sun
                     }
 
                     positions[arraycounter + 0] = l.Position.X;
@@ -397,5 +428,16 @@ namespace KWEngine2.GameObjects
             count = countTemp;
         }
 
+        /// <summary>
+        /// Vergleicht zwei Lichter miteinander
+        /// </summary>
+        /// <param name="obj">Zu vergleichendes Licht</param>
+        /// <returns>1, -1</returns>
+        public int CompareTo(object obj)
+        {
+            LightObject light = (LightObject)obj;
+            //return light.IsShadowCaster && !this.IsShadowCaster ? 1 : -1;
+            return light.IsShadowCaster ? 1 : -1;
+        }
     }
 }

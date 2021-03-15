@@ -44,8 +44,9 @@ uniform vec3 uCameraPos;
 uniform vec3 uCameraDirection;
 
 uniform samplerCube uTextureSkybox;
-uniform sampler2D uTexture2D;
+uniform sampler2D uTextureSky2D;
 uniform int uUseTextureSkybox;
+uniform float uTextureSkyBoost;
 
 uniform vec4 uLightsPositions[10];
 uniform vec4 uLightsTargets[10]; // w: point = 0, directional = 1, sun = -1
@@ -106,18 +107,17 @@ float calculateDarkening(float cosTheta, int index)
 	return max(darkening, 0.0);
 }
 
-float debugDarkeningCubeMap(vec3 fragToLightNormalized, vec3 fragToLight, float cosTheta, int index)
+float calculateDarkeningCubeMap(int index)
 {
-    return texture(uTextureShadowMapCubeMap[index], fragToLightNormalized).r;
-}
+	vec3 lightToFrag = vPosition - uLightsPositions[index].xyz;
+	float dotProduct = max(dot(vNormal, normalize(lightToFrag)), 0.0);
 
-float calculateDarkeningCubeMap(vec3 fragToLightNormalized, vec3 fragToLight, float cosTheta, int index) // TODO: Index might be > 2!!!
-{
-	float bias = uLightsMeta[index].x * sqrt (1.0f - cosTheta * cosTheta) / cosTheta;
-	bias = clamp(bias, 0.0, 0.5);
-    float closestDepth = texture(uTextureShadowMapCubeMap[index], fragToLightNormalized).r * uLightsMeta[index].z;
-    float currentDepth = length(fragToLight);
-    return currentDepth - bias > closestDepth  ? 0.0 : 1.0;
+	float bias = uLightsMeta[index].x * sqrt (1.0f - dotProduct * dotProduct) / dotProduct;
+	bias = clamp(bias * uLightsMeta[index].z, 0.0, 0.1);
+	
+    float closestDepth = texture(uTextureShadowMapCubeMap[index], lightToFrag).r * uLightsMeta[index].z;
+    float currentDepth = length(lightToFrag);
+    return currentDepth - bias > closestDepth ? 0.0 : 1.0;
 }  
 
 vec3 getSpecularComponent(vec3 theNormal, vec3 fragmentToLight, float roughnessInverted, float distanceFactor, int i, vec3 fragmentToCamera)
@@ -151,8 +151,6 @@ void main()
 	}
 	albedo *= uTintColor;
 
-	//float test = texture(uTextureShadowMapCubeMap[0], albedo).r;
-
 	vec3 fragmentToCamera = normalize(uCameraPos - vPosition);
 
 	// Normal mapping:
@@ -175,16 +173,22 @@ void main()
 		emissive = uEmissiveColor.xyz;
 	}
 
-
-
 	// Metalness / Reflections:
-	vec3 refl = vec3(0.22 * uSunAmbient.xyz * uSunAmbient.w);
+	vec3 refl = vec3(0.22 * uSunAmbient.xyz * uSunAmbient.w * uTextureSkyBoost);
 	vec3 metalnessTextureLookup = vec3(0);
 	if(uUseTextureSkybox > 0)
 	{
 		vec3 reflectedCameraSurfaceNormal = reflect(-fragmentToCamera, theNormal);
-		refl = texture(uTextureSkybox, reflectedCameraSurfaceNormal).xyz * (uSunAmbient.xyz * uSunAmbient.w);
+		refl = texture(uTextureSkybox, reflectedCameraSurfaceNormal).xyz * (uSunAmbient.xyz * uSunAmbient.w * uTextureSkyBoost);
 	}
+	else if(uUseTextureSkybox < 0)
+	{
+		vec3 reflectedCameraSurfaceNormal = reflect(-fragmentToCamera, theNormal);
+		vec2 coordinates = (reflectedCameraSurfaceNormal.xy + 1.0) / 2.0;
+		coordinates.y = -coordinates.y;
+		refl = texture(uTextureSky2D, coordinates).xyz * (uSunAmbient.xyz * uSunAmbient.w * uTextureSkyBoost);
+	}
+
 	vec3 reflection = refl;
 	vec3 metalness = vec3(uMetalness);
 	if(uUseTextureMetalness > 0)
@@ -226,19 +230,23 @@ void main()
 			vec3 fragmentToCurrentLightNotNormalized = lightPos - vPosition;
 			vec3 fragmentToCurrentLightNormalized = normalize(fragmentToCurrentLightNotNormalized);
 			float currentLightDistanceSq = dot(fragmentToCurrentLightNotNormalized, fragmentToCurrentLightNotNormalized);
-			float distanceFactor = clamp(uLightsPositions[i].w / currentLightDistanceSq, 0.0, 1.0);
-
+			float distanceFactor = 1.0;
+			if(uLightsTargets[i].w >= 0)
+			{
+				distanceFactor = clamp(uLightsPositions[i].w / currentLightDistanceSq, 0.0, 1.0);
+			}
+			// distancefactor nahe bei 1, wenn licht nah, sonst nahe bei 0
 			// Shadow mapping:
 			float darkeningCurrentLight = 1.0;
 			if(uLightsMeta[i].y > 0.0) // y = shadow caster? 1 : 0
 			{
-				float dotLightSurfaceVNormal = max(dot(vNormal, fragmentToCurrentLightNormalized), 0.0);
 				if(uLightsTargets[i].w == 0.0) // if it is point light:
 				{
-					darkeningCurrentLight = calculateDarkeningCubeMap(-fragmentToCurrentLightNormalized, -fragmentToCurrentLightNotNormalized, dotLightSurfaceVNormal, i);
+					darkeningCurrentLight = calculateDarkeningCubeMap(i);
 				}
 				else // directional or sun:
 				{
+					float dotLightSurfaceVNormal = max(dot(vNormal, fragmentToCurrentLightNormalized), 0.0);
 					darkeningCurrentLight = calculateDarkening(dotLightSurfaceVNormal, i);
 				}
 			}
@@ -256,7 +264,7 @@ void main()
 
 			// light intensity:
 			float dotNormalCurrentLight = max(dot(theNormal, fragmentToCurrentLightNormalized), 0.0);
-			float currentLightIntensity = dotNormalCurrentLight * distanceFactor * pow(differenceLightDirectionAndFragmentDirection, 4.0);
+			float currentLightIntensity = dotNormalCurrentLight * pow(differenceLightDirectionAndFragmentDirection, 4.0);
 
 			// roughness:
 			float distributionMicroFacetCurrentLight = computeGGXDistribution(dotNormalCurrentLight, roughness);
@@ -266,25 +274,23 @@ void main()
 			vec3 rgbSpecularCurrentLight = vec3(0.0);
 			if(dotNormalCurrentLight > 0 && darkeningCurrentLight > 0)
 			{
-				rgbSpecularCurrentLight = uLightsColors[i].xyz * uLightsColors[i].w * clamp(distanceFactor * 10, 0.0, 1.0) * differenceLightDirectionAndFragmentDirection;
+				rgbSpecularCurrentLight = uLightsColors[i].xyz * uLightsColors[i].w * distanceFactor * differenceLightDirectionAndFragmentDirection;
 				rgbSpecularCurrentLight *= microFacetContributionCurrentLight;
 				rgbSpecularCurrentLight = min(uLightsColors[i].xyz * uLightsColors[i].w, rgbSpecularCurrentLight) ; // conservation of energy
 			}
 			if(uSpecularReflectionFactor > 0)
 			{	
-				rgbSpecularCurrentLight += getSpecularComponent(theNormal, fragmentToCurrentLightNormalized, roughnessInverted, distanceFactor, i, fragmentToCamera);
+				rgbSpecularCurrentLight += getSpecularComponent(theNormal, fragmentToCurrentLightNormalized, roughnessInverted, uLightsTargets[i].w < 0.0 ? 1.0 : distanceFactor, i, fragmentToCamera);
 			}
 
-			colorComponentIntensityTotalFromLights += uLightsColors[i].xyz * uLightsColors[i].w * currentLightIntensity * darkeningCurrentLight;
+			colorComponentIntensityTotalFromLights += uLightsColors[i].xyz * uLightsColors[i].w * currentLightIntensity * distanceFactor * darkeningCurrentLight;
 			colorComponentSpecularTotalFromLights += rgbSpecularCurrentLight;
 		}
 	}
 
-
-
 	// read pure texture and tone down for ambient:
-	vec3 rgbFragment = albedo * (1.0 - metalness) * uSunAmbient.xyz * uSunAmbient.w + emissive;
-	rgbFragment += colorComponentIntensityTotalFromLights;
+	vec3 rgbFragment = albedo * (1.0 - metalness) + emissive;
+	rgbFragment *= colorComponentIntensityTotalFromLights + uSunAmbient.xyz * uSunAmbient.w;
 	rgbFragment += colorComponentSpecularTotalFromLights;
 
 	// Add reflection from skybox:
@@ -292,11 +298,6 @@ void main()
 	
 	float dotOutline = max(1.0 - 4.0 * pow(abs(dot(uCameraDirection, vNormal)), 2.0), 0.0) * uOutline.w;
 	color.xyz = rgbFragment + uOutline.xyz * dotOutline * 0.9;
-
-	//vec3 testNotNormalized = vPosition - uLightsPositions[0].xyz;
-	//vec3 testNormalized = normalize(testNotNormalized);
-	//color.xyz = vec3(debugDarkeningCubeMap(testNormalized, testNotNormalized, 0.0, 0));
-	//color.w = uOpacity;
 
 	vec3 addedBloom = vec3(max(rgbFragment.x - 1.0, 0.0), max(rgbFragment.y - 1.0, 0.0), max(rgbFragment.z - 1.0, 0.0));
 	addedBloom *= 0.1;

@@ -62,7 +62,7 @@ namespace KWEngine2Test.Worlds
             }
             */
 
-            SpawnParticles();
+            //SpawnParticles();
         }
         
         private void SpawnParticles()
@@ -88,61 +88,113 @@ namespace KWEngine2Test.Worlds
             KWEngine.LoadModelFromFile("MatTest255", @".\models\gltftestcube255.glb");
 
             FOV = 45;
-            FOVShadow = 30f;
 
             //SetSunPosition(100, 100, 100);
             //SetSunTarget(0, 0, 0);
             //SetSunAmbientFactor(0.5f);
             //SetSunColor(1, 1, 1, 0.5f);
-            SetAmbientLight(1, 1, 1, 0.5f);
+            SetAmbientLight(1, 1, 1, 0.25f);
 
             SetCameraPosition(0, 25, 50);
             SetCameraTarget(0, 0, 0);
 
-            SetTextureSkybox(@".\textures\skybox1.jpg");
+            //SetTextureSkybox(@".\textures\skybox1.jpg");
+            SetTextureBackground(@".\textures\bg_greenmountains.png");
+            SetTextureBackgroundBrightnessMultiplier(4);
 
-            CreateMetalSphereTestObject();
+            //CreateMetalSphereTestObject();
             //CreateCubeTestObject();
             //CreateGLBTestObject();
-            CreateTerrainTestObject();
+            //CreateTerrainTestObject();
+
+            CreateRoomForLightTest();
 
 
             CreateFreeFloatPlayer();
 
 
-            
-           
-
-            LightObject l1 = new LightObject(LightType.Point, true);
-            l1.SetPosition(-5, 10, -5);
-            l1.SetFOVShadowBiasCoefficient(0.2f);
-            //l1.SetTarget(-5, 0, -5);
-            l1.SetColor(1, 0, 0, 1);
-            AddLightObject(l1);
-
-            
-            /*
-            LightObject l2 = new LightObject(LightType.Directional, true);
-            l2.SetPosition(0, 10, -10);
-            l2.SetTarget(-5, 0, -5);
-            l2.SetColor(0, 1, 0, 1);
-            l2.SetDistanceMultiplier(20);
-            AddLightObject(l2);
-            */
-
-
             DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
             DebugShowCoordinateSystemGrid = GridType.GridXZ;
-            DebugShadowCaster = false;
         }
 
         private void CreateFreeFloatPlayer()
         {
             PlayerFloat pf = new PlayerFloat();
             pf.SetModel("KWCube");
-            pf.SetPosition(0, 5, 20);
+            pf.SetPosition(0, 5, 15);
             AddGameObject(pf);
             SetFirstPersonObject(pf, 180);
+        }
+
+        private void CreateRoomForLightTest()
+        {
+            SetAmbientLight(1, 1, 1, 0.25f);
+
+            Cube c1 = new Cube();
+            c1.SetModel("KWCube");
+            c1.SetScale(20, 10, 2);
+            c1.SetPosition(0, 5, -11);
+            c1.IsShadowCaster = true;
+            AddGameObject(c1);
+
+            Cube c2 = new Cube();
+            c2.SetModel("KWCube");
+            c2.SetScale(20, 2, 20);
+            c2.SetPosition(0, -1, 0);
+            c2.IsShadowCaster = true;
+            AddGameObject(c2);
+
+            Cube c3 = new Cube();
+            c3.SetModel("KWCube");
+            c3.SetScale(2, 10, 20);
+            c3.SetPosition(-11, 5, 0);
+            c3.IsShadowCaster = true;
+            AddGameObject(c3);
+
+            Cube c4 = new Cube();
+            c4.SetModel("KWCube");
+            c4.SetScale(2, 10, 20);
+            c4.SetPosition(+11, 5, 0);
+            c4.IsShadowCaster = true;
+            AddGameObject(c4);
+
+            // Testing Cubes and Spheres
+            Cube box1 = new Cube();
+            box1.SetModel("KWCube");
+            box1.SetPosition(-5, 1, 0);
+            box1.SetScale(2);
+            box1.IsShadowCaster = true;
+            AddGameObject(box1);
+
+            Cube box2 = new Cube();
+            box2.SetModel("KWCube");
+            box2.SetPosition(0, 0.5f, -3);
+            box2.SetScale(1);
+            box2.IsShadowCaster = true;
+            box2.SetMetalness(0.9f);
+            AddGameObject(box2);
+
+            Cube box3 = new Cube();
+            box3.SetModel("KWCube");
+            box3.SetPosition(0, 3, -7.5f);
+            box3.SetScale(3);
+            box3.IsShadowCaster = true;
+            AddGameObject(box3);
+
+            LightObject pointlightWithShadow = new LightObject(LightType.Point, true);
+            pointlightWithShadow.SetPosition(0, 5, 0);
+            pointlightWithShadow.SetDistanceMultiplier(20);
+            pointlightWithShadow.SetColor(1, 0, 0, 1);
+            AddLightObject(pointlightWithShadow);
+
+            LightObject sunlight = new LightObject(LightType.Sun, true);
+            sunlight.SetPosition(50, 50, 50);
+            sunlight.SetTarget(0, 0, 0);
+            sunlight.SetColor(1, 1, 0, 0.25f);
+            sunlight.SetFOVBiasCoefficient(0.0001f);
+            AddLightObject(sunlight);
+
+            //DebugShadowLight = sunlight;
         }
 
         private void CreateMetalSphereTestObject()
@@ -157,6 +209,13 @@ namespace KWEngine2Test.Worlds
             s.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
             s.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
             AddGameObject(s);
+
+            Cube c = new Cube();
+            c.SetModel("KWCube");
+            c.SetScale(1);
+            c.IsShadowCaster = true;
+            c.SetPosition(-2.5f, 0.5f, -2.5f);
+            AddGameObject(c);
 
             CubeRoughnessTest floor = new CubeRoughnessTest();
             floor.SetModel("KWCube");

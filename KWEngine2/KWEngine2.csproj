@@ -139,9 +139,6 @@
     <Compile Include="Model\GeoMesh.cs" />
     <Compile Include="Model\GeoMeshHitbox.cs" />
     <Compile Include="Model\GeoModel.cs" />
-    <Compile Include="Model\GeoModelCube.cs" />
-    <Compile Include="Model\GeoModelCube1.cs" />
-    <Compile Include="Model\GeoModelCube6.cs" />
     <Compile Include="Model\GeoNode.cs" />
     <Compile Include="Model\GeoNodeAnimationChannel.cs" />
     <Compile Include="Model\GeoTerrain.cs" />

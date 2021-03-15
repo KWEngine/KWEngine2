@@ -10,6 +10,7 @@ using OpenTK.Graphics.OpenGL4;
 using System.Linq;
 using KWEngine2.Audio;
 using static KWEngine2.KWEngine;
+using System.Windows.Forms;
 
 namespace KWEngine2
 {
@@ -23,42 +24,26 @@ namespace KWEngine2
         /// </summary>
         public bool DebugShowHitboxes { get; set; } = false;
 
-        private int _debugShadowCasterIndex = -1;
-        public int DebugShadowCasterIndex 
+        private LightObject _debugShadowLight= null;
+        /// <summary>
+        /// Hält eine Referenz zu einem zu untersuchenden Lichtobjekt (nur Directional und Point Lights!)
+        /// </summary>
+        public LightObject DebugShadowLight
         {
             get
             {
-                return _debugShadowCasterIndex;
+                return _debugShadowLight;
             }
             set
             {
-                if(value >= 0 && value < KWEngine.MAX_SHADOWMAPS)
+                if(value != null && value.Type != LightType.Point && value.IsShadowCaster)
                 {
-                    _debugShadowCasterIndex = value;
+                    _debugShadowLight = value;
                 }
                 else
                 {
-                    _debugShadowCasterIndex = -1;
-                }
-            }
-        }
-
-        private bool _debugShadowCaster = false;
-        /// <summary>
-        /// Zeige die Welt aus der Sicht der Sonne
-        /// </summary>
-        public bool DebugShadowCaster {
-            get
-            {
-                return _debugShadowCasterIndex >= 0;
-            }
-            set
-            {
-                if(value == true)
-                {
-                    if (_debugShadowCasterIndex < 0)
-                        _debugShadowCasterIndex = 0;
-                    _debugShadowCaster = value;
+                    _debugShadowLight = null;
+                    HelperGL.ShowErrorAndQuit("World::DebugShadowLight", "Cannot set debug mode on this light because it either is null, is of type 'Point' or it does not cast shadows!");
                 }
             }
         }
@@ -274,10 +259,10 @@ namespace KWEngine2
         /// <summary>
         /// Verstärkt die Helligkeit des Hintergrundbilds (2D und 3D-Skybox)
         /// </summary>
-        /// <param name="m">Verstärkung der Helligkeit (0.0 bis 2.0) - Standardwert: 1</param>
+        /// <param name="m">Verstärkung der Helligkeit (0.000001 bis 10) - Standardwert: 1</param>
         public void SetTextureBackgroundBrightnessMultiplier(float m)
         {
-            _textureBackgroundMultiplier = HelperGL.Clamp(m, 0, 2);
+            _textureBackgroundMultiplier = HelperGL.Clamp(m, 0.000001f, 10);
         }
 
         /// <summary>
@@ -333,7 +318,6 @@ namespace KWEngine2
         internal Vector4 _ambientLight = new Vector4(1, 1, 1, 0.75f);
 
         private float _fov = 45f;
-        private float _fovShadow = 45f;
         private float _zFar = 1000f;
 
         /// <summary>
@@ -375,22 +359,6 @@ namespace KWEngine2
             set
             {
                 _fov = HelperGL.Clamp(value, 20, 175);
-                CurrentWindow.CalculateProjectionMatrix();
-            }
-        }
-
-        /// <summary>
-        /// Field of View (Standard: 45 Grad)
-        /// </summary>
-        public float FOVShadow
-        {
-            get
-            {
-                return _fovShadow;
-            }
-            set
-            {
-                _fovShadow = HelperGL.Clamp(value, 20, 175);
                 CurrentWindow.CalculateProjectionMatrix();
             }
         }
@@ -621,12 +589,15 @@ namespace KWEngine2
                 {
                     if (!_lightObjects.Contains(g) && _lightcount <= KWEngine.MAX_LIGHTS)
                     {
+                        g.ApplyFramebuffer();
+
                         _lightObjects.Add(g);
                         g.CurrentWorld = this;
                     }
                     else
                     {
-                        throw new Exception("Please do not add more than " + KWEngine.MAX_LIGHTS + " lights.");
+                        HelperGL.ShowErrorAndQuit("World::AddLightObject()", "Please do not add more than " + KWEngine.MAX_LIGHTS + " lights.");
+                        _lightObjectsTBA.Remove(g);
                     }
                 }
                 _lightObjectsTBA.Clear();
@@ -661,7 +632,7 @@ namespace KWEngine2
             }
             else
             {
-                throw new Exception("This HUD object already exists in this world.");
+                HelperGL.ShowErrorAndQuit("World::AddHUDObject()", "This HUD object already exists in this world.");
             }
         }
 
@@ -680,13 +651,42 @@ namespace KWEngine2
         /// <param name="l">Objekt</param>
         public void AddLightObject(LightObject l)
         {
-            if (!_lightObjects.Contains(l))
+            int shadowLightCount = 0;
+            bool alreadyInWorld = false;
+            int lightCount = 0;
+
+            for (int i = 0; i < _lightObjectsTBA.Count; i++)
+            {
+                if (_lightObjectsTBA[i].IsShadowCaster)
+                    shadowLightCount++;
+
+                if (_lightObjectsTBA[i] == l)
+                    alreadyInWorld = true;
+
+                lightCount++;
+            }
+            if (!alreadyInWorld && shadowLightCount < KWEngine.MAX_SHADOWMAPS)
+            {
+                for (int i = 0; i < _lightObjects.Count; i++)
+                {
+                    if (_lightObjects[i].IsShadowCaster)
+                        shadowLightCount++;
+
+                    if (_lightObjects[i] == l)
+                        alreadyInWorld = true;
+
+                    lightCount++;
+                }
+            }
+
+
+            if (!alreadyInWorld && lightCount < KWEngine.MAX_LIGHTS && shadowLightCount < KWEngine.MAX_SHADOWMAPS)
             {
                 _lightObjectsTBA.Add(l);
             }
             else
             {
-                throw new Exception("This light already exists in this world.");
+                HelperGL.ShowErrorAndQuit("Fatal error!", "Either this light already exists in this world or you have exceeded the maximum number of lights(" + KWEngine.MAX_SHADOWMAPS + "x shadow, " + KWEngine.MAX_LIGHTS + "x lights total)");
             }
 
         }
@@ -697,6 +697,7 @@ namespace KWEngine2
         /// <param name="l">Objekt</param>
         public void RemoveLightObject(LightObject l)
         {
+            l.RemoveFramebuffer();
             _lightObjectsTBR.Add(l);
         }
 
@@ -713,7 +714,7 @@ namespace KWEngine2
                     _gameObjectsTBA.Add(g);
                 }
                 else
-                    throw new Exception("GameObject instance " + g.Name + " already exists in current world.");
+                    HelperGL.ShowErrorAndQuit("Fatal error!", "GameObject instance " + g.Name + " already exists in current world.");
             }
 
         }
@@ -726,12 +727,14 @@ namespace KWEngine2
         {
             lock (_explosionObjects)
             {
-                if (ex != null && !_explosionObjects.Contains(ex))
+                if (ex != null && !_explosionObjects.Contains(ex) && !_explosionObjectsTBA.Contains(ex))
                 {
                     _explosionObjectsTBA.Add(ex);
                 }
                 else
-                    throw new Exception("Explosion instance already exists in current world.");
+                {
+                    HelperGL.ShowErrorAndQuit("World::AddGameObject()", "This Explosion instance already exists in the current world.");
+                }
             }
         }
 
@@ -795,9 +798,35 @@ namespace KWEngine2
 
             lock (_lightObjects)
             {
+                CurrentWindow.InitializeFramebuffersLightsList();
+
+                for(int i = 0; i < _lightObjects.Count; i++)
+                {
+                    if(_lightObjects[i].IsShadowCaster)
+                    {
+                        _lightObjects[i] = null;
+                    }
+                }
                 _lightObjects.Clear();
+
+                for (int i = 0; i < _lightObjectsTBA.Count; i++)
+                {
+                    if (_lightObjectsTBA[i].IsShadowCaster)
+                    {
+                        _lightObjectsTBA[i] = null;
+                    }
+                }
                 _lightObjectsTBA.Clear();
+
+                for (int i = 0; i < _lightObjectsTBR.Count; i++)
+                {
+                    if (_lightObjectsTBR[i].IsShadowCaster)
+                    {
+                        _lightObjectsTBR[i] = null;
+                    }
+                }
                 _lightObjectsTBR.Clear();
+
             }
 
             lock (_explosionObjects)
@@ -830,8 +859,12 @@ namespace KWEngine2
                     GL.DeleteTexture(texId);
                 }
                 dict.Clear();
+                
                 KWEngine.CustomTextures.Remove(this);
             }
+            GL.Flush();
+            GL.Finish();
+            GC.Collect(GC.MaxGeneration);
         }
 
         /// <summary>

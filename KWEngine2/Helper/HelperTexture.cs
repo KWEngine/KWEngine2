@@ -253,7 +253,8 @@ namespace KWEngine2.Helper
                 Bitmap image = new Bitmap(s);
                 if (image == null)
                 {
-                    throw new Exception("File " + resourceName + " is not a valid image file.");
+                    HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureFromAssembly()", "File " + resourceName + " is not a valid image file.");
+                    return -1;
                 }
                 texID = GL.GenTexture();
                 GL.BindTexture(TextureTarget.Texture2D, texID);
@@ -305,7 +306,8 @@ namespace KWEngine2.Helper
                 Bitmap image = new Bitmap(filename);
                 if (image == null)
                 {
-                    throw new Exception("File " + filename + " is not a valid image file.");
+                    HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureForModelExternal()", "File " + filename + " is not a valid image file.");
+                    return -1;
                 }
                 texID =  GL.GenTexture();
                 GL.BindTexture(TextureTarget.Texture2D, texID);
@@ -337,7 +339,8 @@ namespace KWEngine2.Helper
             }
             catch (Exception ex)
             {
-                throw new Exception("Could not load image file " + filename + "! Make sure to copy it to the correct output directory. " + "[" + ex.Message + "]");
+                HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureForModelExternal()", "Could not load image file " + filename + "! Make sure to copy it to the correct output directory. " + "[" + ex.Message + "]");
+                return -1;
             }
             return texID;
         }
@@ -352,7 +355,8 @@ namespace KWEngine2.Helper
                     Bitmap image = new Bitmap(ms);
                     if (image == null)
                     {
-                        throw new Exception("Image data inside GLB file corrupted. No valid image data found.");
+                        HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureForModelGLB()", "Could not load image file from GLB!");
+                        return -1;
                     }
                     texID = GL.GenTexture();
                     GL.BindTexture(TextureTarget.Texture2D, texID);
@@ -384,7 +388,8 @@ namespace KWEngine2.Helper
             }
             catch (Exception ex)
             {
-                throw new Exception("Could not load image file inside GLB. [" + ex.Message + "]");
+                HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureForModelGLB()", "Could not load image file! Make sure to copy it to the correct output directory. " + "[" + ex.Message + "]");
+                return -1;
             }
             return texID;
         }
@@ -401,7 +406,8 @@ namespace KWEngine2.Helper
                     Bitmap image = new Bitmap(s);
                     if (image == null)
                     {
-                        throw new Exception("File " + filename + " is not a valid image file.");
+                        HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureForModelInternal()", "Could not load image file! Make sure to copy it to the correct output directory.");
+                        return -1;
                     }
                     texID = GL.GenTexture();
                     GL.BindTexture(TextureTarget.Texture2D, texID);
@@ -434,7 +440,8 @@ namespace KWEngine2.Helper
             }
             catch (Exception)
             {
-                throw new Exception("Could not load image file from assembly: " + filename);
+                HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureForModel()", "Could not load image file from assembly: " + filename);
+                return -1;
             }
             return texID;
         }
@@ -541,7 +548,10 @@ namespace KWEngine2.Helper
         {
             Assembly a = Assembly.GetEntryAssembly();
             if (!filename.ToLower().EndsWith("jpg") && !filename.ToLower().EndsWith("jpeg") && !filename.ToLower().EndsWith("png"))
-                throw new Exception("Only JPG and PNG files are supported.");
+            {
+                HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureSkybox()", "Only JPG and PNG files are supported.");
+                return -1;
+            }
 
             if (!KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(filename))
             {

@@ -89,8 +89,6 @@ namespace KWEngine2.Renderers
             {
                 if (g.Hitboxes[i].IsActive)
                 {
-                    GL.UseProgram(mProgramId);
-
                     float[] v = g.Hitboxes[i].GetVertices();
                     GL.UniformMatrix4(mUniform_MVP, false, ref viewProjection);
                     GL.Uniform4(mUniform_BaseColor, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -109,7 +107,6 @@ namespace KWEngine2.Renderers
                     GL.DeleteBuffer(tmp);
                     GL.DeleteVertexArray(tmpVAO);
 
-                    GL.UseProgram(0);
                 }
             }
         }

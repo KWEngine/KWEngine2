@@ -184,7 +184,7 @@ namespace KWEngine2.GameObjects
             {
                 if (Model != null && Model.IsTerrain)
                 {
-                    throw new Exception("Outline cannot be set for terrain geometry.");
+                    HelperGL.ShowErrorAndQuit("Fatal error!", "Outline cannot be set for terrain models.");
                 }
                 _colorOutline.X = HelperGL.Clamp(value.X, 0, 1);
                 _colorOutline.Y = HelperGL.Clamp(value.Y, 0, 1);
@@ -222,7 +222,7 @@ namespace KWEngine2.GameObjects
             {
                 if (Model == null || !Model.IsValid || Model.Animations.Count == 0 || value >= Model.Animations.Count)
                 {
-                    throw new Exception("Cannot set animation id on invalid model. Model might be null, invalid, without any animations or the animation id does not exist.");
+                    HelperGL.ShowErrorAndQuit("Fatal error!", "Cannot set animation id on invalid model. Model might be null, invalid, without any animations or the animation id does not exist.");
                 }
                 else
                 {
@@ -519,7 +519,7 @@ namespace KWEngine2.GameObjects
                 HelperCamera.AddRotation(-(ms.X - centerX) * Math.Abs(KWEngine.MouseSensitivity), (centerY - ms.Y) * KWEngine.MouseSensitivity);
             }
             else
-                throw new Exception("FPS mode is not active.");
+                HelperGL.ShowErrorAndQuit("Fatal error!", "First Person Mode is not active!");
         }
 
         /// <summary>
@@ -565,7 +565,12 @@ namespace KWEngine2.GameObjects
         internal void SetModel(GeoModel m)
         {
             // is m null? throw exception then!
-            _model = m ?? throw new Exception("Your model is null.");
+            if(m == null)
+            {
+                HelperGL.ShowErrorAndQuit("Fatal error!", "Invalid model.");
+                return;
+            }
+            _model = m;
 
             CopyMaterialsFromMeshes();
 
@@ -672,7 +677,7 @@ namespace KWEngine2.GameObjects
 
             if (Model.IsTerrain)
             {
-                throw new Exception("Terrains cannot 'look' at objects.");
+                HelperGL.ShowErrorAndQuit("GameObject::IsLookingAt()", "Terrains cannot 'look' at objects.");
             }
 
             Vector3 position = GetCenterPointForAllHitboxes();
@@ -764,7 +769,7 @@ namespace KWEngine2.GameObjects
             }
             else
             {
-                throw new Exception("Cannot set rotation on empty geometry object. Did you assign an instance of GeometryObject to your GameObject instance?");
+                HelperGL.ShowErrorAndQuit("GameObject::SetRotation()", "Cannot set rotation on empty geometry object. Did you assign an instance of GeometryObject to your GameObject instance?");
             }
         }
 
@@ -929,8 +934,7 @@ namespace KWEngine2.GameObjects
                 Position = new Vector3(newPosition);
             }
             else
-                throw new Exception("Cannot set position on empty model object. Did you assign an instance of GeoModel to your GameObject via SetModel() ?");
-
+                HelperGL.ShowErrorAndQuit("GameObject::SetPosition()", "Cannot set position on empty model object. Did you assign an instance of GeoModel to your GameObject via SetModel() ?");
         }
 
         /// <summary>
@@ -1061,7 +1065,7 @@ namespace KWEngine2.GameObjects
             }
             else
             {
-                throw new Exception("MoveAndStrafeFirstPerson() may only be called from the current FPS object.");
+                HelperGL.ShowErrorAndQuit("GameObject::MoveAndStrafeFirstPersonXYZ()", "MoveAndStrafeFirstPerson() may only be called from the current FPS object.");
             }
         }
 
@@ -1089,7 +1093,7 @@ namespace KWEngine2.GameObjects
             }
             else
             {
-                throw new Exception("MoveAndStrafeFirstPersonXZ() may only be called from the current FPS object.");
+                HelperGL.ShowErrorAndQuit("GameObject::MoveAndStrafeFirstPersonXZ()", "MoveAndStrafeFirstPerson() may only be called from the current FPS object.");
             }
         }
 
@@ -1283,7 +1287,7 @@ namespace KWEngine2.GameObjects
         {
             if (Model == null || GLWindow.CurrentWindow.CurrentWorld == null)
             {
-                throw new Exception("Model and/or World have not been set yet!");
+                HelperGL.ShowErrorAndQuit("- GameObject::CheckModelAndWorld()", "Model and/or World have not been set yet!");
             }
         }
 
@@ -1291,7 +1295,7 @@ namespace KWEngine2.GameObjects
         {
             if (Model == null)
             {
-                throw new Exception("Model has not been set yet!");
+                HelperGL.ShowErrorAndQuit("- GameObject::CheckModel()", "Model has not been set yet!");
             }
         }
 
@@ -1316,7 +1320,7 @@ namespace KWEngine2.GameObjects
             CheckModelAndWorld();
             if (!IsCollisionObject)
             {
-                throw new Exception("Error: You are calling GetIntersectingObjects() on an instance that is marked as a non-colliding object.");
+                HelperGL.ShowErrorAndQuit("GameObject::GetIntersection()", "You are calling collision detection on an instance that is marked as a non-colliding object.");
             }
             if (_collisionCandidates.Count == 0)
             {
@@ -1382,7 +1386,7 @@ namespace KWEngine2.GameObjects
             CheckModelAndWorld();
             if (!IsCollisionObject)
             {
-                throw new Exception("Error: You are calling GetIntersectingObjects() on an instance that is marked as a non-colliding object.");
+                HelperGL.ShowErrorAndQuit("GameObject::GetIntersection()", "You are calling collision detection on an instance that is marked as a non-colliding object.");
             }
             if (_collisionCandidates.Count == 0)
             {
@@ -1440,7 +1444,8 @@ namespace KWEngine2.GameObjects
             List<Intersection> intersections = new List<Intersection>();
             if (!IsCollisionObject)
             {
-                throw new Exception("Error: You are calling GetIntersectingObjects() on an instance that is marked as a non-colliding object.");
+                HelperGL.ShowErrorAndQuit("GameObject::GetIntersections()", "You are calling GetIntersections() on an instance that is marked as a non-colliding object.");
+                return intersections;
             }
             if (_collisionCandidates.Count == 0)
             {
@@ -1505,7 +1510,7 @@ namespace KWEngine2.GameObjects
             List<Intersection> intersections = new List<Intersection>();
             if (!IsCollisionObject)
             {
-                throw new Exception("Error: You are calling GetIntersectingObjects() on an instance that is marked as a non-colliding object.");
+                HelperGL.ShowErrorAndQuit("GameObject::GetIntersections()", "You are calling collision detection on an instance that is marked as a non-colliding object.");
             }
             if (_collisionCandidates.Count == 0)
             {
@@ -1612,7 +1617,8 @@ namespace KWEngine2.GameObjects
             CheckModelAndWorld();
             if (!(Model.IsTerrain || Model.Name == "kwsphere.obj" || Model.Name == "kwcube.obj" || Model.Name == "kwcube6.obj" || Model.Name == "kwrect.obj"))
             {
-                throw new Exception("Cannot set texture on models other than KWCube, KWSphere or Terrain.");
+                HelperGL.ShowErrorAndQuit("GameObject::SetTexture()", "Cannot set texture on models other than KWCube, KWSphere or Terrain.");
+                return;
             }
 
             if (Model.IsTerrain)
@@ -1639,7 +1645,10 @@ namespace KWEngine2.GameObjects
                     terrainMesh.Material = mat;
                 }
                 else
-                    Console.WriteLine("Texture " + texture + " not found.");
+                {
+                    HelperGL.ShowErrorAndQuit("GameObject::SetTexture()", "Texture " + texture + " not found.");
+                    return;
+                }
             }
             else
             {
@@ -1681,7 +1690,10 @@ namespace KWEngine2.GameObjects
         public void SetSpecularReflectionEnabled(bool enabled)
         {
             if (Model == null)
-                throw new Exception("Cannot set roughness - model is not set.");
+            {
+                HelperGL.ShowErrorAndQuit("GameObject::SetSpecularReflectionEnabled()", "Cannot set specular reflections - model is not set.");
+                return;
+            }
 
             if (Model.IsTerrain)
             {
@@ -1705,7 +1717,10 @@ namespace KWEngine2.GameObjects
         public void SetRoughness(float r)
         {
             if (Model == null)
-                throw new Exception("Cannot set roughness - model is not set.");
+            {
+                HelperGL.ShowErrorAndQuit("GameObject::SetRoughness()", "Cannot set roughness - model is not set.");
+                return;
+            }
 
             r = HelperGL.Clamp(r, 0, 1);
 
@@ -1721,7 +1736,8 @@ namespace KWEngine2.GameObjects
                 {
                     if(_materials[i].TextureRoughness.OpenGLID > 0)
                     {
-                        throw new Exception("Cannot set roughness - your model's roughness texture has priority!");
+                        HelperGL.ShowErrorAndQuit("GameObject::SetRoughness()", "Cannot set roughness - your model's roughness texture has priority!");
+                        return;
                     }
                 }
 
@@ -1739,7 +1755,10 @@ namespace KWEngine2.GameObjects
         public void SetMetalness(float m)
         {
             if (Model == null)
-                throw new Exception("Cannot set metalness - model is not set.");
+            {
+                HelperGL.ShowErrorAndQuit("GameObject::SetMetalness()", "Cannot set metalnass - model is empty.");
+                return;
+            }
 
             m = HelperGL.Clamp(m, 0, 1);
             if (Model.IsTerrain)
@@ -1754,7 +1773,8 @@ namespace KWEngine2.GameObjects
                 {
                     if (_materials[i].TextureMetalness.OpenGLID > 0)
                     {
-                        throw new Exception("Cannot set metalness - your model's metalness texture has priority!");
+                        HelperGL.ShowErrorAndQuit("GameObject::SetMetalness()", "Cannot set metalnass - model metalness texture has priority.");
+                        return;
                     }
                 }
 
@@ -1825,7 +1845,9 @@ namespace KWEngine2.GameObjects
             CheckIfNotTerrain();
             if (!(Model.Name == "kwsphere.obj" || Model.Name == "kwcube.obj" || Model.Name == "kwcube6.obj" || Model.Name == "kwrect.obj"))
             {
-                throw new Exception("Cannot set texture repeat values on models other than KWCube or KWSphere.");
+                HelperGL.ShowErrorAndQuit("GameObject::SetTextureRepeat()", "Cannot set texture repeat values on models other than KWCube or KWSphere.");
+                return;
+                
             }
 
             
@@ -1877,7 +1899,10 @@ namespace KWEngine2.GameObjects
         protected Vector3 GetMouseIntersectionPoint(MouseState ms, Plane plane = Plane.Camera)
         {
             if (CurrentWorld.IsFirstPersonMode)
-                throw new Exception("Method GetMouseIntersectionPoint() may not be called from First Person Mode object.");
+            {
+                HelperGL.ShowErrorAndQuit("GameObject::GetMouseIntersectionPoint()", "Method GetMouseIntersectionPoint() may not be called from First Person Mode object.");
+                return Vector3.Zero;
+            }
             
             Vector3 worldRay = Get3DMouseCoords(HelperGL.GetNormalizedMouseCoords(ms.X, ms.Y, CurrentWindow));
             Vector3 normal;
@@ -2191,7 +2216,9 @@ namespace KWEngine2.GameObjects
         private void CheckIfNotTerrain()
         {
             if (Model != null && Model.IsTerrain)
-                throw new Exception("Not a valid call for Terrain objects.");
+            {
+                HelperGL.ShowErrorAndQuit("GameObject::CheckIfNotTerrain()", "Not a valid call for Terrain objects.");
+            }
         }
 
         /// <summary>
@@ -2205,7 +2232,8 @@ namespace KWEngine2.GameObjects
             CheckIfNotTerrain();
             if (!(Model.Name == "kwsphere.obj" || Model.Name == "kwcube.obj" || Model.Name == "kwcube6.obj" || Model.Name == "kwrect.obj"))
             {
-                throw new Exception("Cannot set texture on models other than KWCube or KWSphere.");
+                HelperGL.ShowErrorAndQuit("GameObject::SetTextureRepeat()", "Cannot set texture repeat values on models other than KWCube or KWSphere.");
+                return;
             }
 
             SetTextureRepeat(repeatX, repeatY, CubeSide.All);
@@ -2216,16 +2244,29 @@ namespace KWEngine2.GameObjects
             if (isFile)
             {
                 if (blendTexture != null && !File.Exists(blendTexture))
-                    throw new Exception("Blend texture not found.");
+                {
+                    HelperGL.ShowErrorAndQuit("GameObject::SetTextureTerrainBlendMapping()", "Texture not found.");
+                    return;
+                }
+                    
 
                 if (redTexture != null && !File.Exists(redTexture))
-                    throw new Exception("Red texture not found.");
+                {
+                    HelperGL.ShowErrorAndQuit("GameObject::SetTextureTerrainBlendMapping()", "Texture not found.");
+                    return;
+                }
 
                 if (greenTexture != null && !File.Exists(greenTexture))
-                    throw new Exception("Green texture not found.");
+                {
+                    HelperGL.ShowErrorAndQuit("GameObject::SetTextureTerrainBlendMapping()", "Texture not found.");
+                    return;
+                }
 
                 if (blueTexture != null && !File.Exists(blueTexture))
-                    throw new Exception("Blue texture not found.");
+                {
+                    HelperGL.ShowErrorAndQuit("GameObject::SetTextureTerrainBlendMapping()", "Texture not found.");
+                    return;
+                }
             }
 
             if (Model != null && Model.IsTerrain)
@@ -2302,7 +2343,8 @@ namespace KWEngine2.GameObjects
             }
             else
             {
-                throw new Exception("Method SetTextureTerrainBlendMapping() may only be called from a GameObject that has a terrain attached to it.");
+                HelperGL.ShowErrorAndQuit("HelperTexture::SetTextureTerrainBlendMapping()", "Method SetTextureTerrainBlendMapping() may only be called from a GameObject that has a terrain attached to it.");
+                return;
             }
         }
 

@@ -124,6 +124,8 @@ namespace KWEngine2.Renderers
 
             mUniform_TextureSkybox = GL.GetUniformLocation(mProgramId, "uTextureSkybox");
             mUniform_TextureIsSkybox = GL.GetUniformLocation(mProgramId, "uUseTextureSkybox");
+            mUniform_TextureSky2D = GL.GetUniformLocation(mProgramId, "uTextureSky2D");
+            mUniform_TextureSkyBoost = GL.GetUniformLocation(mProgramId, "uTextureSkyBoost");
 
             mUniform_SpecularReflectionFactor = GL.GetUniformLocation(mProgramId, "uSpecularReflectionFactor");
 
@@ -131,7 +133,7 @@ namespace KWEngine2.Renderers
             HelperGL.CheckGLErrors();
         }
 
-        internal void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum, ref float[] lightColors, ref float[] lightTargets, ref float[] lightPositions, ref float[] lightmeta, int lightCount)
+        internal void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum, int textureIndex)
         {
             if (g == null || !g.HasModel || g.CurrentWorld == null || g.Opacity <= 0)
                 return;
@@ -139,10 +141,8 @@ namespace KWEngine2.Renderers
             g.IsInsideScreenSpace = frustum.SphereVsFrustum(g.GetCenterPointForAllHitboxes(), g.GetMaxDiameter() / 2);
             if (!g.IsInsideScreenSpace)
                 return;
-
-            GL.UseProgram(mProgramId);
+            
             GL.Disable(EnableCap.Blend);
-
             lock (g)
             {
                 if (g.Opacity < 1)
@@ -154,15 +154,6 @@ namespace KWEngine2.Renderers
                 GL.Uniform4(mUniform_Outline, g.ColorOutline);
                 GL.Uniform3(mUniform_TintColor, g.Color);
 
-                // How many lights are there?
-                GL.Uniform1(mUniform_LightCount, lightCount);
-                GL.Uniform4(mUniform_LightsColors, KWEngine.MAX_LIGHTS, lightColors);
-                GL.Uniform4(mUniform_LightsTargets, KWEngine.MAX_LIGHTS, lightTargets);
-                GL.Uniform4(mUniform_LightsPositions, KWEngine.MAX_LIGHTS, lightPositions);
-                GL.Uniform3(mUniform_LightsMeta, KWEngine.MAX_LIGHTS, lightmeta);
-
-                // Sun
-                GL.Uniform4(mUniform_SunAmbient, g.CurrentWorld._ambientLight);
                 GL.Uniform1(mUniform_LightAffection, g.IsAffectedByLight ? 1 : 0);
 
                 // Camera
@@ -177,32 +168,6 @@ namespace KWEngine2.Renderers
                     GL.Uniform3(mUniform_uCameraDirection, HelperCamera.GetLookAtVector());
                 }
 
-                List<LightObject> lights = g.CurrentWorld._lightObjects;
-                int numLights = lights.Count;
-                HelperGL.CheckGLErrors();
-                int textureIndex = 0;
-                for (int lightIndex = 0; lightIndex < KWEngine.MAX_SHADOWMAPS; textureIndex += 2, lightIndex++)
-                {
-                    LightObject currentLight = null;
-                    if (lightIndex < numLights)
-                        currentLight = lights[lightIndex];
-
-                    // POINT LIGHT:
-                    GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
-                    GL.BindTexture(TextureTarget.TextureCubeMap, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTexturesCubeMap[currentLight._framebufferIndex] : KWEngine.TextureDepthCubeMapEmpty);
-                    GL.Uniform1(mUniform_TextureShadowMapCubeMap + lightIndex, textureIndex);
-                    HelperGL.CheckGLErrors();
-
-                    GL.ActiveTexture(TextureUnit.Texture0 + textureIndex + 1);
-                    GL.BindTexture(TextureTarget.Texture2D, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTextures[currentLight._framebufferIndex] : KWEngine.TextureDepthEmpty);
-                    GL.Uniform1(mUniform_TextureShadowMap + lightIndex, textureIndex + 1);
-                    if (currentLight != null)
-                        GL.UniformMatrix4(mUniform_VPShadowMap + lightIndex, false, ref currentLight._viewProjectionMatrixShadow[0]);
-                    else
-                        GL.UniformMatrix4(mUniform_VPShadowMap + lightIndex, false, ref KWEngine.Identity);
-                }
-                HelperGL.CheckGLErrors();
-
                 Matrix4.Mult(ref g.ModelMatrixForRenderPass[0], ref viewProjection, out _modelViewProjection);
                 Matrix4.Transpose(ref g.ModelMatrixForRenderPass[0], out _normalMatrix);
                 Matrix4.Invert(ref _normalMatrix, out _normalMatrix);
@@ -210,14 +175,6 @@ namespace KWEngine2.Renderers
                 GL.UniformMatrix4(mUniform_ModelMatrix, false, ref g.ModelMatrixForRenderPass[0]);
                 GL.UniformMatrix4(mUniform_NormalMatrix, false, ref _normalMatrix);
                 GL.UniformMatrix4(mUniform_MVP, false, ref _modelViewProjection);
-
-
-                // Upload skybox for metal reflections:
-                GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
-                GL.BindTexture(TextureTarget.TextureCubeMap, g.CurrentWorld._textureSkybox >= 0 ? g.CurrentWorld._textureSkybox : KWEngine.TextureCubemapEmpty);
-                GL.Uniform1(mUniform_TextureSkybox, textureIndex);
-                GL.Uniform1(mUniform_TextureIsSkybox, g.CurrentWorld._textureSkybox >= 0 ? 1 : 0);
-                textureIndex++;
 
                 if (g.ColorEmissive.W > 0)
                 {
@@ -380,7 +337,6 @@ namespace KWEngine2.Renderers
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, mesh.VBOIndex);
                 GL.DrawElements(mesh.Primitive, mesh.IndexCount, DrawElementsType.UnsignedInt, 0);
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-                GL.BindTexture(TextureTarget.Texture2D, 0);
                 GL.BindVertexArray(0);
                 HelperGL.CheckGLErrors();
             }
@@ -389,7 +345,7 @@ namespace KWEngine2.Renderers
             {
                 GL.Disable(EnableCap.Blend);
             }
-            GL.UseProgram(0);
+            
         }
     }
 }

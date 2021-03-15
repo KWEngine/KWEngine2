@@ -165,7 +165,8 @@ namespace KWEngine2.GameObjects
             }
             else
             {
-                throw new Exception("SetText() may only be called if the HUDObject is of type 'Text'. Text may also be not empty.");
+                HelperGL.ShowErrorAndQuit("HUDObject::SetText()", "SetText() may only be called if the HUDObject is of type 'Text'. Text may also be not empty.");
+                return;
             }
         }
 
@@ -189,7 +190,8 @@ namespace KWEngine2.GameObjects
             }
             else
             {
-                throw new Exception("Error: Is your HUD Type set to 'Image'? Or maybe the file " + filename + " does not exist?");
+                HelperGL.ShowErrorAndQuit("HUDObject::SetTexture()", "Invalid call. Is your HUD Type set to 'Image' ? Or maybe the file " + filename + " does not exist ? ");
+                return;
             }
         }
 

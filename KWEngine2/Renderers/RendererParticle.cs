@@ -28,13 +28,11 @@ namespace KWEngine2.Renderers
             using (Stream s = assembly.GetManifestResourceStream(resourceNameVertexShader))
             {
                 mShaderVertexId = LoadShader(s, ShaderType.VertexShader, mProgramId);
-                //Console.WriteLine(GL.GetShaderInfoLog(mShaderVertexId));
             }
 
             using (Stream s = assembly.GetManifestResourceStream(resourceNameFragmentShader))
             {
                 mShaderFragmentId = LoadShader(s, ShaderType.FragmentShader, mProgramId);
-                //Console.WriteLine(GL.GetShaderInfoLog(mShaderFragmentId));
             }
 
             if (mShaderFragmentId >= 0 && mShaderVertexId >= 0)

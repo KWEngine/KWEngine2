@@ -60,12 +60,8 @@ namespace KWEngine2Test.Worlds
             KWEngine.LoadModelFromFile("Spaceship", @".\models\spaceship\spaceship4.obj");
 
             KWEngine.BuildTerrainModel("Terrain", @".\textures\heightmap.png", @".\textures\sand_diffuse.jpg", 100, 2, 100, 5, 5);
-            KWEngine.ShadowMapCoefficient = 0.0005f;
-            FOVShadow = 40f;
-            //SetSunPosition(250, 250, -250);
-            //SetSunColor(0.25f, 0.5f, 1, 0.7f);
 
-            //SunAmbientFactor = 0.1f;
+            SetAmbientLight(0, 0.25f, 1f, 0.25f);
             SetCameraPosition(100, 100, 100);
             WorldDistance = 1000;
 
@@ -139,7 +135,7 @@ namespace KWEngine2Test.Worlds
 
             p._flashlight.SetDistanceMultiplier(5);
             p._flashlight.SetColor(1, 0.75f, 0, 5f);
-            p._flashlight.SetFOVShadow(180);
+            p._flashlight.SetFOV(180);
             AddLightObject(p._flashlight);
 
             Immovable lab = new Immovable();
@@ -161,7 +157,7 @@ namespace KWEngine2Test.Worlds
             panel.IsPickable = true;
             panel.IsCollisionObject = true;
             AddGameObject(panel);
-            
+
             /*
             PanelLight pLight = new PanelLight();
             pLight.Type = LightType.Directional;
@@ -171,6 +167,12 @@ namespace KWEngine2Test.Worlds
             pLight.SetDistanceMultiplier(5f);
             AddLightObject(pLight);
             */
+            LightObject sun = new LightObject(LightType.Sun, true);
+            sun.SetPosition(125, 125, -125);
+            sun.SetTarget(0, 0, 0);
+            sun.SetFOVBiasCoefficient(0.0001f);
+            sun.SetColor(0, 0.5f, 1.0f, 0.5f);
+            AddLightObject(sun);
 
             HUDObject ho = new HUDObject(HUDObjectType.Text, 24, 24);
             ho.SetText("kwengine.de");
@@ -179,6 +181,7 @@ namespace KWEngine2Test.Worlds
             AddHUDObject(ho);
            
             DebugShowHitboxes = false;
+            //DebugShadowLight = sun;
             if (IsFirstPersonMode)
             {
                 FOV = 90;

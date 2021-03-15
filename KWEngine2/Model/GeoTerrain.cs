@@ -75,7 +75,8 @@ namespace KWEngine2.Model
 
                         if (image.Width < 4 || image.Height < 4 || image.Height > 256 || image.Width > 256)
                         {
-                            throw new Exception("Image size too small or too big: width and height need to be >= 4 and <= 256 pixels.");
+                            HelperGL.ShowErrorAndQuit("GeoTerrain::BuildTerrain()", "Image size too small or too big: width and height need to be >= 4 and <= 256 pixels.");
+                            return null;
                         }
 
                         Debug.WriteLine("Generating terrain from height map: " + heightMap);
@@ -478,7 +479,8 @@ namespace KWEngine2.Model
             }
             catch (Exception ex)
             {
-                throw new Exception("Terrain could not be created: " + ex.Message);
+                HelperGL.ShowErrorAndQuit("GeoTerrain::BuildTerrain()", "Terrain could not be created: " + ex.Message);
+                return null;
             }
             finally
             {
@@ -547,7 +549,8 @@ namespace KWEngine2.Model
             }
             else
             {
-                throw new Exception("No coarse sector found for hitbox of " + hb.Owner.Name);
+                HelperGL.ShowErrorAndQuit("GeoTerrain::GetTrianglesForHitbox()", "No coarse sector found for hitbox of " + hb.Owner.Name);
+                return null;
             }
             return resultlist;
         }
@@ -565,7 +568,8 @@ namespace KWEngine2.Model
                     return sc;
                 }
             }
-            throw new Exception("Could not calculate coarse sector for " + s.ToString());
+            HelperGL.ShowErrorAndQuit("GeoTerrain::GetSectorCoarseForSector()", "No coarse sector found for hitbox of " + s.ToString());
+            return new Sector();
         }
 
         private List<int> GetSectorsForGeoTriangle(GeoTerrainTriangle triangle)
