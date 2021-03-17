@@ -217,10 +217,7 @@ namespace KWEngine2.Renderers
                     {
                         GL.Uniform1(mUniform_UseAnimations, 0);
                     }
-                    if(meshMaterial.Name.Contains("wire"))
-                    {
-                        Console.WriteLine("!");
-                    }
+
                     GL.Uniform1(mUniform_Roughness, meshMaterial.Roughness);
                     GL.Uniform1(mUniform_Metalness, meshMaterial.Metalness);
                     GL.Uniform1(mUniform_SpecularReflectionFactor, meshMaterial.SpecularReflection ? 1 : 0);
