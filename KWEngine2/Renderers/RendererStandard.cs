@@ -131,13 +131,6 @@ namespace KWEngine2.Renderers
 
         internal void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum, int textureIndex)
         {
-            if (g == null || !g.HasModel || g.CurrentWorld == null || g.Opacity <= 0)
-                return;
-
-            g.IsInsideScreenSpace = frustum.VolumeVsFrustum(g.GetCenterPointForAllHitboxes(), g.GetMaxDimensions().X, g.GetMaxDimensions().Y, g.GetMaxDimensions().Z);
-            if (!g.IsInsideScreenSpace)
-                return;
-
             lock (g)
             {
                 GL.Uniform4(mUniform_Glow, g.Glow);
@@ -156,15 +149,6 @@ namespace KWEngine2.Renderers
                 {
                     GL.Uniform3(mUniform_uCameraPos, g.CurrentWorld.GetFirstPersonObject().Position.X, g.CurrentWorld.GetFirstPersonObject().Position.Y + g.CurrentWorld.GetFirstPersonObject().FPSEyeOffset, g.CurrentWorld.GetFirstPersonObject().Position.Z);
                     GL.Uniform3(mUniform_uCameraDirection, HelperCamera.GetLookAtVector());
-                }
-
-                if (g.ColorEmissive.W > 0)
-                {
-                    GL.Uniform4(mUniform_EmissiveColor, g.ColorEmissive);
-                }
-                else
-                {
-                    GL.Uniform4(mUniform_EmissiveColor, Vector4.Zero);
                 }
 
                 int index = 0;
@@ -210,6 +194,14 @@ namespace KWEngine2.Renderers
                         GL.Enable(EnableCap.Blend);
                     }
 
+                    if (g.ColorEmissive.W > 0)
+                    {
+                        GL.Uniform4(mUniform_EmissiveColor, g.ColorEmissive);
+                    }
+                    else
+                    {
+                        GL.Uniform4(mUniform_EmissiveColor, meshMaterial.ColorEmissive.X, meshMaterial.ColorEmissive.Y, meshMaterial.ColorEmissive.Z, meshMaterial.ColorEmissive.W);
+                    }
                     GL.Uniform1(mUniform_Opacity, meshMaterial.Opacity * g.Opacity);
 
                     if (mesh.BoneNames.Count > 0 && g.AnimationID >= 0 && g.Model.Animations != null && g.Model.Animations.Count > 0)
@@ -225,7 +217,10 @@ namespace KWEngine2.Renderers
                     {
                         GL.Uniform1(mUniform_UseAnimations, 0);
                     }
-
+                    if(meshMaterial.Name.Contains("wire"))
+                    {
+                        Console.WriteLine("!");
+                    }
                     GL.Uniform1(mUniform_Roughness, meshMaterial.Roughness);
                     GL.Uniform1(mUniform_Metalness, meshMaterial.Metalness);
                     GL.Uniform1(mUniform_SpecularReflectionFactor, meshMaterial.SpecularReflection ? 1 : 0);

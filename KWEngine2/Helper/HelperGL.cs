@@ -2,8 +2,8 @@
 using OpenTK.Graphics.OpenGL4;
 using System;
 using System.Diagnostics;
-using System.Windows.Forms;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace KWEngine2.Helper
 {
@@ -14,8 +14,12 @@ namespace KWEngine2.Helper
     {
         internal static void ShowErrorAndQuit(string caption, string errormessage)
         {
-            MessageBox.Show(errormessage, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            KWEngine.CurrentWindow.ForceClose();
+            if (!KWEngine.GlobalError)
+            {
+                MessageBox.Show(errormessage, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                KWEngine.GlobalError = true;
+                KWEngine.CurrentWindow.ForceClose();
+            }
         }
 
         /// <summary>

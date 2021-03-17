@@ -14,16 +14,10 @@ namespace KWEngine2.Helper
         internal static void SaveDepthMapToBitmap(int texId)
         {
             Bitmap b = new Bitmap(KWEngine.ShadowMapSize, KWEngine.ShadowMapSize, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-
-            //BitmapData bmd = b.LockBits(new Rectangle(0, 0, KWEngine.ShadowMapSize, KWEngine.ShadowMapSize), ImageLockMode.WriteOnly, b.PixelFormat);
-
             float[] depthData = new float[KWEngine.ShadowMapSize * KWEngine.ShadowMapSize];
-            HelperGL.CheckGLErrors();
             GL.BindTexture(TextureTarget.Texture2D, texId);
             GL.GetTexImage(TextureTarget.Texture2D, 0, OpenTK.Graphics.OpenGL4.PixelFormat.DepthComponent, PixelType.Float, depthData);
             GL.BindTexture(TextureTarget.Texture2D, 0);
-            HelperGL.CheckGLErrors();
-
             HelperGL.ScaleToRange(0, 255, depthData);
             int x = 0, y = KWEngine.ShadowMapSize - 1;
             for(int i = 0; i < depthData.Length; i++)
@@ -37,9 +31,6 @@ namespace KWEngine2.Helper
                     y--;
                 }
             }
-
-            
-            //b.UnlockBits(bmd);
             b.Save("texture2d_depth.bmp", ImageFormat.Bmp);
             b.Dispose();
         }
@@ -47,16 +38,10 @@ namespace KWEngine2.Helper
         internal static void SaveDepthCubeMapToBitmap(TextureTarget target, int texId)
         {
             Bitmap b = new Bitmap(KWEngine.ShadowMapSize, KWEngine.ShadowMapSize, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-
-            //BitmapData bmd = b.LockBits(new Rectangle(0, 0, KWEngine.ShadowMapSize, KWEngine.ShadowMapSize), ImageLockMode.WriteOnly, b.PixelFormat);
-
             float[] depthData = new float[KWEngine.ShadowMapSize * KWEngine.ShadowMapSize];
-            HelperGL.CheckGLErrors();
             GL.BindTexture(TextureTarget.TextureCubeMap, texId);
             GL.GetTexImage(target, 0, OpenTK.Graphics.OpenGL4.PixelFormat.DepthComponent, PixelType.Float, depthData);
             GL.BindTexture(TextureTarget.TextureCubeMap, 0);
-            HelperGL.CheckGLErrors();
-
             HelperGL.ScaleToRange(0, 255, depthData);
             int x = 0, y = KWEngine.ShadowMapSize - 1;
             for (int i = 0; i < depthData.Length; i++)
@@ -133,7 +118,6 @@ namespace KWEngine2.Helper
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-            HelperGL.CheckGLErrors();
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
             return texID;

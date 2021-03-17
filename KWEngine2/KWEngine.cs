@@ -233,6 +233,7 @@ namespace KWEngine2
 
         internal static Matrix4 Matrix4Dummy = Matrix4.Identity;
 
+        internal static bool GlobalError = false;
         internal static int TextureDefault = -1;
         internal static int TextureBlack = -1;
         internal static int TextureWhite = -1;
@@ -574,7 +575,11 @@ namespace KWEngine2
         {
             bool modelFound = Models.TryGetValue(name, out GeoModel m);
             if (!modelFound)
-                throw new Exception("Model " + name + " not found.");
+            {
+                HelperGL.ShowErrorAndQuit("KWEngine::GetModel()", "Model " + name + " not found.");
+                //throw new Exception("Model " + name + " not found.");
+            }
+                
             return m;
         }
 

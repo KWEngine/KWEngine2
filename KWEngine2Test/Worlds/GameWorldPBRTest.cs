@@ -26,43 +26,8 @@ namespace KWEngine2Test.Worlds
                 CurrentWindow.SetWorld(new GameWorldStart());
                 return;
             }
-            /*
-            if(kb[Key.U])
-            {
-                float i = GetSunColor().W;
-                i -= 0.05f * KWEngine.DeltaTimeFactor;
-                i = HelperGL.Clamp(i, 0, 2);
-                SetSunColor(GetSunColor().X, GetSunColor().Y, GetSunColor().Z, i);
-                Console.WriteLine("SunIntensity: " + i);
-            }
-            else if (kb[Key.I])
-            {
-                float i = GetSunColor().W;
-                i += 0.05f * KWEngine.DeltaTimeFactor;
-                i = HelperGL.Clamp(i, 0, 2);
-                SetSunColor(GetSunColor().X, GetSunColor().Y, GetSunColor().Z, i);
-                Console.WriteLine("SunIntensity: " + i);
-            }
 
-            if (kb[Key.J])
-            {
-                float i = SunAmbientFactor;
-                i -= 0.01f * KWEngine.DeltaTimeFactor;
-                i = HelperGL.Clamp(i, 0, 1);
-                SetSunAmbientFactor(i);
-                Console.WriteLine("Ambient: " + i);
-            }
-            else if (kb[Key.K])
-            {
-                float i = SunAmbientFactor;
-                i += 0.01f * KWEngine.DeltaTimeFactor;
-                i = HelperGL.Clamp(i, 0, 1);
-                SetSunAmbientFactor(i);
-                Console.WriteLine("Ambient: " + i);
-            }
-            */
-
-            //SpawnParticles();
+            SpawnParticles();
         }
         
         private void SpawnParticles()
@@ -84,36 +49,38 @@ namespace KWEngine2Test.Worlds
 
         public override void Prepare()
         {
-            KWEngine.LoadModelFromFile("MatTest", @".\models\gltftestcube.glb");
-            KWEngine.LoadModelFromFile("MatTest255", @".\models\gltftestcube255.glb");
+            //KWEngine.LoadModelFromFile("MatTest", @".\models\gltftestcube.glb");
+            //KWEngine.LoadModelFromFile("MatTest255", @".\models\gltftestcube255.glb");
+            KWEngine.LoadModelFromFile("EmissionTest", @".\models\emission_gltf_test.glb");
 
             FOV = 45;
 
-            //SetSunPosition(100, 100, 100);
-            //SetSunTarget(0, 0, 0);
-            //SetSunAmbientFactor(0.5f);
-            //SetSunColor(1, 1, 1, 0.5f);
-            SetAmbientLight(1, 1, 1, 0.25f);
+            SetAmbientLight(1, 1, 1, 0.2f);
 
             SetCameraPosition(0, 25, 50);
             SetCameraTarget(0, 0, 0);
 
-            //SetTextureSkybox(@".\textures\skybox1.jpg");
-            SetTextureBackground(@".\textures\bg_greenmountains.png");
+            SetTextureSkybox(@".\textures\skybox1.jpg");
+            //SetTextureBackground(@".\textures\bg_greenmountains.png");
             SetTextureBackgroundBrightnessMultiplier(4);
 
-            //CreateMetalSphereTestObject();
-            //CreateCubeTestObject();
-            //CreateGLBTestObject();
-            //CreateTerrainTestObject();
+            CreateMetalSphereTestObject();
+            CreateCubeTestObject();
+            CreateGLBTestObject();
+            CreateTerrainTestObject();
 
-            CreateRoomForLightTest();
+            //CreateRoomForLightTest();
 
 
             CreateFreeFloatPlayer();
 
+            LightObject sun = new LightObject(LightType.Sun, true);
+            sun.SetPosition(30, 30, 30);
+            sun.SetFOVBiasCoefficient(0.00009f);
+            AddLightObject(sun);
 
             DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
+            //DebugShadowLight = sun;
             DebugShowCoordinateSystemGrid = GridType.GridXZ;
         }
 
@@ -130,6 +97,13 @@ namespace KWEngine2Test.Worlds
         {
             SetAmbientLight(1, 1, 1, 0.25f);
 
+            Cube e1 = new Cube();
+            e1.SetModel("EmissionTest");
+            e1.SetPosition(0, 4, 0);
+            e1.IsShadowCaster = true;
+            AddGameObject(e1);
+
+            /*
             Cube c1 = new Cube();
             c1.SetModel("KWCube");
             c1.SetScale(20, 10, 2);
@@ -196,6 +170,7 @@ namespace KWEngine2Test.Worlds
             AddLightObject(sunlight);
 
             //DebugShadowLight = sunlight;
+            */
         }
 
         private void CreateMetalSphereTestObject()

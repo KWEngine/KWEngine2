@@ -179,7 +179,6 @@ void main()
 
 	// Metalness / Reflections:
 	vec3 refl = vec3(0.22 * uSunAmbient.xyz * uSunAmbient.w * uTextureSkyBoost);
-	vec3 metalnessTextureLookup = vec3(0);
 	if(uUseTextureSkybox > 0)
 	{
 		vec3 reflectedCameraSurfaceNormal = reflect(-fragmentToCamera, theNormal);
@@ -194,14 +193,13 @@ void main()
 	}
 
 	vec3 reflection = refl;
-	vec3 metalness = vec3(uMetalness);
+	float metalness = uMetalness;
 	if(uUseTextureMetalness > 0)
 	{
-		metalnessTextureLookup = texture(uTextureMetalness, vTexture).xyz;
-		metalness = vec3(metalnessTextureLookup.z);
+		metalness = texture(uTextureMetalness, vTexture).z;
 	}
 	reflection *= metalness;
-	reflection = min(refl, reflection);
+    reflection = min(refl, reflection);
 
 	// Roughness:
 	float roughness = uRoughness;
@@ -217,11 +215,11 @@ void main()
 	{
 		if(uUseTextureRoughnessIsSpecular > 0)
 		{
-			roughness = metalnessTextureLookup.y;
+			roughness = texture(uTextureMetalness, vTexture).y;
 		}
 	}
+	roughness = clamp(roughness, 0.00001, 0.99999);
 	float roughnessInverted = 1.0 - roughness;
-	float roughnessInvertedClamped = clamp(roughnessInverted, 0.0, 0.999);
 
 	// Loop for lights:
 	vec3 colorComponentSpecularTotalFromLights = vec3(0.0);
@@ -301,7 +299,7 @@ void main()
 	rgbFragment += reflection;
 	
 	float dotOutline = max(1.0 - 4.0 * pow(abs(dot(uCameraDirection, vNormal)), 2.0), 0.0) * uOutline.w;
-	color.xyz = rgbFragment + uOutline.xyz * dotOutline * 0.9;
+	color.xyz = rgbFragment + (uOutline.xyz * dotOutline * 0.9);
 	color.w = uOpacity;
 
 	vec3 addedBloom = vec3(max(rgbFragment.x - 1.0, 0.0), max(rgbFragment.y - 1.0, 0.0), max(rgbFragment.z - 1.0, 0.0));

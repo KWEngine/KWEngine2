@@ -514,9 +514,12 @@ namespace KWEngine2.GameObjects
 
             if (CurrentWorld.IsFirstPersonMode)
             {
-                int centerX = CurrentWindow.X + CurrentWindow.Width / 2;
-                int centerY = CurrentWindow.Y + CurrentWindow.Height / 2;
-                HelperCamera.AddRotation(-(ms.X - centerX) * Math.Abs(KWEngine.MouseSensitivity), (centerY - ms.Y) * KWEngine.MouseSensitivity);
+                if (CurrentWorld.DebugShadowLight == null)
+                {
+                    int centerX = CurrentWindow.X + CurrentWindow.Width / 2;
+                    int centerY = CurrentWindow.Y + CurrentWindow.Height / 2;
+                    HelperCamera.AddRotation(-(ms.X - centerX) * Math.Abs(KWEngine.MouseSensitivity), (centerY - ms.Y) * KWEngine.MouseSensitivity);
+                }
             }
             else
                 HelperGL.ShowErrorAndQuit("Fatal error!", "First Person Mode is not active!");
@@ -1630,39 +1633,47 @@ namespace KWEngine2.GameObjects
                     Type = type
                 };
 
-                if (KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(texture))
+                if (KWEngine.CustomTextures.Count > 0)
                 {
-                    newTex.OpenGLID = KWEngine.CustomTextures[KWEngine.CurrentWorld][texture];
+                    if (KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(texture))
+                    {
+                        newTex.OpenGLID = KWEngine.CustomTextures[KWEngine.CurrentWorld][texture];
+                    }
+                    else
+                    {
+                        SetTextureTerrainInternal(ref newTex, texture);
+                    }
+                    if (newTex.OpenGLID >= 0)
+                    {
+                        GeoMaterial mat = terrainMesh.Material;
+                        mat.SetTexture(newTex.Filename, newTex.Type, newTex.OpenGLID);
+                        terrainMesh.Material = mat;
+                    }
+                    else
+                    {
+                        HelperGL.ShowErrorAndQuit("GameObject::SetTexture()", "Texture " + texture + " not found.");
+                        return;
+                    }
                 }
                 else
-                {
-                    SetTextureTerrainInternal(ref newTex, texture);
-                }
-                if(newTex.OpenGLID >= 0)
-                {
-                    GeoMaterial mat = terrainMesh.Material;
-                    mat.SetTexture(newTex.Filename, newTex.Type, newTex.OpenGLID);
-                    terrainMesh.Material = mat;
-                }
-                else
-                {
-                    HelperGL.ShowErrorAndQuit("GameObject::SetTexture()", "Texture " + texture + " not found.");
                     return;
-                }
             }
             else
             {
                 int texId = -1;
-                if (KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(texture))
+                if (KWEngine.CustomTextures.Count > 0)
                 {
-                    texId = KWEngine.CustomTextures[KWEngine.CurrentWorld][texture];
-                }
-                else
-                {
-                    texId = HelperTexture.LoadTextureForModelExternal(texture);
-                    if (texId > 0 && !KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(texture))
+                    if (KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(texture))
                     {
-                        KWEngine.CustomTextures[KWEngine.CurrentWorld].Add(texture, texId);
+                        texId = KWEngine.CustomTextures[KWEngine.CurrentWorld][texture];
+                    }
+                    else
+                    {
+                        texId = HelperTexture.LoadTextureForModelExternal(texture);
+                        if (texId > 0 && !KWEngine.CustomTextures[KWEngine.CurrentWorld].ContainsKey(texture))
+                        {
+                            KWEngine.CustomTextures[KWEngine.CurrentWorld].Add(texture, texId);
+                        }
                     }
                 }
 
@@ -2271,8 +2282,13 @@ namespace KWEngine2.GameObjects
 
             if (Model != null && Model.IsTerrain)
             {
+                if(KWEngine.CustomTextures.Count == 0)
+                {
+                    return;
+                }
                 lock (KWEngine.CustomTextures)
                 {
+
                     GeoTerrain terrain = Model.Meshes.Values.ElementAt(0).Terrain;
                     if (blendTexture != null && redTexture != null)
                     {

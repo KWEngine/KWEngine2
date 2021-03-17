@@ -192,13 +192,10 @@ namespace KWEngine2
             KWEngine.TextureBlack = HelperTexture.LoadTextureInternal("black.png");
             KWEngine.TextureWhite = HelperTexture.LoadTextureInternal("white.png");
             KWEngine.TextureAlpha = HelperTexture.LoadTextureInternal("alpha.png");
-            HelperGL.CheckGLErrors();
 
             KWEngine.TextureDepthEmpty = HelperTexture.CreateEmptyDepthTexture();
             KWEngine.TextureDepthCubeMapEmpty = HelperTexture.CreateEmptyCubemapDepthTexture();
             KWEngine.TextureCubemapEmpty = HelperTexture.CreateEmptyCubemapTexture();
-            HelperGL.CheckGLErrors();
-
 
             KWEngine.InitializeShaders();
             KWEngine.InitializeModels();
@@ -208,9 +205,6 @@ namespace KWEngine2
             KWEngine.InitializeFont("anonymous3.dds", 2);
             KWEngine.InitializeFont("anonymous4.dds", 3);
             _bloomQuad = KWEngine.KWRect;
-            HelperGL.CheckGLErrors();
-
-
         }
 
 
@@ -264,6 +258,10 @@ namespace KWEngine2
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             base.OnRenderFrame(e);
+
+            if (KWEngine.GlobalError)
+                return;
+
             lock (HelperGLLoader.LoadList)
             {
                 if (HelperGLLoader.LoadList.Count > 0)
@@ -345,7 +343,6 @@ namespace KWEngine2
                         }
                     }
                 }
-                HelperGL.CheckGLErrors();
                 // ==================================================
                 // Do the shadow render pass for all lights:
                 // ==================================================
@@ -463,6 +460,9 @@ namespace KWEngine2
                     {
                         g._collisionCandidates.Clear(); // clear collision list for this objects
 
+                        if (g == null || !g.HasModel || g.CurrentWorld == null || g.Opacity <= 0)
+                            continue;
+
                         if (g.Model.IsTerrain)
                         {
                             mInstancesTerrain.Add(g);
@@ -471,7 +471,11 @@ namespace KWEngine2
 
                         if (g.CurrentWorld.IsFirstPersonMode && g.CurrentWorld.GetFirstPersonObject().Equals(g))
                             continue;
-                        
+
+                        g.IsInsideScreenSpace = Frustum.VolumeVsFrustum(g.GetCenterPointForAllHitboxes(), g.GetMaxDimensions().X, g.GetMaxDimensions().Y, g.GetMaxDimensions().Z);
+                        if (!g.IsInsideScreenSpace)
+                            continue;
+
                         bool opacityFound = false;
                         foreach (GeoMesh mesh in g.Model.Meshes.Values)
                         {
@@ -693,10 +697,9 @@ namespace KWEngine2
 
                 GL.Enable(EnableCap.DepthTest);
             }
+
             DownsampleFramebuffer();
             ApplyBloom();
-            HelperGL.CheckGLErrors();
-
             SwapBuffers();
 
             frameCounter++;
@@ -759,7 +762,8 @@ namespace KWEngine2
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             base.OnUpdateFrame(e);
-
+            if (KWEngine.GlobalError)
+                return;
             KeyboardState ks = Keyboard.GetState();
             MouseState ms = Mouse.GetCursorState();
             _mousePoint.X = ms.X;
@@ -1090,10 +1094,8 @@ namespace KWEngine2
 
                         Thread.Sleep(250);
                     }
-                    HelperGL.CheckGLErrors();
                     InitFramebuffersShadowMap();
                     InitFramebuffersShadowMapCubeMap();
-                    HelperGL.CheckGLErrors();
                 }
                 catch (ArgumentOutOfRangeException ex)
                 {
@@ -1105,8 +1107,6 @@ namespace KWEngine2
 
         internal void InitializeFramebuffers()
         {
-            HelperGL.CheckGLErrors();
-
             bool ok = false;
             while (!ok)
             {
@@ -1136,7 +1136,6 @@ namespace KWEngine2
             }
 
             InitializeFramebuffersLights();
-
         }
 
         private void DownsampleFramebuffer()
