@@ -296,11 +296,11 @@ namespace KWEngine2
                 // Generate VIEW and PROJECTION for main render pass!
                 // ==================================================
                 Matrix4 viewProjection;
-                if (CurrentWorld.DebugShadowLight != null && CurrentWorld.DebugShadowLight.CurrentWorld != null)
+                if (CurrentWorld.DebugShadowLight != null && CurrentWorld.DebugShadowLight.Type != LightType.Point && CurrentWorld.DebugShadowLight.CurrentWorld != null)
                 {
                     _viewMatrix = Matrix4.LookAt(CurrentWorld.DebugShadowLight.Position, CurrentWorld.DebugShadowLight.Target, KWEngine.WorldUp);
-                    viewProjection = _viewMatrix * _projectionMatrix;
-                    Frustum.CalculateFrustum(_projectionMatrix, _viewMatrix);
+                    viewProjection = CurrentWorld.DebugShadowLight._viewProjectionMatrixShadow[0];
+                    Frustum.CalculateFrustum(CurrentWorld.DebugShadowLight._projectionMatrixShadow, _viewMatrix);
                 }
                 else
                 {
