@@ -372,9 +372,10 @@ namespace KWEngine2
                         return;
                     }
                     SwitchToBufferAndClear(fbId);
-                    GL.Viewport(0, 0, KWEngine.ShadowMapSize, KWEngine.ShadowMapSize);
+                    
                     if(currentLight.Type == LightType.Point)
                     {
+                        GL.Viewport(0, 0, HelperTexture.RoundDownToPowerOf2(KWEngine.ShadowMapSize / 4), HelperTexture.RoundDownToPowerOf2(KWEngine.ShadowMapSize / 4));
                         GL.UseProgram(KWEngine.RendererShadowCubeMap.GetProgramId());
                         foreach (GameObject g in CurrentWorld._gameObjects)
                         {
@@ -384,6 +385,7 @@ namespace KWEngine2
                     }
                     else
                     {
+                        GL.Viewport(0, 0, KWEngine.ShadowMapSize, KWEngine.ShadowMapSize);
                         GL.UseProgram(KWEngine.RendererShadow.GetProgramId());
                         foreach (GameObject g in CurrentWorld._gameObjects)
                         {
@@ -1283,7 +1285,7 @@ namespace KWEngine2
                 for (int j = 0; j < 6; j++)
                 {
                     GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + j, 0, PixelInternalFormat.DepthComponent32,
-                        KWEngine.ShadowMapSize, KWEngine.ShadowMapSize, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
+                        HelperTexture.RoundDownToPowerOf2(KWEngine.ShadowMapSize / 4), HelperTexture.RoundDownToPowerOf2(KWEngine.ShadowMapSize / 4), 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
                 }
 
                 GL.TexParameterI(TextureTarget.TextureCubeMap, TextureParameterName.TextureCompareMode, new int[] { (int)TextureCompareMode.CompareRefToTexture });
