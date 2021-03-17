@@ -30,7 +30,7 @@ namespace KWEngine2.GameObjects
     /// </summary>
     public sealed class LightObject : IComparable
     {
-        private int _frustumMultiplier = 5;
+        private int _frustumMultiplier = 10;
 
         /// <summary>
         /// Name
