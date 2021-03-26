@@ -15,6 +15,21 @@ using System.Runtime.CompilerServices;
 namespace KWEngine2
 {
     /// <summary>
+    /// Steuert die 3D-Darstellung der Kamera
+    /// </summary>
+    public enum ProjectionType
+    {
+        /// <summary>
+        /// Nahe Objekte werden größer gezeichnet als ferne Objekte (Standard)
+        /// </summary>
+        Perspective,
+        /// <summary>
+        /// Alle Objekte werden ungeachtet der Kameradistanz gleich groß gezeichnet (ideal für 2D)
+        /// </summary>
+        Orthographic
+    }
+
+    /// <summary>
     /// Einheit zur Anzeige eines 10 Einheiten großen Gitternetzes
     /// </summary>
     public enum GridType
@@ -273,6 +288,23 @@ namespace KWEngine2
             get
             {
                 return DeltaTime.GetDeltaTimeFactor();
+            }
+        }
+
+        private static ProjectionType _projection = ProjectionType.Perspective;
+        /// <summary>
+        /// Stellt die 3D-Darstellung der Kamera ein (Standard: Perspective)
+        /// </summary>
+        public static ProjectionType Projection
+        {
+            get
+            {
+                return _projection;
+            }
+            set
+            {
+                _projection = value;
+                CurrentWindow.CalculateProjectionMatrix();
             }
         }
 

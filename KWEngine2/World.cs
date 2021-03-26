@@ -440,6 +440,30 @@ namespace KWEngine2
             return _cameraLookAt;
         }
 
+        internal Vector3 GetCameraLookAtVectorEitherWay()
+        {
+            if(IsFirstPersonMode && _firstPersonObject != null)
+            {
+                return HelperCamera.GetLookAtVector();
+            }
+            else
+            {
+                return GetCameraLookAtVector();
+            }
+        }
+
+        internal Vector3 GetCameraPositionEitherWay()
+        {
+            if (IsFirstPersonMode && _firstPersonObject != null)
+            {
+                return _firstPersonObject.Position + KWEngine.WorldUp * _firstPersonObject.FPSEyeOffset;
+            }
+            else
+            {
+                return GetCameraPosition();
+            }
+        }
+
         /// <summary>
         /// Setzt das Umgebungslichts (dort wo die Sonne nicht scheint)
         /// </summary>
@@ -1138,7 +1162,17 @@ namespace KWEngine2
         {
             return GameObject.PickGameObject(ms);
         }
-
+        
+        /// <summary>
+        /// Gibt eine Liste von GameObject-Instanzen zurück, die unter dem Mauszeiger liegen (Instanzen müssen mit IsPickable = true gesetzt haben)
+        /// </summary>
+        /// <param name="ms">Mausinformationen</param>
+        /// <returns>Liste betroffener GameObject-Instanzen</returns>
+        public static List<GameObject> PickGameObjects(MouseState ms)
+        {
+            return GameObject.PickGameObjects(ms);
+        }
+        
         /// <summary>
         /// Konvertiert 2D-Mauskoordinaten in 3D-Koordinaten
         /// </summary>
@@ -1148,7 +1182,6 @@ namespace KWEngine2
         /// <returns>3D-Mauskoordinaten</returns>
         protected static Vector3 GetMouseIntersectionPoint(MouseState ms, Plane planeNormal, float planeHeight)
         {
-            Vector3 worldRay = GameObject.Get3DMouseCoords(HelperGL.GetNormalizedMouseCoords(ms.X, ms.Y, KWEngine.CurrentWindow));
             Vector3 normal;
             if (planeNormal == Plane.Y)
                 normal = new Vector3(0, 1, 0.000001f);
@@ -1168,7 +1201,17 @@ namespace KWEngine2
                 }
             }
 
-            bool result = GameObject.LinePlaneIntersection(out Vector3 intersection, worldRay, CurrentWorld.GetCameraPosition(), normal, normal * planeHeight);
+            Vector2 mc = HelperGL.GetNormalizedMouseCoords(ms.X, ms.Y, KWEngine.CurrentWindow);
+            Vector3 worldRay = GameObject.Get3DMouseCoords(mc.X, mc.Y);
+            bool result;
+            Vector3 intersection;
+            if (Projection == ProjectionType.Perspective)
+                result = GameObject.LinePlaneIntersection(out intersection, worldRay, CurrentWorld.GetCameraPosition(), normal, normal * planeHeight);
+            else
+            {
+                Vector3 rayOrigin = HelperGL.GetRayOriginForOrthographicProjection(mc);
+                result = GameObject.LinePlaneIntersection(out intersection, worldRay, rayOrigin, normal, normal * planeHeight);
+            }
             if (result)
             {
                 return intersection;

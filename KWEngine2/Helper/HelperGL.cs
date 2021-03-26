@@ -122,5 +122,29 @@ namespace KWEngine2.Helper
 
             return new Vector2(x, y);
         }
+
+        internal static Vector3 GetRayOriginForOrthographicProjection(Vector2 normalizedMouseCoords)
+        {
+            float aspectRatio = (float)GLWindow.CurrentWindow.Width / (float)GLWindow.CurrentWindow.Height;
+            float xOffset = (2.0f * normalizedMouseCoords.X / (float)GLWindow.CurrentWindow.Width - 1) * ((KWEngine.CurrentWorld.FOV / 2) * aspectRatio);
+            float yOffset = (-(2.0f * normalizedMouseCoords.Y / (float)GLWindow.CurrentWindow.Height - 1)) * (KWEngine.CurrentWorld.FOV / 2);
+            Vector3 lookAt;
+            Vector3 position;
+            if (KWEngine.CurrentWorld.IsFirstPersonMode && KWEngine.CurrentWorld.GetFirstPersonObject() != null)
+            {
+                position = KWEngine.CurrentWorld.GetFirstPersonObject().Position + KWEngine.WorldUp * KWEngine.CurrentWorld.GetFirstPersonObject().FPSEyeOffset;
+                lookAt = HelperCamera.GetLookAtVector();
+            }
+            else
+            {
+                position = KWEngine.CurrentWorld.GetCameraPosition();
+                lookAt = KWEngine.CurrentWorld.GetCameraLookAtVector();
+            }
+            Vector3 cameraRight = Vector3.NormalizeFast(Vector3.Cross(lookAt, KWEngine.WorldUp));
+            Vector3 cameraUp = Vector3.NormalizeFast(Vector3.Cross(cameraRight, lookAt));
+
+            Vector3 rayOrigin = position + cameraRight * xOffset + cameraUp * yOffset;
+            return rayOrigin;
+        }
     }
 }

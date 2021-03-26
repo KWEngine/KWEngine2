@@ -47,7 +47,6 @@ namespace KWEngine2
         internal Matrix4 _modelViewProjectionMatrixBloom = Matrix4.Identity;
         internal Matrix4 _modelViewProjectionMatrixBloomMerge = Matrix4.Identity;
         internal Matrix4 _projectionMatrix = Matrix4.Identity;
-        //internal Matrix4 _projectionMatrixShadow = Matrix4.Identity;
         internal Matrix4 _viewProjectionMatrixHUD = Matrix4.Identity;
 
         internal static float[] LightColors = new float[KWEngine.MAX_LIGHTS * 4];
@@ -56,7 +55,6 @@ namespace KWEngine2
         internal static float[] LightMeta = new float[KWEngine.MAX_LIGHTS * 3];
 
         internal HelperFrustum Frustum = new HelperFrustum();
-//        internal HelperFrustum FrustumShadowMap = new HelperFrustum();
 
         internal System.Drawing.Rectangle _windowRect;
         internal System.Drawing.Point _mousePoint = new System.Drawing.Point(0, 0);
@@ -471,8 +469,18 @@ namespace KWEngine2
 
                         if (g.CurrentWorld.IsFirstPersonMode && g.CurrentWorld.GetFirstPersonObject().Equals(g))
                             continue;
-
-                        g.IsInsideScreenSpace = Frustum.VolumeVsFrustum(g.GetCenterPointForAllHitboxes(), g.GetMaxDimensions().X, g.GetMaxDimensions().Y, g.GetMaxDimensions().Z);
+                        if (KWEngine.Projection == ProjectionType.Perspective)
+                        {
+                            g.IsInsideScreenSpace = Frustum.VolumeVsFrustum(g.GetCenterPointForAllHitboxes(), g.GetMaxDimensions().X, g.GetMaxDimensions().Y, g.GetMaxDimensions().Z);
+                        }
+                        else
+                        {
+                            Vector3 lookAt = CurrentWorld.GetCameraLookAtVectorEitherWay();
+                            Vector3 camPos = CurrentWorld.GetCameraPositionEitherWay();
+                            Vector3 objectCenter = g.GetCenterPointForAllHitboxes();
+                            float dot = Vector3.Dot(objectCenter - camPos, lookAt);
+                            g.IsInsideScreenSpace = dot > 0;
+                        }
                         if (!g.IsInsideScreenSpace)
                             continue;
 
@@ -923,7 +931,13 @@ namespace KWEngine2
 
         internal void CalculateProjectionMatrix()
         {
-            _projectionMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(CurrentWorld != null ? CurrentWorld.FOV / 2 : 45f), ClientSize.Width / (float)ClientSize.Height, 0.1f, CurrentWorld != null ? CurrentWorld.ZFar : 1000f);
+            if (KWEngine.Projection == ProjectionType.Perspective)
+                _projectionMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(CurrentWorld != null ? CurrentWorld.FOV / 2 : 45f), ClientSize.Width / (float)ClientSize.Height, 0.1f, CurrentWorld != null ? CurrentWorld.ZFar : 1000f);
+            else
+            {
+                float aspectratio = CurrentWindow.Width / (float)CurrentWindow.Height;
+                _projectionMatrix = Matrix4.CreateOrthographic(CurrentWorld != null ? CurrentWorld.FOV * aspectratio: 90f * aspectratio, CurrentWorld != null ? CurrentWorld.FOV : 90f, 0.1f, CurrentWorld != null ? CurrentWorld.ZFar : 1000f);
+            }
 
             _modelViewProjectionMatrixBloom = Matrix4.CreateScale(ClientSize.Width / 2f, ClientSize.Height / 2f, 1) * Matrix4.LookAt(0, 0, 1, 0, 0, 0, 0, 1, 0) * Matrix4.CreateOrthographic(ClientSize.Width / 2f, ClientSize.Height / 2f, 0.1f, 100f);
             _modelViewProjectionMatrixBloomMerge = Matrix4.CreateScale(ClientSize.Width, ClientSize.Height, 1) * Matrix4.LookAt(0, 0, 1, 0, 0, 0, 0, 1, 0) * Matrix4.CreateOrthographic(ClientSize.Width, ClientSize.Height, 0.1f, 100f);

@@ -137,7 +137,16 @@ namespace KWEngine2.Renderers
             if (g == null || !g.HasModel || g.CurrentWorld == null || g.Opacity <= 0)
                 return;
 
-            g.IsInsideScreenSpace = frustum.SphereVsFrustum(g.GetCenterPointForAllHitboxes(), g.GetMaxDiameter() / 2);
+            if(KWEngine.Projection == ProjectionType.Perspective)
+                g.IsInsideScreenSpace = frustum.SphereVsFrustum(g.GetCenterPointForAllHitboxes(), g.GetMaxDiameter() / 2);
+            else
+            {
+                Vector3 lookAt = CurrentWorld.GetCameraLookAtVectorEitherWay();
+                Vector3 camPos = CurrentWorld.GetCameraPositionEitherWay();
+                Vector3 objectCenter = g.GetCenterPointForAllHitboxes();
+                float dot = Vector3.Dot(objectCenter - camPos, lookAt);
+                g.IsInsideScreenSpace = dot > 0;
+            }
             if (!g.IsInsideScreenSpace)
                 return;
             
