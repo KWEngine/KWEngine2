@@ -133,7 +133,7 @@ namespace KWEngine2Test.Worlds
             }
 
             FOV = 90;
-            SetTextureBackground(@".\textures\spacebackground.jpg", 2, 2);
+            SetTextureBackground(@".\textures\spacebackground.dds", 2, 2);
             SetAmbientLight(1, 1, 1, 1);
             KWEngine.DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
         }

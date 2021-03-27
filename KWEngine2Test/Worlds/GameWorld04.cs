@@ -61,7 +61,7 @@ namespace KWEngine2Test.Worlds
             KWEngine.LoadModelFromFile("Platform10", @".\Models\JumpAndRun\Platform10.obj");
             KWEngine.LoadModelFromFile("Platform02", @".\Models\JumpAndRun\Platform02.obj");
 
-            SetTextureBackground(@".\Textures\bg_greenmountains.png", 1, 1);
+            SetTextureBackground(@".\Textures\bg_greenmountains.dds", 1, 1);
             SetTextureBackgroundBrightnessMultiplier(0.75f);
             WorldDistance = 1000;
 

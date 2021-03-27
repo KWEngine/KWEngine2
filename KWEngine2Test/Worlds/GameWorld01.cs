@@ -59,7 +59,7 @@ namespace KWEngine2Test.Worlds
             KWEngine.LoadModelFromFile("Panel", @".\models\spacepanel\scifipanel.obj");
             KWEngine.LoadModelFromFile("Spaceship", @".\models\spaceship\spaceship4.obj");
 
-            KWEngine.BuildTerrainModel("Terrain", @".\textures\heightmap.png", @".\textures\sand_diffuse.jpg", 100, 2, 100, 5, 5);
+            KWEngine.BuildTerrainModel("Terrain", @".\textures\heightmap.png", @".\textures\sand_diffuse.dds", 100, 2, 100, 5, 5);
 
             SetAmbientLight(0, 0.25f, 1f, 0.25f);
             SetCameraPosition(100, 100, 100);
@@ -79,7 +79,7 @@ namespace KWEngine2Test.Worlds
             floor.SetModel("Terrain");
             floor.IsCollisionObject = true;
             floor.IsShadowCaster = true;
-            floor.SetTexture(@".\textures\sand_normal.jpg", TextureType.Normal);
+            floor.SetTexture(@".\textures\sand_normal.dds", TextureType.Normal);
             AddGameObject(floor);
             
             Immovable wallLeft1 = new Immovable();
