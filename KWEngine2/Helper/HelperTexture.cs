@@ -123,6 +123,32 @@ namespace KWEngine2.Helper
             return texID;
         }
 
+        public static int LoadTextureCompressedWithMipMaps(string filename)
+        {
+            bool success = HelperDDS2.TryLoadDDS(filename, false, out int texID, out int width, out int height);
+            if (!success)
+            {
+                HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureCompressedWithMipMaps()", "Unsupported compressed texture format: only DXT1, DXT3 and DXT5 are supported.");
+                texID = -1;
+                throw new Exception("Unsupported compressed texture format: only DXT1, DXT3 and DXT5 are supported.");
+            }
+                
+            return texID;
+        }
+
+        public static int LoadTextureCompressedWithMipMaps(Stream stream)
+        {
+            bool success = HelperDDS2.TryLoadDDS(stream, false, out int texID, out int width, out int height);
+            if (!success)
+            {
+                HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureCompressedWithMipMaps()", "Unsupported compressed texture format: only DXT1, DXT3 and DXT5 are supported.");
+                texID = -1;
+                throw new Exception("Unsupported compressed texture format: only DXT1, DXT3 and DXT5 are supported.");
+            }
+
+            return texID;
+        }
+
         public static int LoadTextureCompressedNoMipMap(Stream s)
         {
             int texID = -1;
@@ -229,6 +255,48 @@ namespace KWEngine2.Helper
             return (int)v;
         }
 
+        internal static int LoadTextureFromByteArray(byte[] imagedata)
+        {
+            int texID = -1;
+            using (MemoryStream s = new MemoryStream(imagedata, false))
+            {
+                Bitmap image = new Bitmap(s);
+                if (image == null)
+                {
+                    HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureFromByteArray()", "Invalid byte array data for texture.");
+                    return -1;
+                }
+                texID = GL.GenTexture();
+                GL.BindTexture(TextureTarget.Texture2D, texID);
+                BitmapData data = null;
+
+                if (image.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+                {
+                    data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
+                     OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+                }
+                else
+                {
+                    data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
+                     OpenTK.Graphics.OpenGL4.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
+                }
+
+                GL.TexParameter(TextureTarget.Texture2D, (TextureParameterName)OpenTK.Graphics.OpenGL.ExtTextureFilterAnisotropic.TextureMaxAnisotropyExt, GLWindow.CurrentWindow.AnisotropicFiltering);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+                GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+
+                image.UnlockBits(data);
+                image.Dispose();
+                GL.BindTexture(TextureTarget.Texture2D, 0);
+            }
+            return texID;
+        }
+
         internal static int LoadTextureFromAssembly(string resourceName, Assembly assembly)
         {
             int texID = -1;
@@ -264,6 +332,7 @@ namespace KWEngine2.Helper
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
                 GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
+                image.UnlockBits(data);
                 image.Dispose();
                 GL.BindTexture(TextureTarget.Texture2D, 0);
             }
@@ -282,6 +351,10 @@ namespace KWEngine2.Helper
             if (!File.Exists(filename))
             {
                 return -1;
+            }
+            if(filename.ToLower().EndsWith("dds"))
+            {
+                return LoadTextureCompressedWithMipMaps(filename);
             }
 
             int texID;
@@ -317,6 +390,7 @@ namespace KWEngine2.Helper
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
                 GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
+                image.UnlockBits(data);
                 image.Dispose();
                 GL.BindTexture(TextureTarget.Texture2D, 0);
 
@@ -332,10 +406,20 @@ namespace KWEngine2.Helper
         public static int LoadTextureForModelGLB(byte[] rawTextureData)
         {
             int texID;
+
+            if (rawTextureData[0] == 0x44 && rawTextureData[1] == 0x44 && rawTextureData[2] == 53)
+            {
+                HelperDDS2.TryLoadDDS(rawTextureData, false, out texID, out int width, out int height);
+                return texID;
+            }
+
             try
             {
                 using (MemoryStream ms = new MemoryStream(rawTextureData))
                 {
+                    
+                    
+
                     Bitmap image = new Bitmap(ms);
                     if (image == null)
                     {
@@ -366,6 +450,7 @@ namespace KWEngine2.Helper
                     GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
                     GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
+                    image.UnlockBits(data);
                     image.Dispose();
                     GL.BindTexture(TextureTarget.Texture2D, 0);
                 }
@@ -382,6 +467,16 @@ namespace KWEngine2.Helper
         {
             Assembly a = Assembly.GetEntryAssembly();
             int texID;
+
+            if (filename.ToLower().EndsWith("dds"))
+            {
+                string assPath = a.GetName().Name + "." + filename;
+                using (Stream s = a.GetManifestResourceStream(assPath))
+                    texID = LoadTextureCompressedWithMipMaps(s);
+
+                return texID;
+            }
+
             try
             {
                 string assPath = a.GetName().Name + "." + filename;
@@ -417,6 +512,7 @@ namespace KWEngine2.Helper
                     GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
                     GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
+                    image.UnlockBits(data);
                     image.Dispose();
                     GL.BindTexture(TextureTarget.Texture2D, 0);
 
@@ -434,6 +530,16 @@ namespace KWEngine2.Helper
         {
             Assembly a = Assembly.GetEntryAssembly();
             int texID;
+
+            if (assemblyPathAndName.ToLower().EndsWith(".dds"))
+            {
+                using (Stream s = a.GetManifestResourceStream(a.GetName().Name + "." + assemblyPathAndName))
+                {
+                    HelperDDS2.TryLoadDDS(s, false, out texID, out int width, out int height, true);
+                }
+                return texID;
+            }
+
             try
             {
                 using (Stream s = a.GetManifestResourceStream(a.GetName().Name + "." + assemblyPathAndName))
@@ -468,6 +574,7 @@ namespace KWEngine2.Helper
                     GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
                     //GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
+                    image.UnlockBits(data);
                     image.Dispose();
                     GL.BindTexture(TextureTarget.Texture2D, 0);
                 }
@@ -487,6 +594,11 @@ namespace KWEngine2.Helper
                 return -1;
             }
             int texID;
+            if(filename.ToLower().EndsWith(".dds"))
+            {
+                HelperDDS2.TryLoadDDS(filename, false, out texID, out int width, out int height, true);
+                return texID;
+            }
             try
             {
                 Bitmap image = new Bitmap(filename);
@@ -517,6 +629,7 @@ namespace KWEngine2.Helper
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
                 //GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
+                image.UnlockBits(data);
                 image.Dispose();
                 GL.BindTexture(TextureTarget.Texture2D, 0);
 
@@ -531,9 +644,9 @@ namespace KWEngine2.Helper
         internal static int LoadTextureSkybox(string filename, bool isInAssembly = false)
         {
             Assembly a = Assembly.GetEntryAssembly();
-            if (!filename.ToLower().EndsWith("jpg") && !filename.ToLower().EndsWith("jpeg") && !filename.ToLower().EndsWith("png"))
+            if (!filename.ToLower().EndsWith("jpg") && !filename.ToLower().EndsWith("jpeg") && !filename.ToLower().EndsWith("png") && !filename.ToLower().EndsWith("dds"))
             {
-                HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureSkybox()", "Only JPG and PNG files are supported.");
+                HelperGL.ShowErrorAndQuit("HelperTexture::LoadTextureSkybox()", "Only JPG, PNG and DDS (DXT1/3/5) files are supported.");
                 return -1;
             }
 
@@ -543,6 +656,13 @@ namespace KWEngine2.Helper
                 {
                     using (Stream s = isInAssembly ? a.GetManifestResourceStream(a.GetName().Name + "." + filename) : File.Open(filename, FileMode.Open))
                     {
+                        if(filename.ToLower().EndsWith(".dds"))
+                        {
+                            int textureId = -1;
+                            HelperDDS2.TryLoadDDSCubeMap(s, false, out textureId);
+                            return textureId;
+                        }
+
                         Bitmap image = new Bitmap(s);
                         int width = image.Width;
                         int height = image.Height;

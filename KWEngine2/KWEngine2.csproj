@@ -120,6 +120,7 @@
     <Compile Include="GameObjects\ParticleObject.cs" />
     <Compile Include="Helper\HelperCamera.cs" />
     <Compile Include="Helper\HelperDDS.cs" />
+    <Compile Include="Helper\HelperDDS2.cs" />
     <Compile Include="Helper\HelperFont.cs" />
     <Compile Include="Helper\HelperFrustum.cs" />
     <Compile Include="Helper\HelperGLLoader.cs" />
