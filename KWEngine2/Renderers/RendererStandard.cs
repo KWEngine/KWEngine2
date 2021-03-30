@@ -339,7 +339,7 @@ namespace KWEngine2.Renderers
                     GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
                     GL.BindVertexArray(0);
                     GL.BindTexture(TextureTarget.Texture2D, 0);
-                    HelperGL.CheckGLErrors();
+                    //HelperGL.CheckGLErrors();
                 }
             }
            

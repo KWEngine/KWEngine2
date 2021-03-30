@@ -531,14 +531,16 @@ namespace KWEngine2.Model
                 bool specularUsed = false;
                 int roughnessTextureIndex = -1;
                 TextureSlot[] texturesOfMaterial = material.GetAllMaterialTextures();
+                List<string> textureFilePaths = new List<string>();
+
                 for(int i = 0; i < texturesOfMaterial.Length; i++)
                 {
                     TextureSlot slot = texturesOfMaterial[i];
+                    textureFilePaths.Add(slot.FilePath);
                     if (roughnessTextureIndex < 0 && slot.TextureType == Assimp.TextureType.Shininess)
                     {
                         roughnessTextureIndex = i;
                     }
-
 
                     if(slot.TextureType == Assimp.TextureType.Specular)
                     {
@@ -552,16 +554,32 @@ namespace KWEngine2.Model
                         }
                         else
                         {
-                            if (model.AssemblyMode == AssemblyMode.File)
+                            EmbeddedTexture embTex = scene.GetEmbeddedTexture(slot.FilePath);
+                            if (embTex != null)
                             {
-                                tex.OpenGLID = HelperTexture.LoadTextureForModelExternal(
-                                        FindTextureInSubs(StripPathFromFile(tex.Filename), model.PathAbsolute)
-                                    );
+                                if (embTex.CompressedFormatHint.ToLower().EndsWith("dds"))
+                                {
+                                    HelperDDS2.TryLoadDDS(embTex.CompressedData, false, out tex.OpenGLID, out int width, out int height);
+                                }
+                                else
+                                {
+                                    tex.OpenGLID = HelperTexture.LoadTextureFromByteArray(embTex.CompressedData);
+                                }
                             }
                             else
                             {
-                                string path = StripFileNameFromAssemblyPath(model.PathAbsolute).Substring(model.PathAbsolute.IndexOf('.') + 1) + StripPathFromFile(tex.Filename);
-                                tex.OpenGLID = HelperTexture.LoadTextureForModelInternal(path, true);
+
+                                if (model.AssemblyMode == AssemblyMode.File)
+                                {
+                                    tex.OpenGLID = HelperTexture.LoadTextureForModelExternal(
+                                            FindTextureInSubs(StripPathFromFile(tex.Filename), model.PathAbsolute)
+                                        );
+                                }
+                                else
+                                {
+                                    string path = StripFileNameFromAssemblyPath(model.PathAbsolute).Substring(model.PathAbsolute.IndexOf('.') + 1) + StripPathFromFile(tex.Filename);
+                                    tex.OpenGLID = HelperTexture.LoadTextureForModelInternal(path, true);
+                                }
                             }
                             if (tex.OpenGLID > 0)
                             {
@@ -580,7 +598,63 @@ namespace KWEngine2.Model
                         }
                     }
                 }
+                EmbeddedTexture metalnessTexture = null;
+                if(scene.TextureCount > textureFilePaths.Count)
+                {
+                    foreach(EmbeddedTexture et in scene.Textures)
+                    {
+                        if(!textureFilePaths.Contains(et.Filename))
+                        {
+                            // workaround: check if it is metalness texture
+                            if(et.Filename.ToLower().Contains("metal.") || et.Filename.ToLower().Contains("metalness."))
+                            {
+                                //might be metal:
+                                metalnessTexture = et;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if(metalnessTexture != null)
+                {
+                    GeoTexture tex = new GeoTexture();
+                    tex.UVTransform = new OpenTK.Vector2(1, 1);
+                    tex.Filename = metalnessTexture.Filename;
+                    tex.UVMapIndex = material.TextureDiffuse.UVIndex;
+                    tex.Type = TextureType.Metalness;
+                    if (model.Textures.ContainsKey(tex.Filename))
+                    {
+                        tex.OpenGLID = model.Textures[tex.Filename].OpenGLID;
+                        geoMaterial.TextureMetalness = tex;
+                    }
+                    else if (CheckIfOtherModelsShareTexture(tex.Filename, model.Path, out GeoTexture sharedTexture))
+                    {
+                        geoMaterial.TextureMetalness = sharedTexture;
+                    }
+                    else
+                    {
 
+                        if (metalnessTexture.CompressedFormatHint.ToLower().EndsWith("dds"))
+                        {
+                            HelperDDS2.TryLoadDDS(metalnessTexture.CompressedData, false, out tex.OpenGLID, out int width, out int height);
+                        }
+                        else
+                        {
+                            tex.OpenGLID = HelperTexture.LoadTextureFromByteArray(metalnessTexture.CompressedData);
+                        }
+                        
+                        if (tex.OpenGLID > 0)
+                        {
+                            geoMaterial.TextureMetalness = tex;
+                            model.Textures.Add(tex.Filename, tex);
+                        }
+                        else
+                        {
+                            tex.OpenGLID = KWEngine.TextureBlack;
+                            geoMaterial.TextureMetalness = tex;
+                        }
+                    }
+                }
                 
                 // Diffuse texture
                 if (material.HasTextureDiffuse)
@@ -661,7 +735,7 @@ namespace KWEngine2.Model
                     }
                     else
                     {
-                        EmbeddedTexture embTex = scene.GetEmbeddedTexture(material.TextureDiffuse.FilePath);
+                        EmbeddedTexture embTex = scene.GetEmbeddedTexture(material.TextureNormal.FilePath);
                         if (embTex != null)
                         {
                             if (embTex.CompressedFormatHint.ToLower().EndsWith("dds"))
@@ -714,7 +788,7 @@ namespace KWEngine2.Model
                     }
                     else
                     {
-                        EmbeddedTexture embTex = scene.GetEmbeddedTexture(material.TextureDiffuse.FilePath);
+                        EmbeddedTexture embTex = scene.GetEmbeddedTexture(texturesOfMaterial[roughnessTextureIndex].FilePath);
                         if (embTex != null)
                         {
                             if (embTex.CompressedFormatHint.ToLower().EndsWith("dds"))
@@ -749,7 +823,7 @@ namespace KWEngine2.Model
                 }
                 else
                 {
-                    if(specularUsed)
+                    if(specularUsed && roughnessTextureIndex >= 0)
                     {
                         Debug.WriteLine("Skipping roughness texture for " + model.Filename + " because old style specular texture was found.");
                     }
@@ -774,7 +848,7 @@ namespace KWEngine2.Model
                     }
                     else
                     {
-                        EmbeddedTexture embTex = scene.GetEmbeddedTexture(material.TextureDiffuse.FilePath);
+                        EmbeddedTexture embTex = scene.GetEmbeddedTexture(material.TextureEmissive.FilePath);
                         if (embTex != null)
                         {
                             if (embTex.CompressedFormatHint.ToLower().EndsWith("dds"))
@@ -832,7 +906,7 @@ namespace KWEngine2.Model
                     }
                     else
                     {
-                        EmbeddedTexture embTex = scene.GetEmbeddedTexture(material.TextureDiffuse.FilePath);
+                        EmbeddedTexture embTex = scene.GetEmbeddedTexture(material.TextureLightMap.FilePath);
                         if (embTex != null)
                         {
                             if (embTex.CompressedFormatHint.ToLower().EndsWith("dds"))

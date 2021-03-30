@@ -161,7 +161,7 @@ void main()
 	vec3 theNormal = vNormal;
 	if(uUseTextureNormal > 0)
     {
-        theNormal = vTBN * (texture(uTextureNormal, vTexture).xyz * 2.0 - 1.0);	// ? normalize necessary?
+        theNormal = normalize(vTBN * (texture(uTextureNormal, vTexture).xyz * 2.0 - 1.0));
     }
 	
 
