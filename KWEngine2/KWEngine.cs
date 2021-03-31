@@ -786,11 +786,14 @@ namespace KWEngine2
                 return;
             }
             GeoModel m = SceneImporter.LoadModel(filename, true, SceneImporter.AssemblyMode.File);
-            name = name.Trim();
-            m.Name = name;
-            lock (KWEngine.Models)
+            if (m != null)
             {
-                KWEngine.Models.Add(name, m);
+                name = name.Trim();
+                m.Name = name;
+                lock (KWEngine.Models)
+                {
+                    KWEngine.Models.Add(name, m);
+                }
             }
         }
 

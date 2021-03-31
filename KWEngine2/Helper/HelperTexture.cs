@@ -407,7 +407,7 @@ namespace KWEngine2.Helper
         {
             int texID;
 
-            if (rawTextureData[0] == 0x44 && rawTextureData[1] == 0x44 && rawTextureData[2] == 53)
+            if (rawTextureData[0] == 0x44 && rawTextureData[1] == 0x44 && rawTextureData[2] == 0x53)
             {
                 HelperDDS2.TryLoadDDS(rawTextureData, false, out texID, out int width, out int height);
                 return texID;

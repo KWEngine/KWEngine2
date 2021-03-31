@@ -15,7 +15,17 @@ namespace KWEngine2.Model
     {
         internal static GeoModel LoadModel(string filename, bool flipTextureCoordinates = false)
         {
-            Gltf scene = Interface.LoadModel(filename);
+            Gltf scene = null;
+            try
+            {
+                scene = Interface.LoadModel(filename);
+            }
+            catch(Exception ex)
+            {
+                HelperGL.ShowErrorAndQuit("SceneImporterGLTF::LoadModel()", "Invalid model file: " + ex.Message);
+                return null;
+            }
+            
             if(scene.Scenes.Length != 1)
             {
                 HelperGL.ShowErrorAndQuit("SceneImporterGLTF::LoadModel()", "Cannot load gltf files with less or more than one scene. Please remodel!");

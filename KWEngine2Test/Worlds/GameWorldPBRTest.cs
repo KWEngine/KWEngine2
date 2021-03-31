@@ -49,8 +49,9 @@ namespace KWEngine2Test.Worlds
 
         public override void Prepare()
         {
-            //KWEngine.LoadModelFromFile("MatTest", @".\models\gltftestcube.glb");
-            //KWEngine.LoadModelFromFile("MatTest255", @".\models\gltftestcube255.glb");
+            //KWEngine.LoadModelFromFile("ddstest", @".\models\placeholdertest.gltf");
+            KWEngine.LoadModelFromFile("MatTest", @".\models\gltftestcube.glb");
+            KWEngine.LoadModelFromFile("MatTest255", @".\models\gltftestcube255.glb");
             KWEngine.LoadModelFromFile("EmissionTest", @".\models\emission_gltf_test.glb");
 
             FOV = 45;
@@ -60,7 +61,7 @@ namespace KWEngine2Test.Worlds
             SetCameraPosition(0, 25, 50);
             SetCameraTarget(0, 0, 0);
 
-            SetTextureSkybox(@".\textures\skybox1.jpg");
+            SetTextureSkybox(@".\textures\skybox1.dds");
             //SetTextureBackground(@".\textures\bg_greenmountains.png");
             SetTextureBackgroundBrightnessMultiplier(4);
 
@@ -253,18 +254,18 @@ namespace KWEngine2Test.Worlds
 
         private void CreateTerrainTestObject()
         {
-            KWEngine.BuildTerrainModel("Terrain", @".\textures\heightmap.png", @".\textures\sand_diffuse.jpg", 10, 1, 10, 1, 1);
+            KWEngine.BuildTerrainModel("Terrain", @".\textures\heightmap.png", @".\textures\sand_diffuse.dds", 10, 1, 10, 1, 1);
             Immovable floor2 = new Immovable();
             floor2.SetModel("Terrain");
             floor2.IsCollisionObject = true;
             floor2.IsShadowCaster = true;
             floor2.SetPosition(5, 0, 5);
             floor2.SetRoughness(0.9f);
-            floor2.SetTexture(@".\textures\sand_normal.jpg", TextureType.Normal);
+            floor2.SetTexture(@".\textures\sand_normal.dds", TextureType.Normal);
             floor2.SetTextureTerrainBlendMapping(
                 @".\textures\blendmap.png",
                 @".\textures\metal022_1K_Color.jpg",
-                @".\textures\bg_greenmountains.png",
+                @".\textures\bg_greenmountains.dds",
                 @".\textures\metalplates006_1k_color.jpg");
             AddGameObject(floor2);
         }
