@@ -500,7 +500,7 @@ namespace KWEngine2
                         }
                         else
                         {
-                            KWEngine.RendererStandard.Draw(g, ref viewProjection, Frustum, textureIndex);
+                            KWEngine.RendererStandard.Draw(g, ref viewProjection, textureIndex);
                         }
                     }
                     GL.BindTexture(TextureTarget.Texture2D, 0);
@@ -582,7 +582,7 @@ namespace KWEngine2
                     }
                     else if (CurrentWorld._textureSkybox > 0)
                     {
-                        KWEngine.RendererSkybox.Draw(ref _projectionMatrix);
+                        KWEngine.RendererSkybox.Draw(_projectionMatrix);
                     }
 
 
@@ -642,7 +642,7 @@ namespace KWEngine2
 
                         foreach (GameObject g in mInstancesRenderLast)
                         {
-                            KWEngine.RendererStandard.Draw(g, ref viewProjection, Frustum, textureIndex);
+                            KWEngine.RendererStandard.Draw(g, ref viewProjection, textureIndex);
                         }
                         GL.UseProgram(0);
 
@@ -755,7 +755,7 @@ namespace KWEngine2
             }
         }
 
-        private static void SwitchToBufferAndClear(int id)
+        internal static void SwitchToBufferAndClear(int id)
         {
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, id);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -1050,6 +1050,313 @@ namespace KWEngine2
             }
         }
 
+        internal void DrawSceneForSkybox(Matrix4 viewMatrix, Matrix4 projectionMatrix, int matrixIndex)
+        {
+            List<GameObject> instancesRenderLast = new List<GameObject>();
+            List<GameObject> instancesTerrain = new List<GameObject>();
+
+            CurrentWorld.AddRemoveObjects();
+
+            if (CurrentWorld != null)
+            {
+                Matrix4 viewProjection = viewMatrix * projectionMatrix;
+
+                CurrentWorld._lightObjects.Sort();
+                LightObject.PrepareLightsForRenderPass(CurrentWorld._lightObjects, ref LightColors, ref LightTargets, ref LightPositions, ref LightMeta, ref CurrentWorld._lightcount);
+
+                foreach (GameObject g in CurrentWorld._gameObjects)
+                {
+                    for (int index = 0; index < g.Model.Meshes.Count; index++)
+                    {
+                        GeoMesh mesh = g.Model.Meshes.Values.ElementAt(index);
+                        bool useMeshTransform = mesh.BoneNames.Count == 0 || !(g.AnimationID >= 0 && g.Model.Animations != null && g.Model.Animations.Count > 0);
+                        if (useMeshTransform)
+                        {
+                            Matrix4.Mult(ref mesh.Transform, ref g._modelMatrix, out g.ModelMatrixForRenderPass[g.Model.IsKWCube6 ? 0 : index]);
+                        }
+                        else
+                        {
+                            g.ModelMatrixForRenderPass[g.Model.IsKWCube6 ? 0 : index] = g._modelMatrix;
+                        }
+                    }
+                }
+
+                for (int i = 0; i < CurrentWorld._lightObjects.Count; i++)
+                {
+                    LightObject currentLight = CurrentWorld._lightObjects[i];
+                    if (!currentLight.IsShadowCaster)
+                    {
+                        continue;
+                    }
+
+                    int fbId = -1;
+                    if (currentLight.Type == LightType.Point)
+                    {
+                        fbId = FramebuffersShadowCubeMap[currentLight._framebufferIndex];
+                    }
+                    else
+                    {
+                        fbId = FramebuffersShadow[currentLight._framebufferIndex];
+                    }
+                    if (fbId < 0)
+                    {
+                        HelperGL.ShowErrorAndQuit("GLWindow::DrawSceneForSkybox()", "Internal error: frame buffer index for light is -1");
+                        return;
+                    }
+                    SwitchToBufferAndClear(fbId);
+
+                    if (currentLight.Type == LightType.Point)
+                    {
+                        GL.Viewport(0, 0, HelperTexture.RoundDownToPowerOf2(KWEngine.ShadowMapSize / 4), HelperTexture.RoundDownToPowerOf2(KWEngine.ShadowMapSize / 4));
+                        GL.UseProgram(KWEngine.RendererShadowCubeMap.GetProgramId());
+                        foreach (GameObject g in CurrentWorld._gameObjects)
+                        {
+                            KWEngine.RendererShadowCubeMap.Draw(g, currentLight.Position, currentLight.GetDistanceMultiplier(), currentLight.GetDistanceMultiplier() * currentLight.GetFrustumMultiplier(), ref currentLight._viewProjectionMatrixShadow);
+                        }
+                        GL.UseProgram(0);
+                    }
+                    else
+                    {
+                        GL.Viewport(0, 0, KWEngine.ShadowMapSize, KWEngine.ShadowMapSize);
+                        GL.UseProgram(KWEngine.RendererShadow.GetProgramId());
+                        foreach (GameObject g in CurrentWorld._gameObjects)
+                        {
+                            KWEngine.RendererShadow.Draw(g, ref currentLight._viewProjectionMatrixShadow[0], currentLight._frustumShadowMap);
+                        }
+                        GL.UseProgram(0);
+                    }
+                }
+
+                // ==================================================
+                // Do the MAIN RENDER PASS:
+                // ==================================================
+                SwitchToBufferAndClear(HelperSkybox._fbFull);
+                GL.Viewport(0, 0, HelperSkybox._resolution, HelperSkybox._resolution);
+
+                lock (CurrentWorld._gameObjects)
+                {
+                    GL.UseProgram(KWEngine.RendererStandard.GetProgramId());
+
+                    // How many lights are there?
+                    GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleLightCount(), CurrentWorld._lightcount);
+                    GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleLightsColors(), KWEngine.MAX_LIGHTS, LightColors);
+                    GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleLightsTargets(), KWEngine.MAX_LIGHTS, LightTargets);
+                    GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleLightsPositions(), KWEngine.MAX_LIGHTS, LightPositions);
+                    GL.Uniform3(KWEngine.RendererStandard.GetUniformHandleLightsMeta(), KWEngine.MAX_LIGHTS, LightMeta);
+
+                    // Ambient color and intensity:
+                    GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleSunAmbient(), CurrentWorld._ambientLight);
+
+                    List<LightObject> lights = CurrentWorld._lightObjects;
+                    int numLights = lights.Count;
+                    int textureIndex = 0;
+                    for (int lightIndex = 0; lightIndex < KWEngine.MAX_SHADOWMAPS; textureIndex += 2, lightIndex++)
+                    {
+                        LightObject currentLight = null;
+                        if (lightIndex < numLights)
+                            currentLight = lights[lightIndex];
+
+                        // POINT LIGHT:
+                        GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                        GL.BindTexture(TextureTarget.TextureCubeMap, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTexturesCubeMap[currentLight._framebufferIndex] : KWEngine.TextureDepthCubeMapEmpty);
+                        GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureShadowMapCubeMap() + lightIndex, textureIndex);
+
+                        GL.ActiveTexture(TextureUnit.Texture0 + textureIndex + 1);
+                        GL.BindTexture(TextureTarget.Texture2D, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTextures[currentLight._framebufferIndex] : KWEngine.TextureDepthEmpty);
+                        GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureShadowMap() + lightIndex, textureIndex + 1);
+                        if (currentLight != null)
+                            GL.UniformMatrix4(KWEngine.RendererStandard.GetUniformHandleVPShadowMap() + lightIndex, false, ref currentLight._viewProjectionMatrixShadow[0]);
+                        else
+                            GL.UniformMatrix4(KWEngine.RendererStandard.GetUniformHandleVPShadowMap() + lightIndex, false, ref KWEngine.Identity);
+                    }
+
+                    // Upload skybox for metal reflections:
+                    GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                    GL.BindTexture(TextureTarget.TextureCubeMap, CurrentWorld._textureSkybox > 0 ? CurrentWorld._textureSkybox : KWEngine.TextureCubemapEmpty);
+                    GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureSkybox(), textureIndex);
+                    textureIndex++;
+
+                    // Upload 2d sky for metal reflections:
+                    GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                    GL.BindTexture(TextureTarget.Texture2D, CurrentWorld._textureBackground > 0 ? CurrentWorld._textureBackground : KWEngine.TextureBlack);
+                    GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureSky2D(), textureIndex);
+                    textureIndex++;
+
+                    GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureIsSkybox(), CurrentWorld._textureSkybox > 0 ? 1 : CurrentWorld._textureBackground > 0 ? -1 : 0);
+                    GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureSkyBoost(), CurrentWorld._textureBackgroundMultiplier);
+
+
+                    foreach (GameObject g in CurrentWorld._gameObjects)
+                    {
+                        if (g == null || !g.HasModel || g.CurrentWorld == null || g.Opacity <= 0)
+                            continue;
+
+                        if (g.Model.IsTerrain)
+                        {
+                            instancesTerrain.Add(g);
+                            continue;
+                        }
+
+                        if (g.CurrentWorld.IsFirstPersonMode && g.CurrentWorld.GetFirstPersonObject().Equals(g))
+                            continue;
+
+                        bool opacityFound = false;
+                        foreach (GeoMesh mesh in g.Model.Meshes.Values)
+                        {
+                            if (mesh.Material.Opacity < 1f)
+                            {
+                                opacityFound = true;
+                                break;
+                            }
+                        }
+                        if (opacityFound || g.Opacity < 1f)
+                        {
+                            instancesRenderLast.Add(g);
+                            continue;
+                        }
+                        else
+                        {
+                            KWEngine.RendererStandard.Draw(g, ref viewProjection, textureIndex);
+                        }
+                    }
+                    GL.BindTexture(TextureTarget.Texture2D, 0);
+                    GL.UseProgram(0);
+
+                    if (instancesTerrain.Count > 0)
+                    {
+                        GL.UseProgram(KWEngine.RendererTerrain.GetProgramId());
+
+                        // How many lights are there?
+                        GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleLightCount(), CurrentWorld._lightcount);
+                        GL.Uniform4(KWEngine.RendererTerrain.GetUniformHandleLightsColors(), KWEngine.MAX_LIGHTS, LightColors);
+                        GL.Uniform4(KWEngine.RendererTerrain.GetUniformHandleLightsTargets(), KWEngine.MAX_LIGHTS, LightTargets);
+                        GL.Uniform4(KWEngine.RendererTerrain.GetUniformHandleLightsPositions(), KWEngine.MAX_LIGHTS, LightPositions);
+                        GL.Uniform3(KWEngine.RendererTerrain.GetUniformHandleLightsMeta(), KWEngine.MAX_LIGHTS, LightMeta);
+
+                        // Ambient color and intensity:
+                        GL.Uniform4(KWEngine.RendererTerrain.GetUniformHandleSunAmbient(), CurrentWorld._ambientLight);
+
+                        textureIndex = 0;
+                        for (int lightIndex = 0; lightIndex < KWEngine.MAX_SHADOWMAPS; textureIndex += 2, lightIndex++)
+                        {
+                            LightObject currentLight = null;
+                            if (lightIndex < numLights)
+                                currentLight = lights[lightIndex];
+
+                            // POINT LIGHT:
+                            GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                            GL.BindTexture(TextureTarget.TextureCubeMap, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTexturesCubeMap[currentLight._framebufferIndex] : KWEngine.TextureDepthCubeMapEmpty);
+                            GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleTextureShadowMapCubeMap() + lightIndex, textureIndex);
+
+                            GL.ActiveTexture(TextureUnit.Texture0 + textureIndex + 1);
+                            GL.BindTexture(TextureTarget.Texture2D, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTextures[currentLight._framebufferIndex] : KWEngine.TextureDepthEmpty);
+                            GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleTextureShadowMap() + lightIndex, textureIndex + 1);
+                            if (currentLight != null)
+                                GL.UniformMatrix4(KWEngine.RendererTerrain.GetUniformHandleVPShadowMap() + lightIndex, false, ref currentLight._viewProjectionMatrixShadow[0]);
+                            else
+                                GL.UniformMatrix4(KWEngine.RendererTerrain.GetUniformHandleVPShadowMap() + lightIndex, false, ref KWEngine.Identity);
+                        }
+
+                        // Upload skybox for metal reflections:
+                        GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                        GL.BindTexture(TextureTarget.TextureCubeMap, CurrentWorld._textureSkybox > 0 ? CurrentWorld._textureSkybox : KWEngine.TextureCubemapEmpty);
+                        GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleTextureSkybox(), textureIndex);
+                        textureIndex++;
+
+                        // Upload 2d sky for metal reflections:
+                        GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                        GL.BindTexture(TextureTarget.Texture2D, CurrentWorld._textureBackground > 0 ? CurrentWorld._textureBackground : KWEngine.TextureBlack);
+                        GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleTextureSky2D(), textureIndex);
+                        textureIndex++;
+
+                        GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleTextureIsSkybox(), CurrentWorld._textureSkybox > 0 ? 1 : CurrentWorld._textureBackground > 0 ? -1 : 0);
+                        GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleTextureSkyBoost(), CurrentWorld._textureBackgroundMultiplier);
+
+                        foreach (GameObject g in instancesTerrain)
+                        {
+                            KWEngine.RendererTerrain.Draw(g, ref viewProjection, Frustum, textureIndex);
+                        }
+                        GL.BindTexture(TextureTarget.Texture2D, 0);
+                        GL.UseProgram(0);
+                        instancesTerrain.Clear();
+                    }
+
+                    // Background rendering:
+                    if (CurrentWorld._textureBackground > 0)
+                    {
+                        KWEngine.RendererBackground.Draw(ref _modelViewProjectionMatrixBackground);
+                    }
+                    else if (CurrentWorld._textureSkybox > 0)
+                    {
+                        KWEngine.RendererSkybox.Draw(projectionMatrix, matrixIndex);
+                    }
+
+
+                    // =========================
+                    // RENDER TRANSPARENT STUFF:
+                    // =========================
+                    if (instancesRenderLast.Count > 0)
+                    {
+                        instancesRenderLast.Sort((x, y) => x == null ? (y == null ? 0 : -1) : (y == null ? 1 : y.DistanceToCamera.CompareTo(x.DistanceToCamera)));
+                        GL.UseProgram(KWEngine.RendererStandard.GetProgramId());
+
+                        // How many lights are there?
+                        GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleLightCount(), CurrentWorld._lightcount);
+                        GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleLightsColors(), KWEngine.MAX_LIGHTS, LightColors);
+                        GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleLightsTargets(), KWEngine.MAX_LIGHTS, LightTargets);
+                        GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleLightsPositions(), KWEngine.MAX_LIGHTS, LightPositions);
+                        GL.Uniform3(KWEngine.RendererStandard.GetUniformHandleLightsMeta(), KWEngine.MAX_LIGHTS, LightMeta);
+
+                        // Ambient color and intensity:
+                        GL.Uniform4(KWEngine.RendererStandard.GetUniformHandleSunAmbient(), CurrentWorld._ambientLight);
+
+                        textureIndex = 0;
+                        for (int lightIndex = 0; lightIndex < KWEngine.MAX_SHADOWMAPS; textureIndex += 2, lightIndex++)
+                        {
+                            LightObject currentLight = null;
+                            if (lightIndex < numLights)
+                                currentLight = lights[lightIndex];
+
+                            // POINT LIGHT:
+                            GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                            GL.BindTexture(TextureTarget.TextureCubeMap, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTexturesCubeMap[currentLight._framebufferIndex] : KWEngine.TextureDepthCubeMapEmpty);
+                            GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureShadowMapCubeMap() + lightIndex, textureIndex);
+
+                            GL.ActiveTexture(TextureUnit.Texture0 + textureIndex + 1);
+                            GL.BindTexture(TextureTarget.Texture2D, currentLight != null && currentLight.IsShadowCaster ? GLWindow.CurrentWindow.FramebuffersShadowTextures[currentLight._framebufferIndex] : KWEngine.TextureDepthEmpty);
+                            GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureShadowMap() + lightIndex, textureIndex + 1);
+                            if (currentLight != null)
+                                GL.UniformMatrix4(KWEngine.RendererStandard.GetUniformHandleVPShadowMap() + lightIndex, false, ref currentLight._viewProjectionMatrixShadow[0]);
+                            else
+                                GL.UniformMatrix4(KWEngine.RendererStandard.GetUniformHandleVPShadowMap() + lightIndex, false, ref KWEngine.Identity);
+                        }
+
+                        // Upload skybox for metal reflections:
+                        GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                        GL.BindTexture(TextureTarget.TextureCubeMap, CurrentWorld._textureSkybox > 0 ? CurrentWorld._textureSkybox : KWEngine.TextureCubemapEmpty);
+                        GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureSkybox(), textureIndex);
+                        textureIndex++;
+
+                        // Upload 2d sky for metal reflections:
+                        GL.ActiveTexture(TextureUnit.Texture0 + textureIndex);
+                        GL.BindTexture(TextureTarget.Texture2D, CurrentWorld._textureBackground > 0 ? CurrentWorld._textureBackground : KWEngine.TextureBlack);
+                        GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureSky2D(), textureIndex);
+                        textureIndex++;
+
+                        GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureIsSkybox(), CurrentWorld._textureSkybox > 0 ? 1 : CurrentWorld._textureBackground > 0 ? -1 : 0);
+                        GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureSkyBoost(), CurrentWorld._textureBackgroundMultiplier);
+
+                        foreach (GameObject g in instancesRenderLast)
+                        {
+                            KWEngine.RendererStandard.Draw(g, ref viewProjection, textureIndex);
+                        }
+                        GL.UseProgram(0);
+                        instancesRenderLast.Clear();
+                    }
+                }
+            }
+        }
+
         #region Framebuffers
 
         internal int[] FramebuffersShadow = new int[KWEngine.MAX_SHADOWMAPS];
@@ -1165,7 +1472,7 @@ namespace KWEngine2
 
                 GL.ReadBuffer(ReadBufferMode.ColorAttachment1);
                 GL.DrawBuffer(DrawBufferMode.ColorAttachment1);
-                GL.BlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
+                GL.BlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Linear);
             }
             else
             {

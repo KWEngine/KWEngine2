@@ -26,6 +26,11 @@ namespace KWEngine2Test.Worlds
                 CurrentWindow.SetWorld(new GameWorldStart());
                 return;
             }
+            
+            if(kb[Key.P])
+            {
+                HelperSkybox.CreateSkyboxFromCurrentSceneAndExit();
+            }
 
             SpawnParticles();
         }
@@ -58,7 +63,7 @@ namespace KWEngine2Test.Worlds
 
             SetAmbientLight(1, 1, 1, 0.2f);
 
-            SetCameraPosition(0, 25, 50);
+            SetCameraPosition(0, 10, 0);
             SetCameraTarget(0, 0, 0);
 
             SetTextureSkybox(@".\textures\skybox1.dds");

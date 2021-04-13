@@ -55,22 +55,29 @@ namespace KWEngine2.Renderers
             mUniform_TintColor = GL.GetUniformLocation(mProgramId, "uTintColor");
         }
 
-        internal void Draw(ref Matrix4 viewProjection)
+        internal void Draw(Matrix4 projection, int environmentMapMatrix = -1)
         {
-
-            if (KWEngine.CurrentWorld.IsFirstPersonMode)
+            if (environmentMapMatrix >= 0)
             {
-                _viewMatrix = HelperCamera.GetViewMatrix(KWEngine.CurrentWorld.GetFirstPersonObject().Position);
+                _viewMatrix = HelperSkybox._viewMatrixSkybox[environmentMapMatrix];
+                projection = HelperSkybox._projectionMatrixSkybox;
             }
             else
             {
-                _viewMatrix = KWEngine.CurrentWindow._viewMatrix;
+                if (KWEngine.CurrentWorld.IsFirstPersonMode)
+                {
+                    _viewMatrix = HelperCamera.GetViewMatrix(KWEngine.CurrentWorld.GetFirstPersonObject().Position);
+                }
+                else
+                {
+                    _viewMatrix = KWEngine.CurrentWindow._viewMatrix;
+                }
             }
 
             // Clear translation part:
             _viewMatrix = _viewMatrix.ClearTranslation();
             _viewMatrix = KWEngine.CurrentWorld._skyboxRotation * _viewMatrix;
-            Matrix4 MVP = _viewMatrix * viewProjection;
+            Matrix4 MVP = _viewMatrix * projection;
 
 
             GL.FrontFace(FrontFaceDirection.Cw);

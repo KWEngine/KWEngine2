@@ -127,6 +127,7 @@
     <Compile Include="Helper\HelperMouseRay.cs" />
     <Compile Include="Helper\HelperRandom.cs" />
     <Compile Include="Helper\HelperRotation.cs" />
+    <Compile Include="Helper\HelperSkybox.cs" />
     <Compile Include="Helper\LoadPackage.cs" />
     <Compile Include="Helper\ParticleInfo.cs" />
     <Compile Include="Helper\Sector.cs" />

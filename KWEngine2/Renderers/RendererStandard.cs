@@ -129,7 +129,7 @@ namespace KWEngine2.Renderers
             mUniform_SpecularReflectionFactor = GL.GetUniformLocation(mProgramId, "uSpecularReflectionFactor");
         }
 
-        internal void Draw(GameObject g, ref Matrix4 viewProjection, HelperFrustum frustum, int textureIndex)
+        internal void Draw(GameObject g, ref Matrix4 viewProjection, int textureIndex)
         {
             lock (g)
             {
