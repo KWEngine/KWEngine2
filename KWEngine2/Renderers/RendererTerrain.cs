@@ -126,6 +126,7 @@ namespace KWEngine2.Renderers
             mUniform_TextureIsSkybox = GL.GetUniformLocation(mProgramId, "uUseTextureSkybox");
             mUniform_TextureSky2D = GL.GetUniformLocation(mProgramId, "uTextureSky2D");
             mUniform_TextureSkyBoost = GL.GetUniformLocation(mProgramId, "uTextureSkyBoost");
+            mUniform_TextureSkyboxRotation = GL.GetUniformLocation(mProgramId, "uTextureSkyboxRotation");
 
             mUniform_SpecularReflectionFactor = GL.GetUniformLocation(mProgramId, "uSpecularReflectionFactor");
 
@@ -149,7 +150,7 @@ namespace KWEngine2.Renderers
             }
             if (!g.IsInsideScreenSpace)
                 return;
-            
+
             GL.Disable(EnableCap.Blend);
             lock (g)
             {
@@ -346,7 +347,6 @@ namespace KWEngine2.Renderers
                 GL.DrawElements(mesh.Primitive, mesh.IndexCount, DrawElementsType.UnsignedInt, 0);
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
                 GL.BindVertexArray(0);
-                HelperGL.CheckGLErrors();
             }
 
             if (g.Opacity < 1)

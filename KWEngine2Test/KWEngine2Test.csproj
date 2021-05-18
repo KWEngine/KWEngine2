@@ -65,11 +65,13 @@
     <Compile Include="Objects\SpaceInvaders\EnemySimple.cs" />
     <Compile Include="Objects\SpaceInvaders\Player.cs" />
     <Compile Include="Objects\SpaceInvaders\Shot.cs" />
+    <Compile Include="Objects\TestAll\PlayerSphere.cs" />
     <Compile Include="Objects\TestAll\Sphere.cs" />
     <Compile Include="Objects\SweepAndPruneTest\Enemy.cs" />
     <Compile Include="Objects\SweepAndPruneTest\Player.cs" />
     <Compile Include="Objects\SweepAndPruneTest\Shot.cs" />
     <Compile Include="Objects\SweepAndPruneTest\SweepCube.cs" />
+    <Compile Include="Worlds\GameWorldSphereCollisionTest.cs" />
     <Compile Include="Worlds\GameWorldPBRTest.cs" />
     <Compile Include="Worlds\GameWorldSchool.cs" />
     <Compile Include="Worlds\GameWorld04.cs" />
@@ -107,6 +109,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Models\ArenaOuter\ArenaPlatforms.fbx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Models\convexhull.glb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Models\emission_gltf_test.glb">
@@ -627,6 +632,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Textures\skybox1.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Textures\skybox2.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Textures\spacebackground.dds">

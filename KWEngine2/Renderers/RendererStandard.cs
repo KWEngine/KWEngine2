@@ -15,6 +15,7 @@ namespace KWEngine2.Renderers
     internal class RendererStandard : Renderer
     {
         private Matrix4 _identityMatrix = Matrix4.Identity;
+        
 
         public override void Initialize()
         {
@@ -125,6 +126,7 @@ namespace KWEngine2.Renderers
             mUniform_TextureIsSkybox = GL.GetUniformLocation(mProgramId, "uUseTextureSkybox");
             mUniform_TextureSky2D = GL.GetUniformLocation(mProgramId, "uTextureSky2D");
             mUniform_TextureSkyBoost = GL.GetUniformLocation(mProgramId, "uTextureSkyBoost");
+            mUniform_TextureSkyboxRotation = GL.GetUniformLocation(mProgramId, "uTextureSkyboxRotation");
 
             mUniform_SpecularReflectionFactor = GL.GetUniformLocation(mProgramId, "uSpecularReflectionFactor");
         }
@@ -339,7 +341,6 @@ namespace KWEngine2.Renderers
                     GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
                     GL.BindVertexArray(0);
                     GL.BindTexture(TextureTarget.Texture2D, 0);
-                    //HelperGL.CheckGLErrors();
                 }
             }
            

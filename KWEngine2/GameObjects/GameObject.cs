@@ -2564,7 +2564,12 @@ namespace KWEngine2.GameObjects
 
         internal bool IsCubeOrSphere()
         {
-            return this.Model != null && (this.Model.Filename == "kwcube.obj" || this.Model.Filename == "kwsphere.obj" || this.Model.Filename == "kwcube6.obj");
+            return Model != null && (Model.Filename == "kwcube.obj" || Model.Filename == "kwsphere.obj" || Model.Filename == "kwcube6.obj");
+        }
+
+        internal bool IsSpherePerfect()
+        {
+            return Model != null && Model.Filename == "kwsphere.obj" && Scale.X == Scale.Y && Scale.X == Scale.Z;
         }
     }
 }

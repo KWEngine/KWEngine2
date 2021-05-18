@@ -453,6 +453,9 @@ namespace KWEngine2
                     GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureIsSkybox(), CurrentWorld._textureSkybox > 0 ? 1 : CurrentWorld._textureBackground > 0 ? -1 : 0);
                     GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleTextureSkyBoost(), CurrentWorld._textureBackgroundMultiplier);
 
+                    Matrix3 skyboxRotation = new Matrix3(CurrentWorld._skyboxRotation);
+                    GL.UniformMatrix3(KWEngine.RendererStandard.GetUniformTextureSkyboxRotation(), false, ref skyboxRotation);
+
 
                     foreach (GameObject g in CurrentWorld._gameObjects)
                     {
@@ -519,6 +522,8 @@ namespace KWEngine2
                     if (mInstancesTerrain.Count > 0)
                     {
                         GL.UseProgram(KWEngine.RendererTerrain.GetProgramId());
+
+                        GL.UniformMatrix3(KWEngine.RendererTerrain.GetUniformTextureSkyboxRotation(), false, ref skyboxRotation);
 
                         // How many lights are there?
                         GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleLightCount(), CurrentWorld._lightcount);
@@ -593,6 +598,8 @@ namespace KWEngine2
                     {
                         mInstancesRenderLast.Sort((x, y) => x == null ? (y == null ? 0 : -1) : (y == null ? 1 : y.DistanceToCamera.CompareTo(x.DistanceToCamera)));
                         GL.UseProgram(KWEngine.RendererStandard.GetProgramId());
+
+                        GL.UniformMatrix3(KWEngine.RendererStandard.GetUniformTextureSkyboxRotation(), false, ref skyboxRotation);
 
                         // How many lights are there?
                         GL.Uniform1(KWEngine.RendererStandard.GetUniformHandleLightCount(), CurrentWorld._lightcount);
@@ -1271,6 +1278,9 @@ namespace KWEngine2
 
                         GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleTextureIsSkybox(), CurrentWorld._textureSkybox > 0 ? 1 : CurrentWorld._textureBackground > 0 ? -1 : 0);
                         GL.Uniform1(KWEngine.RendererTerrain.GetUniformHandleTextureSkyBoost(), CurrentWorld._textureBackgroundMultiplier);
+
+                        Matrix3 skyboxRotation = new Matrix3(CurrentWorld._skyboxRotation);
+                        GL.UniformMatrix3(KWEngine.RendererTerrain.GetUniformHandleTextureSkyBoost(), false, ref skyboxRotation);
 
                         foreach (GameObject g in instancesTerrain)
                         {

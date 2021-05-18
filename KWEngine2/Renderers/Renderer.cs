@@ -93,6 +93,8 @@ namespace KWEngine2.Renderers
         protected int mUniform_SpecularReflectionFactor = -1;
         protected int mUniform_TextureSkyBoost = -1;
 
+        protected int mUniform_TextureSkyboxRotation = -1;
+
         public Renderer()
         {
             Initialize();
@@ -348,6 +350,12 @@ namespace KWEngine2.Renderers
         public int GetUniformHandleTextureSkyBoost()
         {
             return mUniform_TextureSkyBoost;
+        }
+
+        public int GetUniformTextureSkyboxRotation()
+        {
+            return mUniform_TextureSkyboxRotation;
+
         }
     }
 }

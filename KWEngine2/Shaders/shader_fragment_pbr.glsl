@@ -44,6 +44,7 @@ uniform vec3 uCameraPos;
 uniform vec3 uCameraDirection;
 
 uniform samplerCube uTextureSkybox;
+uniform mat3 uTextureSkyboxRotation;
 uniform sampler2D uTextureSky2D;
 
 uniform int uUseTextureSkybox;
@@ -181,7 +182,7 @@ void main()
 	vec3 refl = vec3(0.22 * uSunAmbient.xyz * uSunAmbient.w * uTextureSkyBoost);
 	if(uUseTextureSkybox > 0)
 	{
-		vec3 reflectedCameraSurfaceNormal = reflect(-fragmentToCamera, theNormal);
+		vec3 reflectedCameraSurfaceNormal =  reflect(-fragmentToCamera, theNormal) * uTextureSkyboxRotation;
 		refl = texture(uTextureSkybox, reflectedCameraSurfaceNormal).xyz * (uSunAmbient.xyz * uSunAmbient.w * uTextureSkyBoost);
 	}
 	else if(uUseTextureSkybox < 0)

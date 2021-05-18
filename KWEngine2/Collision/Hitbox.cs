@@ -106,6 +106,7 @@ namespace KWEngine2.Collision
                 if (i < mNormals.Length)
                 {
                     Vector3.TransformNormal(ref mMesh.Normals[i], ref mModelMatrixFinal, out mNormals[i]);
+                    mNormals[i].NormalizeFast();
                 }
 
                 Vector3.TransformPosition(ref mMesh.Vertices[i], ref mModelMatrixFinal, out mVertices[i]);
@@ -124,7 +125,7 @@ namespace KWEngine2.Collision
             }
 
             Vector3.TransformPosition(ref mMesh.Center, ref mModelMatrixFinal, out mCenter);
-            
+
             float xWidth = maxX - minX;
             float yWidth = maxY - minY;
             float zWidth = maxZ - minZ;
@@ -173,8 +174,131 @@ namespace KWEngine2.Collision
 
         private static Vector3 ZeroVector = Vector3.Zero;
 
+        private static Intersection TestIntersectionSphereConvexHull(Hitbox caller, Hitbox collider, Vector3 offsetCaller)
+        {
+            float mtvDistance = float.MaxValue;
+            float mtvDirection = 1;
+            float mtvDistanceUp = float.MaxValue;
+            float mtvDirectionUp = 1;
+
+            MTVTemp = Vector3.Zero;
+            MTVTempUp = Vector3.Zero;
+
+            float sphereRadius = caller.Owner.Scale.X / 2;
+
+            for (int i = 0; i < collider.mNormals.Length; i++)
+            {
+                float shape1Min, shape1Max, shape2Min, shape2Max;
+
+                shape1Min = Vector3.Dot((caller.GetCenter() + offsetCaller) - collider.mNormals[i] * sphereRadius, collider.mNormals[i]);
+                shape1Max = Vector3.Dot((caller.GetCenter() + offsetCaller) + collider.mNormals[i] * sphereRadius, collider.mNormals[i]);
+                SatTest(ref collider.mNormals[i], ref collider.mVertices, out shape2Min, out shape2Max, ref ZeroVector);
+
+                if (!Overlaps(shape1Min, shape1Max, shape2Min, shape2Max)) 
+                {
+                    return null;
+                }
+                else
+                {
+                    CalculateOverlap(ref collider.mNormals[i], ref shape1Min, ref shape1Max, ref shape2Min, ref shape2Max,
+                        ref mtvDistance, ref mtvDistanceUp, ref MTVTemp, ref MTVTempUp, ref mtvDirection, ref mtvDirectionUp, ref caller.mCenter, ref collider.mCenter, ref offsetCaller);
+                }
+            }
+
+            if (MTVTemp == Vector3.Zero)
+                return null;
+
+            Intersection o = new Intersection(collider.Owner, MTVTemp, MTVTempUp, collider.mMesh.Name);
+            return o;
+        }
+
+        private static Intersection TestIntersectionConvexHullSphere(Hitbox caller, Hitbox collider, Vector3 offsetCaller)
+        {
+            float mtvDistance = float.MaxValue;
+            float mtvDirection = 1;
+            float mtvDistanceUp = float.MaxValue;
+            float mtvDirectionUp = 1;
+
+            MTVTemp = Vector3.Zero;
+            MTVTempUp = Vector3.Zero;
+
+            float sphereRadius = collider.Owner.Scale.X / 2;
+
+            for (int i = 0; i < caller.mNormals.Length; i++)
+            {
+                float shape1Min, shape1Max, shape2Min, shape2Max;
+
+                SatTest(ref caller.mNormals[i], ref caller.mVertices, out shape1Min, out shape1Max, ref ZeroVector);
+                shape2Min = Vector3.Dot(collider.GetCenter() - caller.mNormals[i] * sphereRadius, caller.mNormals[i]);
+                shape2Max = Vector3.Dot(collider.GetCenter() + caller.mNormals[i] * sphereRadius, caller.mNormals[i]);
+                
+
+                if (!Overlaps(shape1Min, shape1Max, shape2Min, shape2Max))
+                {
+                    return null;
+                }
+                else
+                {
+                    CalculateOverlap(ref caller.mNormals[i], ref shape1Min, ref shape1Max, ref shape2Min, ref shape2Max,
+                        ref mtvDistance, ref mtvDistanceUp, ref MTVTemp, ref MTVTempUp, ref mtvDirection, ref mtvDirectionUp, ref caller.mCenter, ref collider.mCenter, ref offsetCaller);
+                }
+            }
+
+            if (MTVTemp == Vector3.Zero)
+                return null;
+
+            Intersection o = new Intersection(collider.Owner, MTVTemp, MTVTempUp, collider.mMesh.Name);
+            return o;
+        }
+
+        private static Intersection TestIntersectionSphereSphere(Hitbox caller, Hitbox collider, Vector3 offsetCaller)
+        {
+            Intersection i = null;
+            Vector3 diff = collider.GetCenter() - (caller.GetCenter() + offsetCaller);
+
+            float diffLength = diff.LengthFast;
+            float radiusCaller = caller.Owner.Scale.X / 2;
+            float radiusCollider = collider.Owner.Scale.X / 2;
+
+            float diffCollision = diffLength - (radiusCollider + radiusCaller);
+
+            if(diffCollision < 0)
+            {
+                // collision detected!
+                diff.NormalizeFast();
+
+                Vector3 mtv = diff * diffCollision;
+                Vector3 mtvUp = new Vector3(0, (caller.GetCenter() + offsetCaller).Y >= collider.GetCenter().Y ? -diffCollision : diffCollision, 0); // approximated!
+
+                i = new Intersection(collider.Owner, mtv , mtvUp, "KWSphere");
+                return i;
+            }
+
+            return i;
+        }
+
+        /*
+        private static Intersection TestIntersectionSphereTerrain(Hitbox caller, Hitbox collider, Vector3 offsetCaller)
+        {
+            return null;
+        }
+        */
+
         public static Intersection TestIntersection(Hitbox caller, Hitbox collider, Vector3 offsetCaller)
         {
+            if(caller.Owner.IsSpherePerfect() && !collider.Owner.IsSpherePerfect())
+            {
+                return TestIntersectionSphereConvexHull(caller, collider, offsetCaller);
+            }
+            else if (caller.Owner.IsSpherePerfect() && collider.Owner.IsSpherePerfect())
+            {
+                return TestIntersectionSphereSphere(caller, collider, offsetCaller);
+            }
+            else if (!caller.Owner.IsSpherePerfect() && collider.Owner.IsSpherePerfect())
+            {
+                return TestIntersectionConvexHullSphere(caller, collider, offsetCaller);
+            }
+
             float mtvDistance = float.MaxValue;
             float mtvDirection = 1;
             float mtvDistanceUp = float.MaxValue;
