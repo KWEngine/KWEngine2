@@ -277,12 +277,45 @@ namespace KWEngine2.Collision
             return i;
         }
 
-        /*
-        private static Intersection TestIntersectionSphereTerrain(Hitbox caller, Hitbox collider, Vector3 offsetCaller)
+        
+        private static Intersection TestIntersectionSpheroidConvexHull(Hitbox caller, Hitbox collider, Vector3 offsetCaller)
         {
-            return null;
+            float mtvDistance = float.MaxValue;
+            float mtvDirection = 1;
+            float mtvDistanceUp = float.MaxValue;
+            float mtvDirectionUp = 1;
+
+            MTVTemp = Vector3.Zero;
+            MTVTempUp = Vector3.Zero;
+
+            float sphereRadius = caller.Owner.Scale.X / 2;
+
+            for (int i = 0; i < collider.mNormals.Length; i++)
+            {
+                float shape1Min, shape1Max, shape2Min, shape2Max;
+
+                shape1Min = Vector3.Dot((caller.GetCenter() + offsetCaller) - collider.mNormals[i] * sphereRadius, collider.mNormals[i]);
+                shape1Max = Vector3.Dot((caller.GetCenter() + offsetCaller) + collider.mNormals[i] * sphereRadius, collider.mNormals[i]);
+                SatTest(ref collider.mNormals[i], ref collider.mVertices, out shape2Min, out shape2Max, ref ZeroVector);
+
+                if (!Overlaps(shape1Min, shape1Max, shape2Min, shape2Max))
+                {
+                    return null;
+                }
+                else
+                {
+                    CalculateOverlap(ref collider.mNormals[i], ref shape1Min, ref shape1Max, ref shape2Min, ref shape2Max,
+                        ref mtvDistance, ref mtvDistanceUp, ref MTVTemp, ref MTVTempUp, ref mtvDirection, ref mtvDirectionUp, ref caller.mCenter, ref collider.mCenter, ref offsetCaller);
+                }
+            }
+
+            if (MTVTemp == Vector3.Zero)
+                return null;
+
+            Intersection o = new Intersection(collider.Owner, MTVTemp, MTVTempUp, collider.mMesh.Name);
+            return o;
         }
-        */
+        
 
         public static Intersection TestIntersection(Hitbox caller, Hitbox collider, Vector3 offsetCaller)
         {
@@ -297,6 +330,10 @@ namespace KWEngine2.Collision
             else if (!caller.Owner.IsSpherePerfect() && collider.Owner.IsSpherePerfect())
             {
                 return TestIntersectionConvexHullSphere(caller, collider, offsetCaller);
+            }
+            else if(caller.Owner.IsSpheroid() && !collider.Owner.IsSpheroid() && !collider.Owner.IsSpherePerfect())
+            {
+                return TestIntersectionSpheroidConvexHull(caller, collider, offsetCaller);
             }
 
             float mtvDistance = float.MaxValue;

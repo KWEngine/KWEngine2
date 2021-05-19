@@ -2571,5 +2571,10 @@ namespace KWEngine2.GameObjects
         {
             return Model != null && Model.Filename == "kwsphere.obj" && Scale.X == Scale.Y && Scale.X == Scale.Z;
         }
+
+        internal bool IsSpheroid()
+        {
+            return Model != null && Model.Filename == "kwsphere.obj" && (Scale.X != Scale.Y || Scale.X != Scale.Z || Scale.Y != Scale.Z);
+        }
     }
 }

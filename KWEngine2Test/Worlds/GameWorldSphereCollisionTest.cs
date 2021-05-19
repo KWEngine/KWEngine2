@@ -36,7 +36,7 @@ namespace KWEngine2Test.Worlds
 
             SetAmbientLight(1, 1, 1, 0.2f);
 
-            SetCameraPosition(0, 25, 0);
+            SetCameraPosition(0, 25, 10);
             SetCameraTarget(0, 0, 0);
 
             SetTextureSkybox(@".\textures\skybox1.dds");
@@ -56,18 +56,16 @@ namespace KWEngine2Test.Worlds
         private void CreateTestScene()
         {
             PlayerSphere s = new PlayerSphere();
-            s.SetModel("ConvexHull");
+            s.SetModel("KWSphere");
             s.SetPosition(3, 1, 0);
             s.SetScale(2);
             s.Name = "Sphere #1";
             s.IsShadowCaster = true;
             s.IsCollisionObject = true;
-            /*
             s.SetTexture(@".\textures\Metal022_1K_Color.jpg");
             s.SetTexture(@".\textures\Metal022_1K_Normal.jpg", TextureType.Normal);
             s.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
             s.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
-            */
             AddGameObject(s);
 
             Immovable sC = new Immovable();
@@ -94,7 +92,7 @@ namespace KWEngine2Test.Worlds
             //AddGameObject(floor);
 
             Immovable convexHull = new Immovable();
-            convexHull.SetModel("KWSphere");
+            convexHull.SetModel("ConvexHull");
             convexHull.SetScale(2);
             convexHull.SetPosition(0, 1, 0);
             convexHull.IsCollisionObject = true;

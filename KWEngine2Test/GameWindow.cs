@@ -18,7 +18,7 @@ namespace KWEngine2Test
                   1024                              // shadow map resolution (256 to 4096 at 2^n values)
                   )
         {
-            SetWorld(new GameWorldStart());
+            SetWorld(new GameWorldSphereCollisionTest());
         }
     }
 }
