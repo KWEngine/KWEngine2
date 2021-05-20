@@ -59,7 +59,7 @@ namespace KWEngine2Test.Worlds
             PlayerSphere s = new PlayerSphere();
             s.SetModel("KWSphere");
             s.SetPosition(4, 1, 0);
-            s.SetScale(2, 1, 1);
+            s.SetScale(2, 2, 2);
             //s.SetScale(2);
             s.Name = "Sphere #1";
             s.IsShadowCaster = true;
@@ -100,6 +100,8 @@ namespace KWEngine2Test.Worlds
             convexHull.IsCollisionObject = true;
             convexHull.IsShadowCaster = true;
             AddGameObject(convexHull);
+
+            DebugShowHitboxes = true;
         }
 
         private void CreateTerrainTestObject()

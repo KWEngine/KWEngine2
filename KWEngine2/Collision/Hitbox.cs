@@ -10,6 +10,37 @@ namespace KWEngine2.Collision
 {
     internal class Hitbox
     {
+        private Vector3[] mVerticesSpheroid = new Vector3[] { 
+                    Vector3.UnitX / 2, 
+                    Vector3.UnitY / 2, 
+                    Vector3.UnitZ / 2, 
+                    -Vector3.UnitX / 2, 
+                    -Vector3.UnitY / 2, 
+                    -Vector3.UnitZ / 2,
+                    Vector3.NormalizeFast(Vector3.UnitX + Vector3.UnitY - Vector3.UnitZ) / 2,
+                    Vector3.NormalizeFast(Vector3.UnitX + Vector3.UnitY + Vector3.UnitZ) / 2,
+                    Vector3.NormalizeFast(Vector3.UnitX - Vector3.UnitY - Vector3.UnitZ) / 2,
+                     Vector3.NormalizeFast(Vector3.UnitX - Vector3.UnitY + Vector3.UnitZ) / 2,
+
+                    Vector3.NormalizeFast(-Vector3.UnitX + Vector3.UnitY - Vector3.UnitZ) / 2,
+                    Vector3.NormalizeFast(-Vector3.UnitX + Vector3.UnitY + Vector3.UnitZ) / 2,
+                    Vector3.NormalizeFast(-Vector3.UnitX - Vector3.UnitY - Vector3.UnitZ) / 2,
+                     Vector3.NormalizeFast(-Vector3.UnitX - Vector3.UnitY + Vector3.UnitZ) / 2,
+
+                };
+        private Vector3[] mNormalsSpheroid = new Vector3[] {
+                    Vector3.NormalizeFast(Vector3.UnitX + Vector3.UnitY - Vector3.UnitZ),
+                    Vector3.NormalizeFast(Vector3.UnitX + Vector3.UnitY + Vector3.UnitZ),
+                    Vector3.NormalizeFast(Vector3.UnitX - Vector3.UnitY - Vector3.UnitZ),
+                     Vector3.NormalizeFast(Vector3.UnitX - Vector3.UnitY + Vector3.UnitZ),
+
+                    Vector3.NormalizeFast(-Vector3.UnitX + Vector3.UnitY - Vector3.UnitZ),
+                    Vector3.NormalizeFast(-Vector3.UnitX + Vector3.UnitY + Vector3.UnitZ),
+                    Vector3.NormalizeFast(-Vector3.UnitX - Vector3.UnitY - Vector3.UnitZ),
+                     Vector3.NormalizeFast(-Vector3.UnitX - Vector3.UnitY + Vector3.UnitZ),
+
+                    };
+
         private Vector3[] mVertices = new Vector3[8];
         private Vector3[] mNormals = new Vector3[3];
         private Vector3 mCenter = new Vector3(0, 0, 0);
@@ -79,26 +110,10 @@ namespace KWEngine2.Collision
                 mVertices = new Vector3[mesh.Vertices.Length];
                 mNormals = new Vector3[mesh.Normals.Length];
             }
-            else if (Owner.IsSpheroid())
+            else if (Owner.Model.Filename == "kwsphere.obj")
             {
-                mVertices = new Vector3[] { 
-                    Vector3.UnitX / 2, 
-                    Vector3.UnitY / 2, 
-                    Vector3.UnitZ / 2, 
-                    -Vector3.UnitX / 2, 
-                    -Vector3.UnitY / 2, 
-                    -Vector3.UnitZ / 2,
-                    Vector3.NormalizeFast(Vector3.UnitX + Vector3.UnitY) / 2,
-                    Vector3.NormalizeFast(Vector3.UnitX + Vector3.UnitZ) / 2,
-                    Vector3.NormalizeFast(-Vector3.UnitX - Vector3.UnitY) / 2,
-                    Vector3.NormalizeFast(-Vector3.UnitX - Vector3.UnitZ) / 2
-                };
-                mNormals = new Vector3[] {
-                    Vector3.NormalizeFast(Vector3.UnitX + Vector3.UnitY),
-                    Vector3.NormalizeFast(Vector3.UnitX + Vector3.UnitZ),
-                    Vector3.NormalizeFast(-Vector3.UnitX - Vector3.UnitY),
-                    Vector3.NormalizeFast(-Vector3.UnitX - Vector3.UnitZ)
-                    };
+                mVertices = new Vector3[mVerticesSpheroid.Length];
+                mNormals = new Vector3[mNormalsSpheroid.Length];
             }
             if (mMesh.IsActive)
             { 
@@ -126,11 +141,34 @@ namespace KWEngine2.Collision
             {
                 if (i < mNormals.Length)
                 {
-                    Vector3.TransformNormal(ref mMesh.Normals[i], ref mModelMatrixFinal, out mNormals[i]);
-                    mNormals[i].NormalizeFast();
+                    if (Owner.Model.Name == "kwsphere.obj")
+                    {
+                        if (Owner.IsSpheroid())
+                        {
+                            Vector3.TransformNormal(ref mNormalsSpheroid[i], ref mModelMatrixFinal, out mNormals[i]);
+                            mNormals[i].NormalizeFast();
+                        }
+                    }
+                    else
+                    {
+                        Vector3.TransformNormal(ref mMesh.Normals[i], ref mModelMatrixFinal, out mNormals[i]);
+                        mNormals[i].NormalizeFast();
+                    }
                 }
-                
-                Vector3.TransformPosition(ref mMesh.Vertices[i], ref mModelMatrixFinal, out mVertices[i]);  
+
+                if (Owner.Model.Name == "kwsphere.obj")
+                {
+                    if (Owner.IsSpheroid())
+                    {
+                        Vector3.TransformPosition(ref mVerticesSpheroid[i], ref mModelMatrixFinal, out mVertices[i]);
+                    }
+
+                }
+                else
+                {
+                    Vector3.TransformPosition(ref mMesh.Vertices[i], ref mModelMatrixFinal, out mVertices[i]);
+                }
+
                 if (mVertices[i].X > maxX)
                     maxX = mVertices[i].X;
                 if (mVertices[i].X < minX)
