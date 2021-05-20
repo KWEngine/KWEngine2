@@ -13,7 +13,7 @@ namespace KWEngine2Test.Objects.TestAll
 {
     class PlayerSphere : GameObject
     {
-        private float _speed = 0.1f;
+        private float _speed = 0.05f;
 
         public override void Act(KeyboardState ks, MouseState ms)
         {
@@ -30,6 +30,11 @@ namespace KWEngine2Test.Objects.TestAll
                 MoveOffset(0, -_speed, 0);
             if (ks[Key.E])
                 MoveOffset(0, +_speed, 0);
+
+            if (ks[Key.F])
+                AddRotationY(1, true);
+            if (ks[Key.G])
+                AddRotationZ(1, true);
 
             Intersection i = GetIntersection();
             if(i != null)

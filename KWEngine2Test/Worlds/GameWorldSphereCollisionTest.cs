@@ -15,7 +15,7 @@ namespace KWEngine2Test.Worlds
 {
     class GameWorldSphereCollisionTest : World
     {
-        private long timestamp = 0;
+        //private long timestamp = 0;
         private HUDObject ho;
         private HUDObject ho2;
 
@@ -36,7 +36,7 @@ namespace KWEngine2Test.Worlds
 
             SetAmbientLight(1, 1, 1, 0.2f);
 
-            SetCameraPosition(0, 25, 10);
+            SetCameraPosition(0, 25, 0);
             SetCameraTarget(0, 0, 0);
 
             SetTextureSkybox(@".\textures\skybox1.dds");
@@ -44,6 +44,7 @@ namespace KWEngine2Test.Worlds
 
             LightObject sun = new LightObject(LightType.Sun, true);
             sun.SetPosition(30, 30, 30);
+            sun.SetColor(1, 1, 1, 0.8f);
             sun.SetFOVBiasCoefficient(0.00009f);
             AddLightObject(sun);
 
@@ -57,8 +58,9 @@ namespace KWEngine2Test.Worlds
         {
             PlayerSphere s = new PlayerSphere();
             s.SetModel("KWSphere");
-            s.SetPosition(3, 1, 0);
-            s.SetScale(2);
+            s.SetPosition(4, 1, 0);
+            s.SetScale(2, 1, 1);
+            //s.SetScale(2);
             s.Name = "Sphere #1";
             s.IsShadowCaster = true;
             s.IsCollisionObject = true;

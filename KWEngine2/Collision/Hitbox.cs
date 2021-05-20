@@ -79,6 +79,27 @@ namespace KWEngine2.Collision
                 mVertices = new Vector3[mesh.Vertices.Length];
                 mNormals = new Vector3[mesh.Normals.Length];
             }
+            else if (Owner.IsSpheroid())
+            {
+                mVertices = new Vector3[] { 
+                    Vector3.UnitX / 2, 
+                    Vector3.UnitY / 2, 
+                    Vector3.UnitZ / 2, 
+                    -Vector3.UnitX / 2, 
+                    -Vector3.UnitY / 2, 
+                    -Vector3.UnitZ / 2,
+                    Vector3.NormalizeFast(Vector3.UnitX + Vector3.UnitY) / 2,
+                    Vector3.NormalizeFast(Vector3.UnitX + Vector3.UnitZ) / 2,
+                    Vector3.NormalizeFast(-Vector3.UnitX - Vector3.UnitY) / 2,
+                    Vector3.NormalizeFast(-Vector3.UnitX - Vector3.UnitZ) / 2
+                };
+                mNormals = new Vector3[] {
+                    Vector3.NormalizeFast(Vector3.UnitX + Vector3.UnitY),
+                    Vector3.NormalizeFast(Vector3.UnitX + Vector3.UnitZ),
+                    Vector3.NormalizeFast(-Vector3.UnitX - Vector3.UnitY),
+                    Vector3.NormalizeFast(-Vector3.UnitX - Vector3.UnitZ)
+                    };
+            }
             if (mMesh.IsActive)
             { 
                 Vector3 sceneCenter = Update(ref owner._sceneDimensions);
@@ -108,8 +129,8 @@ namespace KWEngine2.Collision
                     Vector3.TransformNormal(ref mMesh.Normals[i], ref mModelMatrixFinal, out mNormals[i]);
                     mNormals[i].NormalizeFast();
                 }
-
-                Vector3.TransformPosition(ref mMesh.Vertices[i], ref mModelMatrixFinal, out mVertices[i]);
+                
+                Vector3.TransformPosition(ref mMesh.Vertices[i], ref mModelMatrixFinal, out mVertices[i]);  
                 if (mVertices[i].X > maxX)
                     maxX = mVertices[i].X;
                 if (mVertices[i].X < minX)
@@ -121,7 +142,7 @@ namespace KWEngine2.Collision
                 if (mVertices[i].Z > maxZ)
                     maxZ = mVertices[i].Z;
                 if (mVertices[i].Z < minZ)
-                    minZ = mVertices[i].Z;
+                    minZ = mVertices[i].Z;   
             }
 
             Vector3.TransformPosition(ref mMesh.Center, ref mModelMatrixFinal, out mCenter);
@@ -277,46 +298,6 @@ namespace KWEngine2.Collision
             return i;
         }
 
-        
-        private static Intersection TestIntersectionSpheroidConvexHull(Hitbox caller, Hitbox collider, Vector3 offsetCaller)
-        {
-            float mtvDistance = float.MaxValue;
-            float mtvDirection = 1;
-            float mtvDistanceUp = float.MaxValue;
-            float mtvDirectionUp = 1;
-
-            MTVTemp = Vector3.Zero;
-            MTVTempUp = Vector3.Zero;
-
-            float sphereRadius = caller.Owner.Scale.X / 2;
-
-            for (int i = 0; i < collider.mNormals.Length; i++)
-            {
-                float shape1Min, shape1Max, shape2Min, shape2Max;
-
-                shape1Min = Vector3.Dot((caller.GetCenter() + offsetCaller) - collider.mNormals[i] * sphereRadius, collider.mNormals[i]);
-                shape1Max = Vector3.Dot((caller.GetCenter() + offsetCaller) + collider.mNormals[i] * sphereRadius, collider.mNormals[i]);
-                SatTest(ref collider.mNormals[i], ref collider.mVertices, out shape2Min, out shape2Max, ref ZeroVector);
-
-                if (!Overlaps(shape1Min, shape1Max, shape2Min, shape2Max))
-                {
-                    return null;
-                }
-                else
-                {
-                    CalculateOverlap(ref collider.mNormals[i], ref shape1Min, ref shape1Max, ref shape2Min, ref shape2Max,
-                        ref mtvDistance, ref mtvDistanceUp, ref MTVTemp, ref MTVTempUp, ref mtvDirection, ref mtvDirectionUp, ref caller.mCenter, ref collider.mCenter, ref offsetCaller);
-                }
-            }
-
-            if (MTVTemp == Vector3.Zero)
-                return null;
-
-            Intersection o = new Intersection(collider.Owner, MTVTemp, MTVTempUp, collider.mMesh.Name);
-            return o;
-        }
-        
-
         public static Intersection TestIntersection(Hitbox caller, Hitbox collider, Vector3 offsetCaller)
         {
             if(caller.Owner.IsSpherePerfect() && !collider.Owner.IsSpherePerfect())
@@ -330,10 +311,6 @@ namespace KWEngine2.Collision
             else if (!caller.Owner.IsSpherePerfect() && collider.Owner.IsSpherePerfect())
             {
                 return TestIntersectionConvexHullSphere(caller, collider, offsetCaller);
-            }
-            else if(caller.Owner.IsSpheroid() && !collider.Owner.IsSpheroid() && !collider.Owner.IsSpherePerfect())
-            {
-                return TestIntersectionSpheroidConvexHull(caller, collider, offsetCaller);
             }
 
             float mtvDistance = float.MaxValue;
@@ -594,7 +571,7 @@ namespace KWEngine2.Collision
         }
 
 
-        private static void CalculateOverlap(ref Vector3 axis, ref float shape1Min, ref float shape1Max, ref float shape2Min, ref float shape2Max,
+        private static bool CalculateOverlap(ref Vector3 axis, ref float shape1Min, ref float shape1Max, ref float shape2Min, ref float shape2Max,
             ref float mtvDistance, ref float mtvDistanceUp, ref Vector3 mtv, ref Vector3 mtvUp, ref float mtvDirection, ref float mtvDirectionUp, ref Vector3 posA, ref Vector3 posB, ref Vector3 callerOffset)
         {
             float intersectionDepthScaled;
@@ -660,7 +637,10 @@ namespace KWEngine2.Collision
                 float notSameDirection = Vector3.Dot(posA + callerOffset - posB, mtv);
                 mtvDirection = notSameDirection < 0 ? -1.0f : 1.0f;
                 mtv = mtv * mtvDirection;
+
+                return true;
             }
+            return false;
         }
 
         private static bool Overlaps(float min1, float max1, float min2, float max2)
