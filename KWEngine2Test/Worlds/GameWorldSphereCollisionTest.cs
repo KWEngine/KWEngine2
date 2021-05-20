@@ -15,7 +15,7 @@ namespace KWEngine2Test.Worlds
 {
     class GameWorldSphereCollisionTest : World
     {
-        private long timestamp = 0;
+        //private long timestamp = 0;
         private HUDObject ho;
         private HUDObject ho2;
 
@@ -44,6 +44,7 @@ namespace KWEngine2Test.Worlds
 
             LightObject sun = new LightObject(LightType.Sun, true);
             sun.SetPosition(30, 30, 30);
+            sun.SetColor(1, 1, 1, 0.8f);
             sun.SetFOVBiasCoefficient(0.00009f);
             AddLightObject(sun);
 
@@ -56,18 +57,17 @@ namespace KWEngine2Test.Worlds
         private void CreateTestScene()
         {
             PlayerSphere s = new PlayerSphere();
-            s.SetModel("ConvexHull");
-            s.SetPosition(3, 1, 0);
-            s.SetScale(2);
+            s.SetModel("KWSphere");
+            s.SetPosition(4, 1, 0);
+            s.SetScale(2, 2, 2);
+            //s.SetScale(2);
             s.Name = "Sphere #1";
             s.IsShadowCaster = true;
             s.IsCollisionObject = true;
-            /*
             s.SetTexture(@".\textures\Metal022_1K_Color.jpg");
             s.SetTexture(@".\textures\Metal022_1K_Normal.jpg", TextureType.Normal);
             s.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
             s.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
-            */
             AddGameObject(s);
 
             Immovable sC = new Immovable();
@@ -94,12 +94,14 @@ namespace KWEngine2Test.Worlds
             //AddGameObject(floor);
 
             Immovable convexHull = new Immovable();
-            convexHull.SetModel("KWSphere");
+            convexHull.SetModel("ConvexHull");
             convexHull.SetScale(2);
             convexHull.SetPosition(0, 1, 0);
             convexHull.IsCollisionObject = true;
             convexHull.IsShadowCaster = true;
             AddGameObject(convexHull);
+
+            DebugShowHitboxes = true;
         }
 
         private void CreateTerrainTestObject()

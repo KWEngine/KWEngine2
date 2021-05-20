@@ -179,7 +179,7 @@ namespace KWEngine2
         private void BasicInit()
         {
             string productVersion = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductName + " " + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductMajorPart +
-                "." + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductMinorPart + "." + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductBuildPart;
+                "." + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductMinorPart + "." + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductPrivatePart;
             Console.Write("\n\n\n============================================================================\n" + "Running " + productVersion + " ");
             Console.WriteLine("on OpenGL 4.5 Core Profile.");
             if (_multithreaded)
