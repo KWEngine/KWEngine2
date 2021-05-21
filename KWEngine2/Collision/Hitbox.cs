@@ -158,11 +158,7 @@ namespace KWEngine2.Collision
 
                 if (Owner.Model.Name == "kwsphere.obj")
                 {
-                    if (Owner.IsSpheroid())
-                    {
-                        Vector3.TransformPosition(ref mVerticesSpheroid[i], ref mModelMatrixFinal, out mVertices[i]);
-                    }
-
+                    Vector3.TransformPosition(ref mVerticesSpheroid[i], ref mModelMatrixFinal, out mVertices[i]);
                 }
                 else
                 {
