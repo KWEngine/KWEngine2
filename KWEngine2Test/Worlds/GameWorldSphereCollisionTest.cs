@@ -42,11 +42,13 @@ namespace KWEngine2Test.Worlds
             SetTextureSkybox(@".\textures\skybox1.dds");
             SetTextureBackgroundBrightnessMultiplier(4);
 
+            /*
             LightObject sun = new LightObject(LightType.Sun, true);
             sun.SetPosition(30, 30, 30);
             sun.SetColor(1, 1, 1, 0.8f);
             sun.SetFOVBiasCoefficient(0.00009f);
             AddLightObject(sun);
+            */
 
             DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
             DebugShowCoordinateSystemGrid = GridType.GridXZ;
@@ -64,10 +66,13 @@ namespace KWEngine2Test.Worlds
             s.Name = "Sphere #1";
             s.IsShadowCaster = true;
             s.IsCollisionObject = true;
+            /*
             s.SetTexture(@".\textures\Metal022_1K_Color.jpg");
             s.SetTexture(@".\textures\Metal022_1K_Normal.jpg", TextureType.Normal);
             s.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
             s.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
+            */
+            s.ColorEmissive = new Vector4(1, 1, 1, 0.1f);
             AddGameObject(s);
 
             Immovable sC = new Immovable();

@@ -181,7 +181,7 @@ void main()
 	}
 	else
 	{
-		emissive = uEmissiveColor.xyz;
+		emissive = uEmissiveColor.xyz * uEmissiveColor.w;
 	}
 
 	// Metalness / Reflections:
@@ -311,8 +311,9 @@ void main()
 
 	vec3 addedBloom = vec3(max(rgbFragment.x - 1.0, 0.0), max(rgbFragment.y - 1.0, 0.0), max(rgbFragment.z - 1.0, 0.0));
 	addedBloom *= 0.1;
-	bloom.x = addedBloom.x + uGlow.x * uGlow.w + uOutline.x * dotOutline * 0.15 + emissive.x * 0.125;
-	bloom.y = addedBloom.y + uGlow.y * uGlow.w + uOutline.y * dotOutline * 0.15 + emissive.y * 0.125;
-	bloom.z = addedBloom.z + uGlow.z * uGlow.w + uOutline.z * dotOutline * 0.15 + emissive.z * 0.125;
-	bloom.w = uEmissiveColor.w > 0.0 ? uEmissiveColor.w : 1.0;
+	bloom.x = addedBloom.x + uGlow.x * uGlow.w + uOutline.x * dotOutline * 0.15 + emissive.x * 0.05;
+	bloom.y = addedBloom.y + uGlow.y * uGlow.w + uOutline.y * dotOutline * 0.15 + emissive.y * 0.05;
+	bloom.z = addedBloom.z + uGlow.z * uGlow.w + uOutline.z * dotOutline * 0.15 + emissive.z * 0.05;
+	bloom.w = 1.0;
+	//bloom.w = uEmissiveColor.w > 0.0 ? uEmissiveColor.w : 1.0;
 }
