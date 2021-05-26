@@ -66,12 +66,6 @@ namespace KWEngine2Test.Worlds
             s.Name = "Sphere #1";
             s.IsShadowCaster = true;
             s.IsCollisionObject = true;
-            /*
-            s.SetTexture(@".\textures\Metal022_1K_Color.jpg");
-            s.SetTexture(@".\textures\Metal022_1K_Normal.jpg", TextureType.Normal);
-            s.SetTexture(@".\textures\Metal022_1K_Metalness.jpg", TextureType.Metalness);
-            s.SetTexture(@".\textures\Metal022_1K_Roughness.jpg", TextureType.Roughness);
-            */
             s.ColorEmissive = new Vector4(1, 1, 1, 0.1f);
             AddGameObject(s);
 

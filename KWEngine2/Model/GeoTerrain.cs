@@ -143,8 +143,11 @@ namespace KWEngine2.Model
                                 sec.ID = mSectors.Count;
                                 mSectors.Add(sec);
                                 Sector coarseSector = GetSectorCoarseForSector(sec);
-                                mSectorCoarseMap[coarseSector].Add(sec);
-                                mSectorTriangleMap.Add(mSectors.Count - 1, new List<GeoTerrainTriangle>());
+                                if (coarseSector.IsValid)
+                                {
+                                    mSectorCoarseMap[coarseSector].Add(sec);
+                                    mSectorTriangleMap.Add(mSectors.Count - 1, new List<GeoTerrainTriangle>());
+                                }
                             }
 
                         }
@@ -549,8 +552,8 @@ namespace KWEngine2.Model
             }
             else
             {
-                HelperGL.ShowErrorAndQuit("GeoTerrain::GetTrianglesForHitbox()", "No coarse sector found for hitbox of " + hb.Owner.Name);
-                return null;
+                //HelperGL.ShowErrorAndQuit("GeoTerrain::GetTrianglesForHitbox()", "No coarse sector found for hitbox of " + hb.Owner.Name);
+                return resultlist;
             }
             return resultlist;
         }
@@ -568,7 +571,7 @@ namespace KWEngine2.Model
                     return sc;
                 }
             }
-            HelperGL.ShowErrorAndQuit("GeoTerrain::GetSectorCoarseForSector()", "No coarse sector found for hitbox of " + s.ToString());
+            //HelperGL.ShowErrorAndQuit("GeoTerrain::GetSectorCoarseForSector()", "No coarse sector found for hitbox of " + s.ToString());
             return new Sector();
         }
 

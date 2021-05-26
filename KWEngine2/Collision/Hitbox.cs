@@ -240,7 +240,7 @@ namespace KWEngine2.Collision
             MTVTempUp = Vector3.Zero;
 
             float sphereRadius = caller.Owner.Scale.X / 2;
-
+            int bestCollisionIndex = 0;
             for (int i = 0; i < collider.mNormals.Length; i++)
             {
                 float shape1Min, shape1Max, shape2Min, shape2Max;
@@ -255,15 +255,17 @@ namespace KWEngine2.Collision
                 }
                 else
                 {
-                    CalculateOverlap(ref collider.mNormals[i], ref shape1Min, ref shape1Max, ref shape2Min, ref shape2Max,
+                    bool m = CalculateOverlap(ref collider.mNormals[i], ref shape1Min, ref shape1Max, ref shape2Min, ref shape2Max,
                         ref mtvDistance, ref mtvDistanceUp, ref MTVTemp, ref MTVTempUp, ref mtvDirection, ref mtvDirectionUp, ref caller.mCenter, ref collider.mCenter, ref offsetCaller);
+                    if (m)
+                        bestCollisionIndex = i;
                 }
             }
 
             if (MTVTemp == Vector3.Zero)
                 return null;
 
-            Intersection o = new Intersection(collider.Owner, MTVTemp, MTVTempUp, collider.mMesh.Name);
+            Intersection o = new Intersection(collider.Owner, MTVTemp, MTVTempUp, collider.mMesh.Name, collider.mNormals[bestCollisionIndex]);
             return o;
         }
 
@@ -278,7 +280,7 @@ namespace KWEngine2.Collision
             MTVTempUp = Vector3.Zero;
 
             float sphereRadius = collider.Owner.Scale.X / 2;
-
+            Vector3 collisionSurfaceNormal = new Vector3(0, 0, 0);
             for (int i = 0; i < caller.mNormals.Length; i++)
             {
                 float shape1Min, shape1Max, shape2Min, shape2Max;
@@ -294,15 +296,17 @@ namespace KWEngine2.Collision
                 }
                 else
                 {
-                    CalculateOverlap(ref caller.mNormals[i], ref shape1Min, ref shape1Max, ref shape2Min, ref shape2Max,
+                    bool m = CalculateOverlap(ref caller.mNormals[i], ref shape1Min, ref shape1Max, ref shape2Min, ref shape2Max,
                         ref mtvDistance, ref mtvDistanceUp, ref MTVTemp, ref MTVTempUp, ref mtvDirection, ref mtvDirectionUp, ref caller.mCenter, ref collider.mCenter, ref offsetCaller);
+                    if (m)
+                        collisionSurfaceNormal = Vector3.NormalizeFast((caller.mCenter + offsetCaller) - collider.mCenter);
                 }
             }
 
             if (MTVTemp == Vector3.Zero)
                 return null;
 
-            Intersection o = new Intersection(collider.Owner, MTVTemp, MTVTempUp, collider.mMesh.Name);
+            Intersection o = new Intersection(collider.Owner, MTVTemp, MTVTempUp, collider.mMesh.Name, collisionSurfaceNormal);
             return o;
         }
 
@@ -324,8 +328,8 @@ namespace KWEngine2.Collision
 
                 Vector3 mtv = diff * diffCollision;
                 Vector3 mtvUp = new Vector3(0, (caller.GetCenter() + offsetCaller).Y >= collider.GetCenter().Y ? -diffCollision : diffCollision, 0); // approximated!
-
-                i = new Intersection(collider.Owner, mtv , mtvUp, "KWSphere");
+                Vector3 collisionSurfaceNormal = Vector3.NormalizeFast((caller.GetCenter() + offsetCaller) - collider.GetCenter());
+                i = new Intersection(collider.Owner, mtv , mtvUp, "KWSphere", collisionSurfaceNormal);
                 return i;
             }
 
@@ -354,6 +358,7 @@ namespace KWEngine2.Collision
 
             MTVTemp = Vector3.Zero;
             MTVTempUp = Vector3.Zero;
+            int collisionNormalIndex = 0;
             for (int i = 0; i < caller.mNormals.Length; i++)
             {
                 float shape1Min, shape1Max, shape2Min, shape2Max;
@@ -365,8 +370,10 @@ namespace KWEngine2.Collision
                 }
                 else
                 {
-                    CalculateOverlap(ref caller.mNormals[i], ref shape1Min, ref shape1Max, ref shape2Min, ref shape2Max,
+                    bool m = CalculateOverlap(ref caller.mNormals[i], ref shape1Min, ref shape1Max, ref shape2Min, ref shape2Max,
                         ref mtvDistance, ref mtvDistanceUp, ref MTVTemp, ref MTVTempUp, ref mtvDirection, ref mtvDirectionUp, ref caller.mCenter, ref collider.mCenter, ref offsetCaller);
+                    if (m)
+                        collisionNormalIndex = i;
                 }
             }
 
@@ -381,15 +388,27 @@ namespace KWEngine2.Collision
                 }
                 else
                 {
-                    CalculateOverlap(ref collider.mNormals[i], ref shape1Min, ref shape1Max, ref shape2Min, ref shape2Max,
+                    bool m = CalculateOverlap(ref collider.mNormals[i], ref shape1Min, ref shape1Max, ref shape2Min, ref shape2Max,
                         ref mtvDistance, ref mtvDistanceUp, ref MTVTemp, ref MTVTempUp, ref mtvDirection, ref mtvDirectionUp, ref caller.mCenter, ref collider.mCenter, ref offsetCaller);
+                    if (m)
+                        collisionNormalIndex = caller.mNormals.Length + i;
                 }
             }
 
             if (MTVTemp == Vector3.Zero)
             return null;
 
-            Intersection o = new Intersection(collider.Owner, MTVTemp, MTVTempUp, collider.mMesh.Name);
+            Vector3 collisionSurfaceNormal;
+            if (collisionNormalIndex < caller.mNormals.Length)
+            {
+                collisionSurfaceNormal = caller.mNormals[collisionNormalIndex];
+            }
+            else
+            {
+                collisionSurfaceNormal = collider.mNormals[collisionNormalIndex - caller.mNormals.Length];
+            }
+
+            Intersection o = new Intersection(collider.Owner, MTVTemp, MTVTempUp, collider.mMesh.Name, collisionSurfaceNormal);
             return o;
         }
 
@@ -441,11 +460,11 @@ namespace KWEngine2.Collision
             if (lowestTriangle >= 0)
             {
                 heightOnMap = lowestIntersectionHeight + a - offset.Y;
-                return new Intersection(collider.Owner, Vector3.Zero, Vector3.Zero, collider.Owner.Name, heightOnMap, lowestIntersectionHeight, true);
+                return new Intersection(collider.Owner, Vector3.Zero, Vector3.Zero, collider.Owner.Name, trianglesMTV[lowestTriangle].Normal, heightOnMap, lowestIntersectionHeight, true);
             }
             if (trianglesMTV.Count > 0)
             {
-                return new Intersection(collider.Owner, Vector3.Zero, Vector3.Zero, collider.Owner.Name, collider.mCenter.Y, collider.mCenter.Y, true);
+                return new Intersection(collider.Owner, Vector3.Zero, Vector3.Zero, collider.Owner.Name, KWEngine.WorldUp, collider.mCenter.Y, collider.mCenter.Y, true);
             }
             return null;
         }

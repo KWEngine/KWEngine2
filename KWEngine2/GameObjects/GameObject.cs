@@ -2497,6 +2497,17 @@ namespace KWEngine2.GameObjects
         }
 
         /// <summary>
+        /// Reflektiert den eingehenden Vektor 'vectorIn' am Ebenenvektor 'surfaceNormal'
+        /// </summary>
+        /// <param name="vectorIn">Eingehender Vektor</param>
+        /// <param name="surfaceNormal">Ebenenvektor</param>
+        /// <returns>Reflektierter Vektor</returns>
+        public static Vector3 ReflectVector(Vector3 vectorIn, Vector3 surfaceNormal)
+        {
+            return HelperVector.Reflect(vectorIn, surfaceNormal);
+        }
+
+        /// <summary>
         /// Spielt einen Ton ab
         /// </summary>
         /// <param name="audiofile">Audiodatei</param>

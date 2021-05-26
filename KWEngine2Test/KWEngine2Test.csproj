@@ -66,11 +66,14 @@
     <Compile Include="Objects\SpaceInvaders\Player.cs" />
     <Compile Include="Objects\SpaceInvaders\Shot.cs" />
     <Compile Include="Objects\TestAll\PlayerSphere.cs" />
+    <Compile Include="Objects\TestAll\ReflectObject.cs" />
+    <Compile Include="Objects\TestAll\ReflectPaddle.cs" />
     <Compile Include="Objects\TestAll\Sphere.cs" />
     <Compile Include="Objects\SweepAndPruneTest\Enemy.cs" />
     <Compile Include="Objects\SweepAndPruneTest\Player.cs" />
     <Compile Include="Objects\SweepAndPruneTest\Shot.cs" />
     <Compile Include="Objects\SweepAndPruneTest\SweepCube.cs" />
+    <Compile Include="Worlds\GameWorldReflectionTest.cs" />
     <Compile Include="Worlds\GameWorldSphereCollisionTest.cs" />
     <Compile Include="Worlds\GameWorldPBRTest.cs" />
     <Compile Include="Worlds\GameWorldSchool.cs" />
