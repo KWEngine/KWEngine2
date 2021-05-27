@@ -28,20 +28,31 @@ namespace KWEngine2Test.Objects.JumpAndRun.Actors
 
         private float _momentum = 0;
         private float _gravity = 0.02f;
+        private float _speed = 0.1f;
+        private float _bgOffset = 0;
+
+        private void MoveBackground(float offset)
+        {
+            _bgOffset += offset / 100;
+            CurrentWorld.SetTextureBackgroundOffset(_bgOffset, 0);
+        }
 
         public override void Act(KeyboardState ks, MouseState ms)
         {
+            float currentSpeed = _speed * KWEngine.DeltaTimeFactor;
             if (ks[Key.A] || ks[Key.D])
             {
                 if (ks[Key.A])
                 {
                     SetRotation(0, -90, 0);
-                    MoveOffset(-0.1f * KWEngine.DeltaTimeFactor, 0, 0);
+                    MoveOffset(-currentSpeed, 0, 0);
+                    //MoveBackground(-currentSpeed);
                 }
                 if (ks[Key.D])
                 {
                     SetRotation(0, 90, 0);
-                    MoveOffset(0.1f * KWEngine.DeltaTimeFactor, 0, 0);
+                    MoveOffset(currentSpeed, 0, 0);
+                    //MoveBackground(currentSpeed);
                 }
                 _running = true;
                 _attacking = false;

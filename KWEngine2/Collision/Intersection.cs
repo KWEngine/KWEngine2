@@ -50,6 +50,10 @@ namespace KWEngine2.Collision
         }
 
         private Vector3 _colliderSurfaceNormal = Vector3.UnitZ;
+
+        /// <summary>
+        /// Gibt den Ebenenvektor der Oberfläche des Objekts an, mit dem die Kollision stattfand
+        /// </summary>
         public Vector3 ColliderSurfaceNormal
         {
             get

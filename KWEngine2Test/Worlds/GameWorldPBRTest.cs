@@ -40,7 +40,7 @@ namespace KWEngine2Test.Worlds
             long now = GetCurrentTimeInMilliseconds();
             if (now - timestamp > 3000)
             {
-                ParticleObject p = new ParticleObject(new Vector3(7, 2.5f, -5), new Vector3(5, 5, 5), ParticleType.BurstFirework2);
+                ParticleObject p = new ParticleObject(new Vector3(7, 2.5f, -5), new Vector3(5), ParticleType.BurstFirework2);
                 AddParticleObject(p);
 
                 Explosion e = new Explosion(new Vector3(3, 0, -5), 512, 0.5f, 5f, 3, ExplosionType.Dollar, new Vector4(1, 1, 0, 1));

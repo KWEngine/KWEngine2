@@ -43,6 +43,7 @@ namespace KWEngine2
         /// </summary>
         public static GLWindow CurrentWindow { get; internal set; }
         internal Matrix4 _viewMatrix = Matrix4.Identity;
+        internal Matrix3 _viewMatrixTransposedInverted = Matrix3.Identity;
         internal Matrix4 _modelViewProjectionMatrixBackground = Matrix4.Identity;
         internal Matrix4 _modelViewProjectionMatrixBloom = Matrix4.Identity;
         internal Matrix4 _modelViewProjectionMatrixBloomMerge = Matrix4.Identity;
@@ -309,7 +310,7 @@ namespace KWEngine2
                     viewProjection = _viewMatrix * _projectionMatrix;
                     Frustum.CalculateFrustum(_projectionMatrix, _viewMatrix);
                 }
-
+                _viewMatrixTransposedInverted = new Matrix3(Matrix4.Invert(Matrix4.Transpose(_viewMatrix)));
                 
 
                 // ==================================================

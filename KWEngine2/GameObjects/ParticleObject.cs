@@ -197,23 +197,16 @@ namespace KWEngine2.GameObjects
             _modelMatrix = Matrix4.CreateScale(_scaleCurrent) * _rotation * Matrix4.CreateTranslation(Position);
         }
 
+        internal Matrix4 GetViewMatrixTowardsCamera()
+        {
+            Matrix3 currentViewMatrix = new Matrix3(KWEngine.CurrentWindow._viewMatrix);
+            currentViewMatrix.Invert();
+            return new Matrix4(currentViewMatrix);
+        }
+
         internal void Act()
         {
-            long now = DeltaTime.Watch.ElapsedMilliseconds;
-            if (KWEngine.CurrentWorld.IsFirstPersonMode)
-            {
-                Vector3 fpPos = KWEngine.CurrentWorld.GetFirstPersonObject().Position;
-                fpPos.Y += KWEngine.CurrentWorld.GetFirstPersonObject().FPSEyeOffset;
-                Quaternion tmp = HelperRotation.GetRotationForPoint(Position, fpPos);
-                _rotation = Matrix4.CreateFromQuaternion(tmp * Turn180);
-            }
-            else
-            {
-                Quaternion tmp = HelperRotation.GetRotationForPoint(Position, KWEngine.CurrentWorld.GetCameraPosition());
-                _rotation = Matrix4.CreateFromQuaternion(tmp * Turn180);
-            }
-
-            
+            long now = DeltaTime.Watch.ElapsedMilliseconds;            
             long diff = _lastUpdate < 0 ? 0 : now - _lastUpdate;
             _aliveInMS += diff;
             _frame = (int)(_aliveInMS / 32);
@@ -241,8 +234,15 @@ namespace KWEngine2.GameObjects
                     KWEngine.CurrentWorld.RemoveParticleObject(this);
                 }
             }
-                    
-            _modelMatrix = Matrix4.CreateScale(_scaleCurrent) * _rotation * Matrix4.CreateTranslation(Position);
+
+            _modelMatrix = GetViewMatrixTowardsCamera();
+            _modelMatrix.Row0 *= _scaleCurrent.X;
+            _modelMatrix.Row1 *= _scaleCurrent.Y;
+            _modelMatrix.Row2 *= _scaleCurrent.Z;
+            _modelMatrix.M41 = Position.X;
+            _modelMatrix.M42 = Position.Y;
+            _modelMatrix.M43 = Position.Z;
+            _modelMatrix.M44 = 1;
             _lastUpdate = now;
         }
     }

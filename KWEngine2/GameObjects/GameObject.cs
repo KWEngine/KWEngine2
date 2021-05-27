@@ -2073,22 +2073,15 @@ namespace KWEngine2.GameObjects
         }
 
         /// <summary>
-        /// Dreht die Instanz zur Kamera
+        /// Gleicht die Rotation der Instanz an die der Kamera an
         /// </summary>
-        public void TurnTowardsCamera()
+        public void AdjustRotationToCameraRotation()
         {
             if (CurrentWorld != null)
             {
-                Vector3 target;
-                if(CurrentWorld.IsFirstPersonMode && CurrentWorld.GetFirstPersonObject().Equals(this))
+                if (CurrentWorld.IsFirstPersonMode && CurrentWorld.GetFirstPersonObject() != this)
                 {
-                    target = CurrentWorld.GetFirstPersonObject().Position;
-                    target.Y += CurrentWorld.GetFirstPersonObject().FPSEyeOffset;
-                    TurnTowardsXYZ(target);
-                }
-                else
-                {
-                    TurnTowardsXYZ(CurrentWorld.GetCameraPosition());
+                    Rotation = HelperRotation.GetRotationTowardsCamera(this.CurrentWindow);
                 }
             }
         }
