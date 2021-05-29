@@ -41,7 +41,8 @@ namespace KWEngine2Test.Objects.TestAll
             if(intersection != null)
             {
                 MoveOffset(intersection.MTV);
-                _currentDirection = ReflectVector(_currentDirection, intersection.ColliderSurfaceNormal);
+                _currentDirection = Vector3.NormalizeFast(ReflectVector(_currentDirection, intersection.ColliderSurfaceNormal));
+
                 //MoveAlongVector(_currentDirection, intersection.MTV.Length);
             }
         }

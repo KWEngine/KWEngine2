@@ -16,7 +16,7 @@ namespace KWEngine2.Helper
         public static Vector3 Reflect(Vector3 directionIn, Vector3 surfaceNormal)
         {
             Vector3 reflectedVector = directionIn - 2 * Vector3.Dot(directionIn, surfaceNormal) * surfaceNormal;
-            return reflectedVector;
+            return Vector3.NormalizeFast(reflectedVector);
         }
     }
 }
