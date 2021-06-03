@@ -11,7 +11,7 @@ namespace KWEngine2Test.Objects.TestAll
 {
     class ReflectPaddle : GameObject
     {
-        private float _speed = 0.1f;
+        private float _speed = 0.2f;
         private ReflectObject _theBall;
 
         public ReflectPaddle(ReflectObject ball)

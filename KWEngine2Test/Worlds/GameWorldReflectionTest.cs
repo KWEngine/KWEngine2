@@ -28,6 +28,7 @@ namespace KWEngine2Test.Worlds
         public override void Prepare()
         {
             KWEngine.LoadModelFromFile("ConvexHull", @".\models\convexhull.glb");
+            KWEngine.LoadModelFromFile("Paddle", @".\models\paddle.obj");
 
             FOV = 90;
 
@@ -96,9 +97,9 @@ namespace KWEngine2Test.Worlds
             AddGameObject(convexHull);
 
             ReflectPaddle player = new ReflectPaddle(s);
-            player.SetModel("KWCube");
+            player.SetModel("Paddle");
             player.SetPosition(0, -6, 0);
-            player.SetScale(2, 1, 1);
+            player.SetScale(2);
             player.IsCollisionObject = true;
             AddGameObject(player);
 
