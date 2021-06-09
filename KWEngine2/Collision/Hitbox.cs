@@ -110,7 +110,7 @@ namespace KWEngine2.Collision
                 mVertices = new Vector3[mesh.Vertices.Length];
                 mNormals = new Vector3[mesh.Normals.Length];
             }
-            else if (Owner.Model.Filename == "kwsphere.obj")
+            else if (mMesh.Model.Filename == "kwsphere.obj")
             {
                 mVertices = new Vector3[mVerticesSpheroid.Length];
                 mNormals = new Vector3[mNormalsSpheroid.Length];
@@ -141,7 +141,7 @@ namespace KWEngine2.Collision
             {
                 if (i < mNormals.Length)
                 {
-                    if (Owner.Model.Name == "kwsphere.obj")
+                    if (mMesh.Model.Filename == "kwsphere.obj")
                     {
                         if (Owner.IsSpheroid())
                         {
@@ -156,7 +156,7 @@ namespace KWEngine2.Collision
                     }
                 }
 
-                if (Owner.Model.Name == "kwsphere.obj")
+                if (mMesh.Model.Filename == "kwsphere.obj")
                 {
                     Vector3.TransformPosition(ref mVerticesSpheroid[i], ref mModelMatrixFinal, out mVertices[i]);
                 }

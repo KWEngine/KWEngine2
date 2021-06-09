@@ -31,10 +31,11 @@ namespace KWEngine2Test.Worlds
         public override void Prepare()
         {
             KWEngine.LoadModelFromFile("ConvexHull", @".\models\convexhull.glb");
+            KWEngine.LoadModelFromFile("MS", @".\models\obj\mothership01_ball_end.obj");
 
             FOV = 45;
 
-            SetAmbientLight(1, 1, 1, 0.2f);
+            SetAmbientLight(1, 1, 1, 1f);
 
             SetCameraPosition(0, 25, 0);
             SetCameraTarget(0, 0, 0);
@@ -61,14 +62,19 @@ namespace KWEngine2Test.Worlds
             PlayerSphere s = new PlayerSphere();
             s.SetModel("KWSphere");
             s.SetPosition(4, 1, 0);
-            s.SetScale(4, 2, 2);
+            s.SetScale(2, 2, 2);
             //s.SetScale(2);
             s.Name = "Sphere #1";
             s.IsShadowCaster = true;
             s.IsCollisionObject = true;
-            s.ColorEmissive = new Vector4(1, 1, 1, 0.1f);
+            //s.ColorEmissive = new Vector4(1, 1, 1, 0.1f);
             AddGameObject(s);
 
+            /*Immovable ms = new Immovable();
+            ms.SetModel("MS");
+            ms.IsCollisionObject = true;
+            AddGameObject(ms);*/
+            
             Immovable sC = new Immovable();
             sC.SetModel("KWSphere");
             sC.SetPosition(-5, 1, 0);
@@ -93,13 +99,13 @@ namespace KWEngine2Test.Worlds
             //AddGameObject(floor);
 
             Immovable convexHull = new Immovable();
-            convexHull.SetModel("ConvexHull");
+            convexHull.SetModel("KWCube");
             convexHull.SetScale(2);
             convexHull.SetPosition(0, 1, 0);
             convexHull.IsCollisionObject = true;
             convexHull.IsShadowCaster = true;
             AddGameObject(convexHull);
-
+            
             DebugShowHitboxes = true;
         }
 
