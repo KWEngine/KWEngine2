@@ -58,7 +58,7 @@ namespace KWEngine2Test.Worlds
             ReflectObject s = new ReflectObject();
             s.SetModel("KWSphere");
             s.SetPosition(0, -4, 0);
-            s.SetScale(1,2,1);
+            s.SetScale(1,1,1);
             s.AddRotationZ(45);
             s.Name = "DaBall!";
             s.IsShadowCaster = false;
@@ -90,7 +90,7 @@ namespace KWEngine2Test.Worlds
             AddGameObject(sC2);
 
             Immovable convexHull = new Immovable();
-            convexHull.SetModel("ConvexHull");
+            convexHull.SetModel("KWCube");
             convexHull.SetScale(2);
             convexHull.SetPosition(5, 5, 0);
             convexHull.IsCollisionObject = true;

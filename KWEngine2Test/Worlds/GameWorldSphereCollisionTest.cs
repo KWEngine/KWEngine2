@@ -99,7 +99,7 @@ namespace KWEngine2Test.Worlds
             //AddGameObject(floor);
 
             Immovable convexHull = new Immovable();
-            convexHull.SetModel("KWCube");
+            convexHull.SetModel("ConvexHull");
             convexHull.SetScale(2);
             convexHull.SetPosition(0, 1, 0);
             convexHull.IsCollisionObject = true;

@@ -241,10 +241,9 @@ namespace KWEngine2.Collision
 
             float sphereRadius = caller.Owner.Scale.X / 2;
             int bestCollisionIndex = 0;
+            float shape1Min, shape1Max, shape2Min, shape2Max;
             for (int i = 0; i < collider.mNormals.Length; i++)
             {
-                float shape1Min, shape1Max, shape2Min, shape2Max;
-
                 shape1Min = Vector3.Dot((caller.GetCenter() + offsetCaller) - collider.mNormals[i] * sphereRadius, collider.mNormals[i]);
                 shape1Max = Vector3.Dot((caller.GetCenter() + offsetCaller) + collider.mNormals[i] * sphereRadius, collider.mNormals[i]);
                 SatTest(ref collider.mNormals[i], ref collider.mVertices, out shape2Min, out shape2Max, ref ZeroVector);
@@ -261,11 +260,26 @@ namespace KWEngine2.Collision
                         bestCollisionIndex = i;
                 }
             }
+            Vector3 hullToSphereDirectionVector = Vector3.NormalizeFast((caller.GetCenter() + offsetCaller) - collider.GetCenter());
+            shape1Min = Vector3.Dot((caller.GetCenter() + offsetCaller) - hullToSphereDirectionVector * sphereRadius, hullToSphereDirectionVector);
+            shape1Max = Vector3.Dot((caller.GetCenter() + offsetCaller) + hullToSphereDirectionVector * sphereRadius, hullToSphereDirectionVector);
+            SatTest(ref hullToSphereDirectionVector, ref collider.mVertices, out shape2Min, out shape2Max, ref ZeroVector);
+            if (!Overlaps(shape1Min, shape1Max, shape2Min, shape2Max))
+            {
+                return null;
+            }
+            else
+            {
+                bool m = CalculateOverlap(ref hullToSphereDirectionVector, ref shape1Min, ref shape1Max, ref shape2Min, ref shape2Max,
+                    ref mtvDistance, ref mtvDistanceUp, ref MTVTemp, ref MTVTempUp, ref mtvDirection, ref mtvDirectionUp, ref caller.mCenter, ref collider.mCenter, ref offsetCaller);
+                if (m)
+                    bestCollisionIndex = -100;
+            }
 
             if (MTVTemp == Vector3.Zero)
                 return null;
 
-            Intersection o = new Intersection(collider.Owner, MTVTemp, MTVTempUp, collider.mMesh.Name, collider.mNormals[bestCollisionIndex]);
+            Intersection o = new Intersection(collider.Owner, MTVTemp, MTVTempUp, collider.mMesh.Name, bestCollisionIndex == -100 ? hullToSphereDirectionVector : collider.mNormals[bestCollisionIndex]);
             return o;
         }
 
@@ -278,18 +292,17 @@ namespace KWEngine2.Collision
 
             MTVTemp = Vector3.Zero;
             MTVTempUp = Vector3.Zero;
+            bool useSphereNormal = false;
 
             float sphereRadius = collider.Owner.Scale.X / 2;
             Vector3 collisionSurfaceNormal = new Vector3(0, 0, 0);
+            float shape1Min, shape1Max, shape2Min, shape2Max;
             for (int i = 0; i < caller.mNormals.Length; i++)
             {
-                float shape1Min, shape1Max, shape2Min, shape2Max;
-
                 SatTest(ref caller.mNormals[i], ref caller.mVertices, out shape1Min, out shape1Max, ref ZeroVector);
                 shape2Min = Vector3.Dot(collider.GetCenter() - caller.mNormals[i] * sphereRadius, caller.mNormals[i]);
                 shape2Max = Vector3.Dot(collider.GetCenter() + caller.mNormals[i] * sphereRadius, caller.mNormals[i]);
                 
-
                 if (!Overlaps(shape1Min, shape1Max, shape2Min, shape2Max))
                 {
                     return null;
@@ -302,11 +315,28 @@ namespace KWEngine2.Collision
                         collisionSurfaceNormal = Vector3.NormalizeFast((caller.mCenter + offsetCaller) - collider.mCenter);
                 }
             }
+            //collider is sphere:
+            Vector3 sphereToHullDirectionVector = Vector3.NormalizeFast((caller.GetCenter() + offsetCaller) - collider.GetCenter());
+            SatTest(ref sphereToHullDirectionVector, ref caller.mVertices, out shape1Min, out shape1Max, ref offsetCaller);
+            shape2Min = Vector3.Dot(collider.GetCenter() - sphereToHullDirectionVector * sphereRadius, sphereToHullDirectionVector);
+            shape2Max = Vector3.Dot(collider.GetCenter() + sphereToHullDirectionVector * sphereRadius, sphereToHullDirectionVector);
+            
+            if (!Overlaps(shape1Min, shape1Max, shape2Min, shape2Max))
+            {
+                return null;
+            }
+            else
+            {
+                bool m = CalculateOverlap(ref sphereToHullDirectionVector, ref shape1Min, ref shape1Max, ref shape2Min, ref shape2Max,
+                    ref mtvDistance, ref mtvDistanceUp, ref MTVTemp, ref MTVTempUp, ref mtvDirection, ref mtvDirectionUp, ref caller.mCenter, ref collider.mCenter, ref offsetCaller);
+                if (m)
+                    useSphereNormal = true;
+            }
 
             if (MTVTemp == Vector3.Zero)
                 return null;
 
-            Intersection o = new Intersection(collider.Owner, MTVTemp, MTVTempUp, collider.mMesh.Name, collisionSurfaceNormal);
+            Intersection o = new Intersection(collider.Owner, MTVTemp, MTVTempUp, collider.mMesh.Name, useSphereNormal ? sphereToHullDirectionVector : collisionSurfaceNormal);
             return o;
         }
 
