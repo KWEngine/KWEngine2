@@ -10,7 +10,7 @@ namespace KWEngine2.Collision
 {
     internal class Hitbox
     {
-        private Vector3[] mVerticesSpheroid = new Vector3[] { 
+        private static Vector3[] mVerticesSpheroid = new Vector3[] { 
                     Vector3.UnitX / 2, 
                     Vector3.UnitY / 2, 
                     Vector3.UnitZ / 2, 
@@ -28,7 +28,7 @@ namespace KWEngine2.Collision
                      Vector3.NormalizeFast(-Vector3.UnitX - Vector3.UnitY + Vector3.UnitZ) / 2,
 
                 };
-        private Vector3[] mNormalsSpheroid = new Vector3[] {
+        private static Vector3[] mNormalsSpheroid = new Vector3[] {
                     Vector3.NormalizeFast(Vector3.UnitX + Vector3.UnitY - Vector3.UnitZ),
                     Vector3.NormalizeFast(Vector3.UnitX + Vector3.UnitY + Vector3.UnitZ),
                     Vector3.NormalizeFast(Vector3.UnitX - Vector3.UnitY - Vector3.UnitZ),
@@ -137,49 +137,61 @@ namespace KWEngine2.Collision
             float minZ = float.MaxValue;
             float maxZ = float.MinValue;
 
-            for (int i = 0; i < mVertices.Length; i++)
+            if(!Owner.IsSpherePerfect())
             {
-                if (i < mNormals.Length)
+                for (int i = 0; i < mVertices.Length; i++)
                 {
-                    if (mMesh.Model.Filename == "kwsphere.obj")
+                    if (i < mNormals.Length)
                     {
-                        if (Owner.IsSpheroid())
+                        if (mMesh.Model.Filename == "kwsphere.obj")
                         {
                             Vector3.TransformNormal(ref mNormalsSpheroid[i], ref mModelMatrixFinal, out mNormals[i]);
                             mNormals[i].NormalizeFast();
                         }
+                        else
+                        {
+                            Vector3.TransformNormal(ref mMesh.Normals[i], ref mModelMatrixFinal, out mNormals[i]);
+                            mNormals[i].NormalizeFast();
+                        }
+                    }
+
+                    if (mMesh.Model.Filename == "kwsphere.obj")
+                    {
+                        Vector3.TransformPosition(ref mVerticesSpheroid[i], ref mModelMatrixFinal, out mVertices[i]);
                     }
                     else
                     {
-                        Vector3.TransformNormal(ref mMesh.Normals[i], ref mModelMatrixFinal, out mNormals[i]);
-                        mNormals[i].NormalizeFast();
+                        Vector3.TransformPosition(ref mMesh.Vertices[i], ref mModelMatrixFinal, out mVertices[i]);
                     }
-                }
 
-                if (mMesh.Model.Filename == "kwsphere.obj")
-                {
-                    Vector3.TransformPosition(ref mVerticesSpheroid[i], ref mModelMatrixFinal, out mVertices[i]);
+                    if (mVertices[i].X > maxX)
+                        maxX = mVertices[i].X;
+                    if (mVertices[i].X < minX)
+                        minX = mVertices[i].X;
+                    if (mVertices[i].Y > maxY)
+                        maxY = mVertices[i].Y;
+                    if (mVertices[i].Y < minY)
+                        minY = mVertices[i].Y;
+                    if (mVertices[i].Z > maxZ)
+                        maxZ = mVertices[i].Z;
+                    if (mVertices[i].Z < minZ)
+                        minZ = mVertices[i].Z;
                 }
-                else
-                {
-                    Vector3.TransformPosition(ref mMesh.Vertices[i], ref mModelMatrixFinal, out mVertices[i]);
-                }
-
-                if (mVertices[i].X > maxX)
-                    maxX = mVertices[i].X;
-                if (mVertices[i].X < minX)
-                    minX = mVertices[i].X;
-                if (mVertices[i].Y > maxY)
-                    maxY = mVertices[i].Y;
-                if (mVertices[i].Y < minY)
-                    minY = mVertices[i].Y;
-                if (mVertices[i].Z > maxZ)
-                    maxZ = mVertices[i].Z;
-                if (mVertices[i].Z < minZ)
-                    minZ = mVertices[i].Z;   
             }
 
             Vector3.TransformPosition(ref mMesh.Center, ref mModelMatrixFinal, out mCenter);
+
+            if(Owner.IsSpherePerfect())
+            {
+                float radius = Owner.Scale.X / 2;
+
+                minX = mCenter.X - radius;
+                maxX = mCenter.X + radius;
+                minY = mCenter.Y - radius;
+                maxY = mCenter.Y + radius;
+                minZ = mCenter.Z - radius;
+                maxZ = mCenter.Z + radius;
+            }
 
             float xWidth = maxX - minX;
             float yWidth = maxY - minY;

@@ -41,7 +41,9 @@ namespace KWEngine2Test.Objects.TestAll
             if(intersection != null)
             {
                 MoveOffset(intersection.MTV);
+                SetPositionZ(0);
                 _currentDirection = ReflectVector(_currentDirection, intersection.ColliderSurfaceNormal);
+                _currentDirection.Z = 0;
 
                 //MoveAlongVector(_currentDirection, intersection.MTV.Length);
             }

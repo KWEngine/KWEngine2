@@ -79,7 +79,7 @@ namespace KWEngine2.Renderers
 
         internal void DrawHitbox(GameObject g, ref Matrix4 viewProjection)
         {
-            if (!g.IsInsideScreenSpace || g.Opacity <= 0 || !g.IsCollisionObject)
+            if (!g.IsInsideScreenSpace || g.Opacity <= 0 || !g.IsCollisionObject || g.IsSpherePerfect())
                 return;
 
             
