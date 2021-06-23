@@ -48,7 +48,7 @@ namespace KWEngine2Test.Worlds
 
             DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
             DebugShowCoordinateSystemGrid = GridType.GridXY;
-            DebugShowHitboxes = true;
+            //DebugShowHitboxes = true;
 
             CreateTestScene();
         }
@@ -59,7 +59,7 @@ namespace KWEngine2Test.Worlds
             s.SetModel("KWSphere");
             s.SetPosition(0, -4, 0);
             s.SetScale(1,1,1);
-            s.AddRotationZ(45);
+            //s.AddRotationZ(0);
             s.Name = "DaBall!";
             s.IsShadowCaster = false;
             s.IsCollisionObject = true;
