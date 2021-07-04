@@ -2464,6 +2464,18 @@ namespace KWEngine2.GameObjects
         }
 
         /// <summary>
+        /// Gibt die Intensität der Mauscursorbewegungen pro Frame (in Abhängigkeit der eingestellten Mausempfindlichkeit) an.
+        /// [Sollte weder GLWindow.CursorGrabbed noch World.IsFirstPersonMode 'true' sein, wird immer (0|0) zurückgegeben]
+        /// </summary>
+        /// <param name="ms">Aktueller Mausstatus</param>
+        /// <returns>Aktuelle Intensität der Mauscursorbewegung für den aktuellen Frame</returns>
+        public Vector2 GetMouseCursorMovement(MouseState ms)
+        {
+            return World.GetMouseCursorMovement(ms);
+        }
+
+
+        /// <summary>
         /// Berechnet die Position eines Punkts, der um einen angegeben Punkt entlang einer Achse rotiert wird
         /// </summary>
         /// <param name="point">Mittelpunkt der Rotation</param>

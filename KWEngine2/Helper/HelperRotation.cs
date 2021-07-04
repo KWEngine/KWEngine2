@@ -109,7 +109,7 @@ namespace KWEngine2.Helper
             if (plane == Plane.X)
             {
                 Matrix4.CreateRotationX(radians, out rotationMatrix);
-                Matrix4.CreateTranslation(distance, 0, 0, out translationMatrix);
+                Matrix4.CreateTranslation(0, 0, distance, out translationMatrix);
             }
             else if (plane == Plane.Y)
             {
@@ -119,7 +119,7 @@ namespace KWEngine2.Helper
             else if (plane == Plane.Z)
             {
                 Matrix4.CreateRotationZ(radians, out rotationMatrix);
-                Matrix4.CreateTranslation(0, distance, 0, out translationMatrix);
+                Matrix4.CreateTranslation(distance, 0, 0, out translationMatrix);
             }
             else if(plane == Plane.Camera)
             {

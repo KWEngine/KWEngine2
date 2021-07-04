@@ -842,7 +842,7 @@ namespace KWEngine2
                 //CurrentWorld.SortByZ();
 
 
-                if (CurrentWorld.IsFirstPersonMode && Focused)
+                if ((CurrentWorld.IsFirstPersonMode || CurrentWindow.CursorGrabbed) && Focused)
                 {
                     Mouse.SetPosition(_mousePointFPS.X, _mousePointFPS.Y);
                 }
@@ -878,7 +878,7 @@ namespace KWEngine2
             base.OnFocusedChanged(e);
             if (Focused)
             {
-                if (CurrentWorld != null && CurrentWorld.IsFirstPersonMode)
+                if (CurrentWorld != null && (CurrentWorld.IsFirstPersonMode || CurrentWindow.CursorGrabbed))
                 {
                     Mouse.SetPosition(_mousePointFPS.X, _mousePointFPS.Y);
                 }

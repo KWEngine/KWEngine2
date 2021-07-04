@@ -1219,5 +1219,19 @@ namespace KWEngine2
             else
                 return normal * planeHeight;
         }
+
+        public static Vector2 GetMouseCursorMovement(MouseState ms)
+        {
+            if (KWEngine.CurrentWindow.CursorGrabbed || (KWEngine.CurrentWorld != null && KWEngine.CurrentWorld.IsFirstPersonMode))
+            {
+                int centerX = KWEngine.CurrentWindow.X + KWEngine.CurrentWindow.Width / 2;
+                int centerY = KWEngine.CurrentWindow.Y + KWEngine.CurrentWindow.Height / 2;
+                return new Vector2((ms.X - centerX) * Math.Abs(KWEngine.MouseSensitivity), (centerY - ms.Y) * KWEngine.MouseSensitivity);
+            }
+            else
+            {
+                return Vector2.Zero;
+            }
+        }
     }
 }
