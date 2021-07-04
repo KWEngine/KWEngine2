@@ -94,6 +94,33 @@ namespace KWEngine2.Helper
         }
 
         /// <summary>
+        /// Berechnet die neue Kameraposition in Abhängigkeit der Mausbewegung.
+        /// </summary>
+        /// <param name="pivot">Dreh- und Angelpunkt</param>
+        /// <param name="distance">Distanz zum Dreh- und Angelpunkt</param>
+        /// <param name="degreesLeftRight">Grad der Rotation nach links oder rechts</param>
+        /// <param name="degreesUpDown">Grad der Rotation nach unten oder oben</param>
+        /// <param name="invertX">invertiert die Links-Rechts-Rotation, wenn aktiv</param>
+        /// <param name="invertY">invertiert die Oben-Unten-Rotation, wenn aktiv</param>
+        /// <returns>Neue Kameraposition</returns>
+        public static Vector3 CalculateRotationForArcBallCamera(Vector3 pivot, float distance, float degreesLeftRight, float degreesUpDown, bool invertX = false, bool invertY = false)
+        {
+            Vector3 worldUp = KWEngine.WorldUp;
+            Vector3 z = Vector3.UnitZ;
+
+            float radiansLeftRight = MathHelper.DegreesToRadians(invertX ? degreesLeftRight : -degreesLeftRight);
+            float radiansUpDown = MathHelper.DegreesToRadians(invertY ? degreesUpDown : -degreesUpDown);
+
+            // Get the rotation around the up axis:
+            Matrix4 rotationMatrix = HelperMatrix.CreateRotationMatrixForAxisAngle(ref worldUp, ref radiansLeftRight);
+            Vector3.TransformVector(ref z, ref rotationMatrix, out Vector3 rotatedVector1);
+            Vector3 cross = Vector3.Cross(rotatedVector1, worldUp);
+            Matrix4 rotationMatrix2 = HelperMatrix.CreateRotationMatrixForAxisAngle(ref cross, ref radiansUpDown);
+            Vector3.TransformVector(ref rotatedVector1, ref rotationMatrix2, out Vector3 rotatedVector2);
+            return pivot + rotatedVector2 * distance;
+        }
+
+        /// <summary>
         /// Berechnet die Position eines Punkts, der um einen angegeben Punkt entlang einer Achse rotiert wird
         /// </summary>
         /// <param name="point">Mittelpunkt der Rotation</param>

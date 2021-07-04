@@ -30,7 +30,7 @@ namespace KWEngine2Test.Objects.ThirdPerson
         private float _gravity = 0.02f;
         private float _speed = 0.1f;
         private float _bgOffset = 0;
-        private Vector2 _currentCameraRotationDegrees = new Vector2(0, -20);
+        private Vector2 _currentCameraRotationDegrees = new Vector2(0, 20);
 
         private void MoveBackground(float offset)
         {
@@ -40,28 +40,32 @@ namespace KWEngine2Test.Objects.ThirdPerson
 
         public override void Act(KeyboardState ks, MouseState ms)
         {
-            Vector3 cameraLav = GetCameraLookAtVector();
-            cameraLav.Y = 0;
-            cameraLav.NormalizeFast();
-            Vector3 cameraLavRotated = HelperRotation.RotateVector(cameraLav, -90, Plane.Y);
+            if (Position.Y < -25)
+            {
+                SetPosition(0, 0, 0);
+                return;
+            }
 
             Vector2 msMovement = GetMouseCursorMovement(ms);
             DoCameraPosition(msMovement);
 
+            Vector3 cameraLav = GetCameraLookAtVector();
+            cameraLav.Y = 0;
+            cameraLav.NormalizeFast();
+            Vector3 cameraLavRotated = HelperRotation.RotateVector(cameraLav, -90, Plane.Y);
             float currentSpeed = _speed * KWEngine.DeltaTimeFactor;
+
+            TurnTowardsXZ(Position + cameraLav);
             if (ks[Key.A] || ks[Key.D] || ks[Key.W] || ks[Key.S])
             {
                 if (ks[Key.W])
                 {
-                    TurnTowardsXZ(Position + cameraLav);
                     MoveAlongVector(cameraLav, currentSpeed);
                 }
                 if (ks[Key.S])
                 {
-                    TurnTowardsXZ(Position - cameraLav);
                     MoveAlongVector(cameraLav, -currentSpeed);
                 }
-
                 if(ks[Key.A])
                 {
                     MoveAlongVector(-cameraLavRotated, currentSpeed);
@@ -123,19 +127,22 @@ namespace KWEngine2Test.Objects.ThirdPerson
 
         private void DoCameraPosition(Vector2 m)
         {
-            Console.WriteLine(_currentCameraRotationDegrees);
-            _currentCameraRotationDegrees.X -= m.X * 20;
-            _currentCameraRotationDegrees.Y -= m.Y * 20;
-            if (_currentCameraRotationDegrees.Y > 0)
-                _currentCameraRotationDegrees.Y = 0;
-            if(_currentCameraRotationDegrees.Y < -60)
-                _currentCameraRotationDegrees.Y = -60;
+            _currentCameraRotationDegrees.X -= m.X * 40;
+            _currentCameraRotationDegrees.Y -= m.Y * 40;
+            if (_currentCameraRotationDegrees.Y > 85)
+                _currentCameraRotationDegrees.Y = 85;
+            if (_currentCameraRotationDegrees.Y < -5)
+                _currentCameraRotationDegrees.Y = -5;
             Vector3 arcBallCenter = new Vector3(Position.X, GetCenterPointForAllHitboxes().Y, Position.Z);
-            Vector3 newCamPosLeftRight = HelperRotation.CalculateRotationAroundPointOnAxis(arcBallCenter, Scale.Z * 7.5f, _currentCameraRotationDegrees.X, Plane.Y);
-            Vector3 newCamPosUpDown = HelperRotation.CalculateRotationAroundPointOnAxis(arcBallCenter, Scale.Y * 7.5f, _currentCameraRotationDegrees.Y, Plane.X);
-            newCamPosLeftRight.Y = newCamPosUpDown.Y;
 
-            CurrentWorld.SetCameraPosition(newCamPosLeftRight);
+            Vector3 newCamPos = HelperRotation.CalculateRotationForArcBallCamera(
+                arcBallCenter, 
+                7.5f, 
+                _currentCameraRotationDegrees.X, 
+                _currentCameraRotationDegrees.Y,
+                false,
+                false);
+            CurrentWorld.SetCameraPosition(newCamPos);
             CurrentWorld.SetCameraTarget(Position.X, GetCenterPointForAllHitboxes().Y, Position.Z);
         }
 

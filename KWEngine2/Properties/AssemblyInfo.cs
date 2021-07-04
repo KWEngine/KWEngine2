@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("C# 3D Gaming Engine")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Lutz Karau, Markus Wienhöfer")]
-[assembly: AssemblyProduct("KWEngine2 (Updated on: 2021-06-14)")]
+[assembly: AssemblyProduct("KWEngine2 (Updated on: 2021-07-04)")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
