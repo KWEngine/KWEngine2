@@ -40,7 +40,7 @@ namespace KWEngine2Test.Worlds
             _player.SetModel("UBot");
             _player.SetScale(1.8f);
             _player.SetRotation(0, 180, 0);
-            _player.SetMetalness(0.25f);
+            _player.SetMetalness(0.1f);
             _player.Name = "Player";
             _player.SetPosition(0, 0, 0);
             _player.IsCollisionObject = true;
@@ -62,9 +62,10 @@ namespace KWEngine2Test.Worlds
             
             _sun = new LightObject(LightType.Sun, true);
             _sun.SetColor(1, 1, 1, 0.75f);
-            _sun.SetPosition(50, 50, 50);
+            _sun.SetPosition(100, 100, 50);
             _sun.SetTarget(0, 0, 0);
-            _sun.SetFOV(90);
+            _sun.SetFOV(45);
+            _sun.SetFOVBiasCoefficient(0.0001f);
             AddLightObject(_sun);
             //DebugShadowLight = _sun;
 

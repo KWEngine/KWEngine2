@@ -1,116 +1,90 @@
 ﻿using KWEngine2;
 using KWEngine2.GameObjects;
 using KWEngine2Test.Objects;
+using OpenTK;
 using OpenTK.Input;
 
 namespace KWEngine2Test.Worlds
 {
     class GameWorldStart : World
     {
-        private HUDObject _button = null;
-        private HUDObject _button2 = null;
-        private HUDObject _button3 = null;
-        private HUDObject _button4 = null;
+        private HUDObject[] _buttons = new HUDObject[5];
+        private HUDObject[] _numbers = new HUDObject[5];
+        private Vector4[] _colors = new Vector4[]
+        {
+            new Vector4(1f, 0.75f, 0f, 0.4f),
+            new Vector4(0, 0, 1, 0.3f),
+            new Vector4(0.25f, 1, 0.25f, 0.3f),
+            new Vector4(0.0f, 1, 1.0f, 0.3f),
+            new Vector4(1, 0.5f, 0.25f, 0.4f)
+        };
 
         public override void Act(KeyboardState kb, MouseState ms)
         {
             if (kb[Key.Escape] && GetCurrentTimeInMilliseconds() > 500)
                 CurrentWindow.Close();
 
-            if (_button == null)
-                return;
-
-            if (_button.IsMouseCursorOnMe(ms))
+            
+            for(int i = 0; i < _buttons.Length; i++)
             {
-                _button.SetGlow(0.25f, 0.5f, 0f, 0.4f);
-
-                if (ms.LeftButton == ButtonState.Pressed)
+                if(_buttons[i].IsMouseCursorOnMe(ms) || _numbers[i].IsMouseCursorOnMe(ms))
                 {
-                    CurrentWindow.SetWorld(new GameWorld01());
-                    return;
+                    _numbers[i].SetGlow(_colors[i].X, _colors[i].Y, _colors[i].Z, _colors[i].W);
+                    _buttons[i].SetGlow(_colors[i].X, _colors[i].Y, _colors[i].Z, _colors[i].W);
+
+                    if (ms.LeftButton == ButtonState.Pressed)
+                    {
+                        switch (i)
+                        {
+                            case 0:
+                                CurrentWindow.SetWorld(new GameWorld01());
+                                return;
+                            case 1:
+                                CurrentWindow.SetWorld(new GameWorld02());
+                                return;
+                            case 2:
+                                CurrentWindow.SetWorld(new GameWorld03());
+                                return;
+                            case 3:
+                                CurrentWindow.SetWorld(new GameWorld04());
+                                return;
+                            case 4:
+                                CurrentWindow.SetWorld(new GameWorld05());
+                                return;
+                            default:
+                                return;
+                        }
+                    }
                 }
-            }
-            else
-            {
-                _button.SetGlow(1, 0, 0, 0);
-            }
-
-
-            if (_button2.IsMouseCursorOnMe(ms))
-            {
-                _button2.SetGlow(0, 0, 1, 0.7f);
-
-                if (ms.LeftButton == ButtonState.Pressed)
+                else
                 {
-                    CurrentWindow.SetWorld(new GameWorld02());
-                    return;
+                    _numbers[i].SetGlow(_colors[i].X, _colors[i].Y, _colors[i].Z, 0);
+                    _buttons[i].SetGlow(_colors[i].X, _colors[i].Y, _colors[i].Z, 0);
                 }
-            }
-            else
-            {
-                _button2.SetGlow(1, 0, 0, 0);
-            }
-
-            if (_button3.IsMouseCursorOnMe(ms))
-            {
-                _button3.SetGlow(0.5f, 1, 0.5f, 0.3f);
-
-                if (ms.LeftButton == ButtonState.Pressed)
-                {
-                    CurrentWindow.SetWorld(new GameWorld03());
-                    return;
-                }
-            }
-            else
-            {
-                _button3.SetGlow(1, 0, 0, 0);
-            }
-
-            if (_button4.IsMouseCursorOnMe(ms))
-            {
-                _button4.SetGlow(0.5f, 1, 0.5f, 0.3f);
-
-                if (ms.LeftButton == ButtonState.Pressed)
-                {
-                    CurrentWindow.SetWorld(new GameWorld04());
-                    return;
-                }
-            }
-            else
-            {
-                _button4.SetGlow(1, 0, 0, 0);
             }
         }
      
         public override void Prepare()
         {
-            int imageWidth = 190;
-            int imageHeight = 190;
+            int imageWidth = 128;
+            int imageHeight = 128;
             int width = CurrentWindow.Width;
             int height = CurrentWindow.Height;
+            int offset = -276;
+            for(int i = 0; i < _buttons.Length; i++, offset += 128)
+            {
+                _buttons[i] = new HUDObject(HUDObjectType.Image, width / 2, height / 2 + offset);
+                _buttons[i].SetTexture(@".\textures\button_gen.dds");
+                _buttons[i].SetScale(imageWidth, imageHeight);
+                _buttons[i].SetColor(_colors[i].X, _colors[i].Y, _colors[i].Z, 1);
+                AddHUDObject(_buttons[i]);
 
-            _button = new HUDObject(HUDObjectType.Image, width / 2, height / 2 - 276);
-            _button.SetTexture(@".\textures\button01.png");
-            _button.SetScale(imageWidth, imageHeight);
-            AddHUDObject(_button);
-
-            _button2 = new HUDObject(HUDObjectType.Image, width / 2, height / 2 - 100);
-            _button2.SetTexture(@".\textures\button02.png");
-            _button2.SetScale(imageWidth, imageHeight);
-            _button2.SetColor(1, 0.75f, 1, 1);
-            AddHUDObject(_button2);
-
-            _button3 = new HUDObject(HUDObjectType.Image, width / 2, height / 2 + 76);
-            _button3.SetTexture(@".\textures\button03.png");
-            _button3.SetScale(imageWidth, imageHeight);
-            _button3.SetColor(1, 1, 0.5f, 1);
-            AddHUDObject(_button3);
-
-            _button4 = new HUDObject(HUDObjectType.Image, width / 2, height / 2 + 252);
-            _button4.SetTexture(@".\textures\button04.png");
-            _button4.SetScale(imageWidth, imageHeight);
-            _button4.SetColor(0, 1f, 1f, 1);
-            AddHUDObject(_button4);
+                _numbers[i] = new HUDObject(HUDObjectType.Text, width / 2 - 11, height / 2 + offset + 2);
+                _numbers[i].SetScale(24, 24);
+                _numbers[i].CharacterSpreadFactor = 14;
+                _numbers[i].SetText("0 " + (i + 1));
+                AddHUDObject(_numbers[i]);
+            }
 
             DebugShowPerformanceInTitle = PerformanceUnit.FramesPerSecond;
         }
