@@ -21,6 +21,8 @@ namespace KWEngine2Test.Worlds
         {
             if (ks[Key.Escape])
             {
+                CurrentWindow.CursorVisible = true;
+                CurrentWindow.CursorGrabbed = false;
                 CurrentWindow.SetWorld(new GameWorldStart());
                 return;
             }
