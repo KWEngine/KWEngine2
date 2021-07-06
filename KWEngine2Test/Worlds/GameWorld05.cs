@@ -32,7 +32,7 @@ namespace KWEngine2Test.Worlds
         {
             KWEngine.LoadModelFromFile("UBot", @".\Models\JumpAndRun\UBot.fbx");
 
-            SetTextureSkybox(@".\Textures\skybox2.dds");
+            SetTextureSkybox(@".\Textures\skybox3.dds");
             SetTextureBackgroundBrightnessMultiplier(3);
             SetAmbientLight(1, 1, 1, 0.25f);
             WorldDistance = 50;
@@ -54,8 +54,10 @@ namespace KWEngine2Test.Worlds
             floor.SetModel("KWCube");
             floor.SetTexture(@".\textures\mpanel_diffuse.dds");
             floor.SetTexture(@".\textures\mpanel_normal.dds", TextureType.Normal);
-            floor.SetTexture(@".\textures\mpanel_roughness.dds", TextureType.Roughness);
-            floor.SetTexture(@".\textures\mpanel_metalness.dds", TextureType.Metalness);
+            //floor.SetTexture(@".\textures\mpanel_roughness.dds", TextureType.Roughness);
+            //floor.SetTexture(@".\textures\mpanel_metalness.dds", TextureType.Metalness);
+            floor.SetRoughness(0.25f);
+            floor.SetMetalness(0.1f);
             floor.SetTextureRepeat(5, 5);
             floor.IsCollisionObject = true;
             floor.SetPosition(0, -1f, 0);
@@ -64,7 +66,7 @@ namespace KWEngine2Test.Worlds
             
             _sun = new LightObject(LightType.Sun, true);
             _sun.SetColor(1, 1, 1, 0.75f);
-            _sun.SetPosition(100, 100, 50);
+            _sun.SetPosition(-100, 100, 10);
             _sun.SetTarget(0, 0, 0);
             _sun.SetFOV(45);
             _sun.SetFOVBiasCoefficient(0.0001f);
@@ -77,6 +79,19 @@ namespace KWEngine2Test.Worlds
 
             CurrentWindow.CursorVisible = false;
             CurrentWindow.CursorGrabbed = true;
+
+            // Place some obstacles:
+            Immovable i1 = new Immovable();
+            i1.SetModel("KWCube");
+            i1.SetPosition(2.5f, 1f, -5);
+            i1.SetScale(2);
+            i1.SetRoughness(0.5f);
+            i1.SetColor(1, 0.25f, 0.25f);
+            i1.SetTexture(@".\textures\MetalPlates006_1K_ColorBright.jpg");
+            i1.SetSpecularReflectionEnabled(true);
+            i1.IsShadowCaster = true;
+            i1.IsCollisionObject = true;
+            AddGameObject(i1);
         }
     }
 }

@@ -1368,6 +1368,17 @@ namespace KWEngine2
             }
         }
 
+        /// <summary>
+        /// Ermittelt bei GLWindow.CursorGrabbed = true die relative Mausbewegung des aktuellen Frames
+        /// </summary>
+        /// <param name="ms">Mausstatus</param>
+        /// <returns>Relative X- und Y-Abweichung des Mauscursors als Vector2-InstanzS</returns>
+        public static Vector2 GetMouseCursorMovement(MouseState ms)
+        {
+            return World.GetMouseCursorMovement(ms);
+        }
+
+
         #region Framebuffers
 
         internal int[] FramebuffersShadow = new int[KWEngine.MAX_SHADOWMAPS];

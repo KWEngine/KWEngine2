@@ -45,7 +45,7 @@ namespace KWEngine2Test.Objects.ThirdPerson
                 SetPosition(0, 0, 0);
                 return;
             }
-
+            
             Vector2 msMovement = GetMouseCursorMovement(ms);
             DoCameraPosition(msMovement);
 
@@ -127,23 +127,25 @@ namespace KWEngine2Test.Objects.ThirdPerson
 
         private void DoCameraPosition(Vector2 m)
         {
-            _currentCameraRotationDegrees.X -= m.X * 40;
-            _currentCameraRotationDegrees.Y -= m.Y * 40;
-            if (_currentCameraRotationDegrees.Y > 85)
-                _currentCameraRotationDegrees.Y = 85;
-            if (_currentCameraRotationDegrees.Y < -5)
-                _currentCameraRotationDegrees.Y = -5;
+            _currentCameraRotationDegrees.X += m.X * 40;
+            _currentCameraRotationDegrees.Y += m.Y * 40;
+            if (_currentCameraRotationDegrees.Y < -85)
+                _currentCameraRotationDegrees.Y = -85;
+            if (_currentCameraRotationDegrees.Y > 2)
+                _currentCameraRotationDegrees.Y = 2;
+
+            //Vector3 offset = HelperRotation.RotateVector(GetLookAtVector(), -90, Plane.Y) * 2;
             Vector3 arcBallCenter = new Vector3(Position.X, GetCenterPointForAllHitboxes().Y, Position.Z);
 
             Vector3 newCamPos = HelperRotation.CalculateRotationForArcBallCamera(
                 arcBallCenter, 
-                7.5f, 
+                10f, 
                 _currentCameraRotationDegrees.X, 
                 _currentCameraRotationDegrees.Y,
                 false,
                 false);
             CurrentWorld.SetCameraPosition(newCamPos);
-            CurrentWorld.SetCameraTarget(Position.X, GetCenterPointForAllHitboxes().Y, Position.Z);
+            CurrentWorld.SetCameraTarget(new Vector3(Position.X, GetCenterPointForAllHitboxes().Y, Position.Z));
         }
 
         private void DoStates()

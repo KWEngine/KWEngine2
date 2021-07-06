@@ -108,8 +108,8 @@ namespace KWEngine2.Helper
             Vector3 worldUp = KWEngine.WorldUp;
             Vector3 z = Vector3.UnitZ;
 
-            float radiansLeftRight = MathHelper.DegreesToRadians(invertX ? degreesLeftRight : -degreesLeftRight);
-            float radiansUpDown = MathHelper.DegreesToRadians(invertY ? degreesUpDown : -degreesUpDown);
+            float radiansLeftRight = MathHelper.DegreesToRadians(invertX ? -degreesLeftRight : degreesLeftRight);
+            float radiansUpDown = MathHelper.DegreesToRadians(invertY ? -degreesUpDown : degreesUpDown);
 
             // Get the rotation around the up axis:
             Matrix4 rotationMatrix = HelperMatrix.CreateRotationMatrixForAxisAngle(ref worldUp, ref radiansLeftRight);

@@ -1220,6 +1220,11 @@ namespace KWEngine2
                 return normal * planeHeight;
         }
 
+        /// <summary>
+        /// Ermittelt bei GLWindow.CursorGrabbed = true die relative Mausbewegung des aktuellen Frames
+        /// </summary>
+        /// <param name="ms">Mausstatus</param>
+        /// <returns>Relative X- und Y-Abweichung des Mauscursors als Vector2-InstanzS</returns>
         public static Vector2 GetMouseCursorMovement(MouseState ms)
         {
             if (KWEngine.CurrentWindow.CursorGrabbed || (KWEngine.CurrentWorld != null && KWEngine.CurrentWorld.IsFirstPersonMode))
