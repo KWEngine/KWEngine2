@@ -105,18 +105,14 @@ namespace KWEngine2.Helper
         /// <returns>Neue Kameraposition</returns>
         public static Vector3 CalculateRotationForArcBallCamera(Vector3 pivot, float distance, float degreesLeftRight, float degreesUpDown, bool invertX = false, bool invertY = false)
         {
-            Vector3 worldUp = KWEngine.WorldUp;
-            Vector3 z = Vector3.UnitZ;
+            float radiansLeftRight = MathHelper.DegreesToRadians(invertX ? degreesLeftRight : -degreesLeftRight);
+            float radiansUpDown = MathHelper.DegreesToRadians(invertY ? degreesUpDown : -degreesUpDown);
 
-            float radiansLeftRight = MathHelper.DegreesToRadians(invertX ? -degreesLeftRight : degreesLeftRight);
-            float radiansUpDown = MathHelper.DegreesToRadians(invertY ? -degreesUpDown : degreesUpDown);
-
-            // Get the rotation around the up axis:
-            Matrix4 rotationMatrix = HelperMatrix.CreateRotationMatrixForAxisAngle(ref worldUp, ref radiansLeftRight);
-            Vector3.TransformVector(ref z, ref rotationMatrix, out Vector3 rotatedVector1);
-            Vector3 cross = Vector3.Cross(rotatedVector1, worldUp);
-            Matrix4 rotationMatrix2 = HelperMatrix.CreateRotationMatrixForAxisAngle(ref cross, ref radiansUpDown);
-            Vector3.TransformVector(ref rotatedVector1, ref rotationMatrix2, out Vector3 rotatedVector2);
+            Quaternion yaw = Quaternion.FromAxisAngle(KWEngine.WorldUp, radiansLeftRight);
+            Vector3 rotatedVector1 = RotateVector(Vector3.UnitZ, yaw);
+            Vector3 cross = Vector3.Cross(rotatedVector1, KWEngine.WorldUp);
+            Quaternion pitch = Quaternion.FromAxisAngle(cross, radiansUpDown);
+            Vector3 rotatedVector2 = RotateVector(rotatedVector1, pitch);
             return pivot + rotatedVector2 * distance;
         }
 
