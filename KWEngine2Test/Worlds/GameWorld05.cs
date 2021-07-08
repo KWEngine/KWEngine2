@@ -15,6 +15,7 @@ namespace KWEngine2Test.Worlds
     {
         private Player _player;
         private LightObject _sun;
+        private HUDObject _crosshair;
         //private long _lastspawn = 0;
 
         public override void Act(KeyboardState ks, MouseState ms)
@@ -92,6 +93,12 @@ namespace KWEngine2Test.Worlds
             i1.IsShadowCaster = true;
             i1.IsCollisionObject = true;
             AddGameObject(i1);
+
+            // Place HUD crosshair:
+            _crosshair = new HUDObject(HUDObjectType.Image, CurrentWindow.Width / 2, CurrentWindow.Height / 2);
+            _crosshair.SetTexture(@".\textures\crosshair.dds");
+            _crosshair.SetScale(64, 64);
+            AddHUDObject(_crosshair);
         }
     }
 }

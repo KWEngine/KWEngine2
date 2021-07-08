@@ -13,6 +13,10 @@ namespace KWEngine2Test.Objects.ThirdPerson
 {
     public class Player : GameObject
     {
+        private readonly Vector3 _offsetVertical = new Vector3(0, 1, 0);
+        private readonly long _cooldown = 150;
+        private long _lastShot = 0;
+
         private enum PlayerState
         {
             OnFloor = 0,
@@ -45,19 +49,21 @@ namespace KWEngine2Test.Objects.ThirdPerson
                 SetPosition(0, 0, 0);
                 return;
             }
-            
-            Vector2 msMovement = GetMouseCursorMovement(ms);
-            DoCameraPosition(msMovement);
 
-            Vector3 cameraLav = GetCameraLookAtVector();
-            cameraLav.Y = 0;
-            cameraLav.NormalizeFast();
+            Vector3 bodyCenter = new Vector3(Position.X, GetCenterPointForAllHitboxes().Y, Position.Z);
+
+
+            Vector2 msMovement = GetMouseCursorMovement(ms);
+            AddRotationY(-msMovement.X * 40);
+            Vector3 camTargetWithOffset = DoCameraPosition(msMovement);
+            Vector3 cameraLav = GetLookAtVector();
             Vector3 cameraLavRotated = HelperRotation.RotateVector(cameraLav, -90, Plane.Y);
+
             float currentSpeed = _speed * KWEngine.DeltaTimeFactor;
 
-            TurnTowardsXZ(Position + cameraLav);
+            
             if (ks[Key.A] || ks[Key.D] || ks[Key.W] || ks[Key.S])
-            {
+            {        
                 if (ks[Key.W])
                 {
                     MoveAlongVector(cameraLav, currentSpeed);
@@ -105,36 +111,63 @@ namespace KWEngine2Test.Objects.ThirdPerson
                 _upKeyPressed = false;
             }
 
-            /*
-            if (ks[Key.Space] && _state == PlayerState.OnFloor && !_running)
+            
+            if (ks[Key.ShiftLeft] || ms[MouseButton.Left])
             {
-                _attacking = true;
-                _percentage = 0.25f;
+                DoShoot(ms, camTargetWithOffset);
+                //_attacking = true;
+                //_percentage = 0.25f;
             }
-            if (_attacking && _percentage >= 1)
-            {
-                _attacking = false;
-                _percentage = 0;
-            }
-            */
+            //if (_attacking && _percentage >= 1)
+            //{
+            //    _attacking = false;
+            //    _percentage = 0;
+            //}
+            
 
 
             DoStates();
             DoCollisionDetection();
             DoAnimation();
-            
         }
 
-        private void DoCameraPosition(Vector2 m)
+        private void DoShoot(MouseState ms, Vector3 offset)
+        {
+            Console.WriteLine(ms.X + " | " + ms.Y);
+            if (CurrentWorld.GetCurrentTimeInMilliseconds() - _lastShot > _cooldown)
+            {
+                Shot s = new Shot();
+                s.SetModel("KWSphere");
+                s.SetScale(0.25f);
+                s.SetColor(0, 0, 1);
+                s.SetGlow(0, 0, 1, 0.25f);
+                s.IsCollisionObject = true;
+                s.SetPosition(GetCenterPointForAllHitboxes() + GetLookAtVector() * 1);
+                s.SetRotation(Rotation);
+                s.AddRotationY(-5, true);
+                
+
+
+                CurrentWorld.AddGameObject(s);
+
+                _lastShot = CurrentWorld.GetCurrentTimeInMilliseconds();
+            }
+        }
+
+        private Vector3 DoCameraPosition(Vector2 m)
         {
             _currentCameraRotationDegrees.X += m.X * 40;
             _currentCameraRotationDegrees.Y += m.Y * 40;
-            if (_currentCameraRotationDegrees.Y < -85)
-                _currentCameraRotationDegrees.Y = -85;
-            if (_currentCameraRotationDegrees.Y > 2)
-                _currentCameraRotationDegrees.Y = 2;
+            if (_currentCameraRotationDegrees.Y < -75)
+                _currentCameraRotationDegrees.Y = -75;
+            if (_currentCameraRotationDegrees.Y > 5)
+                _currentCameraRotationDegrees.Y = 5;
 
-            //Vector3 offset = HelperRotation.RotateVector(GetLookAtVector(), -90, Plane.Y) * 2;
+            float lav_factor = (0.00012f * (_currentCameraRotationDegrees.Y * _currentCameraRotationDegrees.Y) + 0.02099f * _currentCameraRotationDegrees.Y + 0.89190f);
+            float lav_factor2 = _currentCameraRotationDegrees.Y >= -15 ? (_currentCameraRotationDegrees.Y + 15) / 20f : 0f;
+            
+            Vector3 offset1 = HelperRotation.RotateVector(GetLookAtVector(), -90, Plane.Y) * 1 + GetLookAtVector() * 5 * lav_factor;
+            Vector3 offset2 = HelperRotation.RotateVector(GetLookAtVector(), -90, Plane.Y) * 1 + GetLookAtVector() * 2 + _offsetVertical * 2 * lav_factor2;
             Vector3 arcBallCenter = new Vector3(Position.X, GetCenterPointForAllHitboxes().Y, Position.Z);
 
             Vector3 newCamPos = HelperRotation.CalculateRotationForArcBallCamera(
@@ -144,8 +177,10 @@ namespace KWEngine2Test.Objects.ThirdPerson
                 _currentCameraRotationDegrees.Y,
                 false,
                 false);
-            CurrentWorld.SetCameraPosition(newCamPos);
-            CurrentWorld.SetCameraTarget(new Vector3(Position.X, GetCenterPointForAllHitboxes().Y, Position.Z));
+            CurrentWorld.SetCameraPosition(newCamPos + offset1);
+            CurrentWorld.SetCameraTarget(new Vector3(Position.X, GetCenterPointForAllHitboxes().Y, Position.Z) + offset2);
+
+            return offset2;
         }
 
         private void DoStates()
@@ -178,6 +213,9 @@ namespace KWEngine2Test.Objects.ThirdPerson
             float maxYUpCorrection = 0;
             foreach (Intersection i in collisionlist)
             {
+                if (i.Object is Shot)
+                    continue;
+
                 if (i.MTV.Y > maxYUpCorrection)
                     maxYUpCorrection = i.MTV.Y;
 
