@@ -133,7 +133,7 @@ namespace KWEngine2Test.Objects.ThirdPerson
 
         private void DoShoot(MouseState ms, Vector3 offset)
         {
-            Console.WriteLine(ms.X + " | " + ms.Y);
+           // Console.WriteLine(ms.X + " | " + ms.Y);
             if (CurrentWorld.GetCurrentTimeInMilliseconds() - _lastShot > _cooldown)
             {
                 Shot s = new Shot();
@@ -143,8 +143,10 @@ namespace KWEngine2Test.Objects.ThirdPerson
                 s.SetGlow(0, 0, 1, 0.25f);
                 s.IsCollisionObject = true;
                 s.SetPosition(GetCenterPointForAllHitboxes() + GetLookAtVector() * 1);
-                s.SetRotation(Rotation);
-                s.AddRotationY(-5, true);
+                
+                Vector3 target = World.GetMouseIntersectionPoint(ms, Plane.Camera, -50, 35, 5);
+                s.TurnTowardsXYZ(target);
+                //s.AddRotationY(-2.5f, true);
                 
 
 
@@ -205,7 +207,6 @@ namespace KWEngine2Test.Objects.ThirdPerson
                 MoveOffset(0, -0.0001f, 0);
             }
         }
-
         private void DoCollisionDetection()
         {
             List<Intersection> collisionlist = GetIntersections();
