@@ -1,14 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="KWEngine2.Collision.Intersection">
-    <Position X="2.5" Y="12.25" Width="2.75" />
+    <Position X="2.5" Y="12.5" Width="2.75" />
     <Members>
+      <Field Name="_colliderSurfaceNormal" Hidden="true" />
       <Method Name="Intersection" Hidden="true" />
       <Field Name="mMTV" Hidden="true" />
       <Field Name="mMTVUp" Hidden="true" />
+      <Field Name="UNIT" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>CAAAAEAAAAAAAAAgAAIEAAAAAAAAAAAAAAICABAAAEA=</HashCode>
+      <HashCode>CAAAAEAAAAAEEAAoAAIEAAAAAAAAAAAAAAICABAAAEA=</HashCode>
       <FileName>Collision\Intersection.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -17,6 +19,7 @@
     <Members>
       <Field Name="_bloomRadius" Hidden="true" />
       <Field Name="_broadPhaseToleranceWidth" Hidden="true" />
+      <Field Name="_projection" Hidden="true" />
       <Field Name="_shadowMapSize" Hidden="true" />
       <Field Name="_worldUp" Hidden="true" />
       <Field Name="Collection" Hidden="true" />
@@ -37,6 +40,7 @@
       <Method Name="DrawCoordinateSystem" Hidden="true" />
       <Property Name="FontTextureArray" Hidden="true" />
       <Field Name="GHitbox" Hidden="true" />
+      <Field Name="GlobalError" Hidden="true" />
       <Field Name="Identity" Hidden="true" />
       <Method Name="InitializeFont" Hidden="true" />
       <Method Name="InitializeModels" Hidden="true" />
@@ -77,7 +81,7 @@
       <Compartment Name="Nested Types" Collapsed="false" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>ARNpZBzBAKGA4KAQoGDAARGAUCAEgBASKchcSlUimAA=</HashCode>
+      <HashCode>ARNpZBzBAKGA4KAQoGDAARGAUCAEgBQSKchcSlUymAA=</HashCode>
       <FileName>KWEngine.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -100,6 +104,7 @@
       <Field Name="_multithreaded" Hidden="true" />
       <Field Name="_projectionMatrix" Hidden="true" />
       <Field Name="_viewMatrix" Hidden="true" />
+      <Field Name="_viewMatrixTransposedInverted" Hidden="true" />
       <Field Name="_viewProjectionMatrixHUD" Hidden="true" />
       <Field Name="_vSync" Hidden="true" />
       <Field Name="_windowRect" Hidden="true" />
@@ -110,6 +115,7 @@
       <Field Name="bloomWidth" Hidden="true" />
       <Method Name="CalculateProjectionMatrix" Hidden="true" />
       <Method Name="DownsampleFramebuffer" Hidden="true" />
+      <Method Name="DrawSceneForSkybox" Hidden="true" />
       <Method Name="ForceClose" Hidden="true" />
       <Field Name="FramebufferBloom1" Hidden="true" />
       <Field Name="FramebufferBloom2" Hidden="true" />
@@ -153,7 +159,7 @@
       <Method Name="UpdateWindowRect" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>ECSBQQSAgCAgk4QQSACAFRAiyAxCYODQiUBpEREBtw4=</HashCode>
+      <HashCode>ECSBQQSAgCAgk4QQSACAFRAiyAxDYODQiUBpEREBvw4=</HashCode>
       <FileName>GLWindow.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -197,6 +203,8 @@
       <Field Name="_zFar" Hidden="true" />
       <Method Name="AddRemoveObjects" Hidden="true" />
       <Method Name="Dispose" Hidden="true" />
+      <Method Name="GetCameraLookAtVectorEitherWay" Hidden="true" />
+      <Method Name="GetCameraPositionEitherWay" Hidden="true" />
       <Method Name="GetParticleObjects" Hidden="true" />
       <Method Name="RemoveExplosionObject" Hidden="true" />
       <Method Name="RemoveParticleObject" Hidden="true" />
@@ -257,6 +265,8 @@
       <Method Name="IntersectRaySphere" Hidden="true" />
       <Method Name="IsCubeOrSphere" Hidden="true" />
       <Method Name="IsPointInsideBox" Hidden="true" />
+      <Method Name="IsSpherePerfect" Hidden="true" />
+      <Method Name="IsSpheroid" Hidden="true" />
       <Property Name="LeftRightMost" Hidden="true" />
       <Method Name="LinePlaneIntersection" Hidden="true" />
       <Field Name="ModelMatrixForRenderPass" Hidden="true" />
@@ -269,13 +279,13 @@
       <Method Name="UpdateModelMatrixAndHitboxes" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>QmHKvhpC2KEgULX0JhLN1QRAkLomj8zZGZoIxgBoSfQ=</HashCode>
+      <HashCode>QmHKvhpC2LEgULX0JhLN1QRAkLomj8xZGZoIxgBoSfQ=</HashCode>
       <FileName>GameObjects\GameObject.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="KWEngine2.GameObjects.Explosion">
-    <Position X="8.5" Y="14.25" Width="2.75" />
+    <Position X="8.5" Y="14.5" Width="2.75" />
     <Members>
       <Field Name="_algorithm" Hidden="true" />
       <Field Name="_amount" Hidden="true" />
@@ -304,7 +314,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="KWEngine2.GameObjects.HUDObject">
-    <Position X="5.5" Y="13.25" Width="2.75" />
+    <Position X="5.5" Y="14" Width="2.75" />
     <Members>
       <Field Name="_absolute" Hidden="true" />
       <Field Name="_count" Hidden="true" />
@@ -331,7 +341,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="KWEngine2.GameObjects.LightObject">
-    <Position X="2.5" Y="8.25" Width="2.75" />
+    <Position X="2.5" Y="8.5" Width="2.75" />
     <Members>
       <Field Name="_distanceMultiplier" Hidden="true" />
       <Field Name="_framebufferIndex" Hidden="true" />
@@ -363,7 +373,7 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="KWEngine2.GameObjects.ParticleObject">
-    <Position X="5.5" Y="10.25" Width="2.75" />
+    <Position X="5.5" Y="10.75" Width="2.75" />
     <Members>
       <Field Name="_aliveInMS" Hidden="true" />
       <Field Name="_durationInMS" Hidden="true" />
@@ -384,12 +394,12 @@
       <Field Name="Turn180" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>AAAgAAAAAAAAAAQwAgAABAAoAAKAAgAAADgggAEAAWA=</HashCode>
+      <HashCode>IAAgAAAAAAAAAAQwAgAABAAoAAKAAgAAADgggAEAAWA=</HashCode>
       <FileName>GameObjects\ParticleObject.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="KWEngine2.Helper.HelperRandom">
-    <Position X="5.5" Y="7" Width="2.75" />
+    <Position X="5.5" Y="7.25" Width="2.75" />
     <Members>
       <Field Name="generator" Hidden="true" />
     </Members>
@@ -399,11 +409,12 @@
     </TypeIdentifier>
   </Class>
   <Class Name="KWEngine2.Helper.HelperRotation">
-    <Position X="5.5" Y="8.25" Width="2.75" />
+    <Position X="5.5" Y="8.5" Width="2.75" />
     <Members>
       <Method Name="CalculateDegreesFromRadians" Hidden="true" />
       <Method Name="CalculateRadiansFromDegrees" Hidden="true" />
       <Field Name="finalTranslationPoint" Hidden="true" />
+      <Method Name="GetRotationTowardsCamera" Hidden="true" />
       <Field Name="rotationMatrix" Hidden="true" />
       <Field Name="spinMatrix" Hidden="true" />
       <Field Name="tempMatrix" Hidden="true" />
@@ -413,12 +424,12 @@
       <Field Name="zeroVector" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>AEEAAAgAIAAgAAAAAAAAAQAAAIBAAA0AABAAQAACAAQ=</HashCode>
+      <HashCode>AEEAAQgAIAAgAAAAAAAAAQBAAIBAAA0AABAAQAACAAQ=</HashCode>
       <FileName>Helper\HelperRotation.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Enum Name="KWEngine2.GameObjects.ParticleType" Collapsed="true">
-    <Position X="5.5" Y="12.5" Width="2.75" />
+    <Position X="5.5" Y="13.25" Width="2.75" />
     <TypeIdentifier>
       <HashCode>EAAAAYAACEAIAAAAIAAAAAAAAMAKAAA0AAAAAAACAAA=</HashCode>
       <FileName>GameObjects\ParticleObject.cs</FileName>
