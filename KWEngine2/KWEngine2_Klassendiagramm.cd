@@ -215,7 +215,7 @@
       <Method Name="UpdateCameraLookAtVector" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>BoDiGFqCIDiRSgJAAUGSAAhB6A4XizI0KRLNElBOSsQ=</HashCode>
+      <HashCode>BoDiGFqCIDiRSgJAAUGSAAhB6C4XizI0KRLNElBOSsQ=</HashCode>
       <FileName>World.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -279,13 +279,13 @@
       <Method Name="UpdateModelMatrixAndHitboxes" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>QmHKvhpC2LEgULX0JhLN1QRAkLomj8xZGZoIxgBoSfQ=</HashCode>
+      <HashCode>QmHKvhpC2LEgUPX0JhLN1QRAkLomj8xZGZoIxgBoSfQ=</HashCode>
       <FileName>GameObjects\GameObject.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="KWEngine2.GameObjects.Explosion">
-    <Position X="8.5" Y="14.5" Width="2.75" />
+    <Position X="8.5" Y="14.75" Width="2.75" />
     <Members>
       <Field Name="_algorithm" Hidden="true" />
       <Field Name="_amount" Hidden="true" />
@@ -314,7 +314,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="KWEngine2.GameObjects.HUDObject">
-    <Position X="5.5" Y="14" Width="2.75" />
+    <Position X="5.5" Y="11.5" Width="2.75" />
     <Members>
       <Field Name="_absolute" Hidden="true" />
       <Field Name="_count" Hidden="true" />
@@ -373,7 +373,7 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="KWEngine2.GameObjects.ParticleObject">
-    <Position X="5.5" Y="10.75" Width="2.75" />
+    <Position X="5.5" Y="8.5" Width="2.75" />
     <Members>
       <Field Name="_aliveInMS" Hidden="true" />
       <Field Name="_durationInMS" Hidden="true" />
@@ -391,6 +391,7 @@
       <Field Name="_tint" Hidden="true" />
       <Field Name="_type" Hidden="true" />
       <Method Name="Act" Hidden="true" />
+      <Method Name="GetViewMatrixTowardsCamera" Hidden="true" />
       <Field Name="Turn180" Hidden="true" />
     </Members>
     <TypeIdentifier>
@@ -409,7 +410,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="KWEngine2.Helper.HelperRotation">
-    <Position X="5.5" Y="8.5" Width="2.75" />
+    <Position X="2.5" Y="15.25" Width="2.75" />
     <Members>
       <Method Name="CalculateDegreesFromRadians" Hidden="true" />
       <Method Name="CalculateRadiansFromDegrees" Hidden="true" />
@@ -428,8 +429,15 @@
       <FileName>Helper\HelperRotation.cs</FileName>
     </TypeIdentifier>
   </Class>
+  <Class Name="KWEngine2.Helper.HelperVector">
+    <Position X="5.5" Y="16" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAABACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Helper\HelperVector.cs</FileName>
+    </TypeIdentifier>
+  </Class>
   <Enum Name="KWEngine2.GameObjects.ParticleType" Collapsed="true">
-    <Position X="5.5" Y="13.25" Width="2.75" />
+    <Position X="5.5" Y="10.75" Width="2.75" />
     <TypeIdentifier>
       <HashCode>EAAAAYAACEAIAAAAIAAAAAAAAMAKAAA0AAAAAAACAAA=</HashCode>
       <FileName>GameObjects\ParticleObject.cs</FileName>

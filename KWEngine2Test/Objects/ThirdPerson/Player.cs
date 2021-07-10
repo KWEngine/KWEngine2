@@ -129,6 +129,14 @@ namespace KWEngine2Test.Objects.ThirdPerson
             DoStates();
             DoCollisionDetection();
             DoAnimation();
+
+            /*
+            List<GameObject> objects = PickGameObjectsFromLookAtVector(GetLookAtVector() + new Vector3(0, 1, 0), 0);
+            foreach(GameObject g in objects)
+            {
+                Console.WriteLine(CurrentWorld.GetCurrentTimeInMilliseconds() + ": " + g.Name);
+            }
+            */
         }
 
         private void DoShoot(MouseState ms, Vector3 offset)

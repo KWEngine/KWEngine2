@@ -2265,7 +2265,47 @@ namespace KWEngine2.GameObjects
             }
             return pickedObjects;
         }
-        private static bool IntersectRaySphere(Vector3 rayStart, Vector3 ray, Vector3 sphereCenter, float sphereRadius)
+
+        /// <summary>
+        /// Erzeugt einen Strahl in Blickrichtung der Instanz und erstellt eine Liste aller Objekte, die von diesem Strahl getroffen werden.
+        /// </summary>
+        /// <param name="offset">Relative Anpassung der Startposition des Strahls</param>
+        /// <param name="maxDistance">Maximale Reichweite des Strahls [Standard: 0 (unendlich)]</param>
+        /// <returns></returns>
+        public List<GameObject> PickGameObjectsFromLookAtVector(Vector3 offset, float maxDistance = 0)
+        {
+            List<GameObject> pickedObjects = new List<GameObject>();
+            GLWindow w = GLWindow.CurrentWindow;
+            if (w == null || w.CurrentWorld == null || !w.Focused)
+            {
+                return pickedObjects;
+            }
+
+            Vector3 offsetPosition = Position + offset;
+            foreach (GameObject go in w.CurrentWorld.GetGameObjects())
+            {
+                if (go != this && go.IsPickable)
+                {
+                    if (IntersectRaySphere(offsetPosition, GetLookAtVector(), go.GetCenterPointForAllHitboxes(), go.GetMaxDiameter() / 2))
+                    {
+                        if(maxDistance > 0)
+                        {
+                            if ((go.GetCenterPointForAllHitboxes() - offsetPosition).LengthFast <= maxDistance)
+                            {
+                                pickedObjects.Add(go);
+                            }
+                        }
+                        else
+                        {
+                            pickedObjects.Add(go);
+                        }
+                    }
+                }
+            }
+            return pickedObjects;
+        }
+
+        internal static bool IntersectRaySphere(Vector3 rayStart, Vector3 ray, Vector3 sphereCenter, float sphereRadius)
         {
             Vector3 p = rayStart - sphereCenter;
 

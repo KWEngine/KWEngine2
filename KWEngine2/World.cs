@@ -1174,6 +1174,18 @@ namespace KWEngine2
         }
 
         /// <summary>
+        /// Erzeugt einen Strahl von der angegebenen Position in die angegebene Richtung und gibt alle Objekte die innerhalb dieser Blickrichtung liegen als Liste zurück.
+        /// </summary>
+        /// <param name="position">Startposition</param>
+        /// <param name="direction">Blickrichtung (relativ)</param>
+        /// <param name="maxDistance">Maximale Suchdistanz [Standard: 0 (unendlich)]</param>
+        /// <returns></returns>
+        public static List<GameObject> PickGameObjectsFrom(Vector3 position, Vector3 direction, float maxDistance = 0)
+        {
+            return HelperVector.PickGameObjectsFrom(position, direction, maxDistance);
+        }
+
+        /// <summary>
         /// Konvertiert 2D-Mauskoordinaten in 3D-Koordinaten
         /// </summary>
         /// <param name="ms">Mausinformationen</param>
@@ -1226,7 +1238,7 @@ namespace KWEngine2
         /// Ermittelt bei GLWindow.CursorGrabbed = true die relative Mausbewegung des aktuellen Frames
         /// </summary>
         /// <param name="ms">Mausstatus</param>
-        /// <returns>Relative X- und Y-Abweichung des Mauscursors als Vector2-InstanzS</returns>
+        /// <returns>Relative X- und Y-Abweichung des Mauscursors als Vector2-Instanz</returns>
         public static Vector2 GetMouseCursorMovement(MouseState ms)
         {
             if (KWEngine.CurrentWindow.CursorGrabbed || (KWEngine.CurrentWorld != null && KWEngine.CurrentWorld.IsFirstPersonMode))

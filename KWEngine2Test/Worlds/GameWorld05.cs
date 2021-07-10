@@ -86,6 +86,8 @@ namespace KWEngine2Test.Worlds
             i1.SetModel("KWCube");
             i1.SetPosition(2.5f, 1f, -5);
             i1.SetScale(2);
+            i1.IsPickable = true;
+            i1.Name = "Obstacle Box #1";
             i1.SetRoughness(0.5f);
             i1.SetColor(1, 0.25f, 0.25f);
             i1.SetTexture(@".\textures\MetalPlates006_1K_ColorBright.jpg");
